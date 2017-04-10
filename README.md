@@ -1,4 +1,6 @@
 Scash (SCS) Release v. 1.0.0
+
+Staking=0 for pool operator
 -----------------------------
 Scash is a peer-to-peer Proof of Stake Velocity digital currency with an initial Proof of Work mining
 distribution period lasting 1 000 000 Blocks. After the initial mining distribution period is over, 
