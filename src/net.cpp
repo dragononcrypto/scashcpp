@@ -1156,7 +1156,6 @@ void MapPort()
 static const char *strDNSSeed[][2] = {
     {"speedcash.acc-pool.pw", "speedcash.acc-pool.pw"},
 	{"104.154.252.148", "104.154.252.148"},
-	{"104.199.131.125", "104.199.131.125"},
 	{"35.184.50.216", "35.184.50.216"},
 };
 
