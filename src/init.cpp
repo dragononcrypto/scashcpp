@@ -138,10 +138,10 @@ bool AppInit(int argc, char* argv[])
             // First part of help message is specific to bitcoind / RPC client
             std::string strUsage = _("Scash version") + " " + FormatFullVersion() + "\n\n" +
                 _("Usage:") + "\n" +
-                  "  CloakCoind [options]                     " + "\n" +
-                  "  CloakCoind [options] <command> [params]  " + _("Send command to -server or CloakCoind") + "\n" +
-                  "  CloakCoind [options] help                " + _("List commands") + "\n" +
-                  "  CloakCoind [options] help <command>      " + _("Get help for a command") + "\n";
+                  "  Scashd [options]                     " + "\n" +
+                  "  Scashd [options] <command> [params]  " + _("Send command to -server or Scashd") + "\n" +
+                  "  Scashd [options] help                " + _("List commands") + "\n" +
+                  "  Scashd [options] help <command>      " + _("Get help for a command") + "\n";
 
             strUsage += "\n" + HelpMessage();
 
@@ -220,7 +220,7 @@ std::string HelpMessage()
     string strUsage = _("Options:") + "\n" +
         "  -?                     " + _("This help message") + "\n" +
         "  -conf=<file>           " + _("Specify configuration file (default: Scash.conf)") + "\n" +
-        "  -pid=<file>            " + _("Specify pid file (default: CloakCoind.pid)") + "\n" +
+        "  -pid=<file>            " + _("Specify pid file (default: Scashd.pid)") + "\n" +
         "  -gen                   " + _("Generate coins") + "\n" +
         "  -gen=0                 " + _("Don't generate coins") + "\n" +
         "  -datadir=<dir>         " + _("Specify data directory") + "\n" +

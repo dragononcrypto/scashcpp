@@ -1155,6 +1155,7 @@ void MapPort()
 // The second name should resolve to a list of seed addresses.
 static const char *strDNSSeed[][2] = {
     {"speedcash.acc-pool.pw", "speedcash.acc-pool.pw"},
+	{"scash.acc-pool.pw", "scash.acc-pool.pw"},
 	{"104.154.252.148", "104.154.252.148"},
 	{"35.184.50.216", "35.184.50.216"},
 };
