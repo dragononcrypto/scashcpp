@@ -1,4 +1,4 @@
-Scash (SCS) Release v. 1.0.0
+Scash (SCS) Release v. 1.1.0
 
 Staking=0 for pool operator
 -----------------------------
@@ -12,12 +12,13 @@ of communication and a sophisticated off-blockchain coin mixing system making it
 to trace transactions between Scash wallets
 -----------------------------
 Specification
-Total coins: 5 249 750 million coins
+Total coins: 5 249 750 SCS
 PoW timespan: 1 000 000 blocks
 Algorithm: x13
 Pre-mine 5%, for rewards
-PoW block reward: 5, PoS 10%
-PoS minimum stake age: 1 hours, Max age unlimited
+PoW block reward: 5 SCS
+PoS 10%
+PoS minimum stake age: 1 hours, 4 hours
 Block time: 60 seconds
 Fast, Private, Secure, Untraceable and Decentralized
 
