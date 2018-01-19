@@ -11,7 +11,7 @@ of communication and a sophisticated off-blockchain coin mixing system making it
 to trace transactions between Scash wallets.
 
 -----------------------------
-Specification
+Specifications:
 
 Total coins: 476 918 SCS
 
