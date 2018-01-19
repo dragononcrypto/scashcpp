@@ -139,7 +139,7 @@ OBJS= \
 all: scashd
 
 test check: test_scash FORCE
-	./test_BottleCaps
+	./test_scash
 
 # auto-generated dependencies:
 -include obj/*.P

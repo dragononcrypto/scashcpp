@@ -1299,7 +1299,7 @@ void static ProcessOneShot()
     }
 }
 
-// ppcoin: stake minter thread
+// Scash: stake minter thread
 void static ThreadStakeMinter(void* parg)
 {
     printf("ThreadStakeMinter started\n");
@@ -1880,7 +1880,7 @@ void StartNode(void* parg)
 
     if(fStaking)
     {
-        // ppcoin: mint proof-of-stake blocks in the background
+        // Scash: mint proof-of-stake blocks in the background
         if (!NewThread(ThreadStakeMinter, pwalletMain))
             printf("Error: NewThread(ThreadStakeMinter) failed\n");
     }

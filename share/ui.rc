@@ -1,4 +1,4 @@
-BottleCaps               ICON    "pixmaps/BottleCaps.ico"
+Scash                 ICON    "pixmaps/favicon.ico"
 
 #include "wx/msw/wx.rc"
 
