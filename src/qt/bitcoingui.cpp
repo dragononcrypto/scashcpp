@@ -818,16 +818,16 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelEncryptionIcon->hide();
         encryptWalletAction->setChecked(false);
         encryptWalletAction->setEnabled(true);
-		changePassphraseAction->setEnabled(false);
-		lockWalletToggleAction->setVisible(false);
+        changePassphraseAction->setEnabled(false);
+        lockWalletToggleAction->setVisible(false);
         break;
     case WalletModel::Unlocked:
         labelEncryptionIcon->show();
         labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_open").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>unlocked</b>."));
         encryptWalletAction->setChecked(true);
-        encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
-		changePassphraseAction->setEnabled(true);
+        encryptWalletAction->setEnabled(false); // Scash: decrypt of already encrypted wallet is not possible
+        changePassphraseAction->setEnabled(true);
         lockWalletToggleAction->setVisible(true);
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_closed"));
         lockWalletToggleAction->setText(tr("&Lock Wallet"));
@@ -838,7 +838,7 @@ void BitcoinGUI::setEncryptionStatus(int status)
         labelEncryptionIcon->setPixmap(QIcon(":/icons/lock_closed").pixmap(STATUSBAR_ICONSIZE,STATUSBAR_ICONSIZE));
         labelEncryptionIcon->setToolTip(tr("Wallet is <b>encrypted</b> and currently <b>locked</b>."));
         encryptWalletAction->setChecked(true);
-        encryptWalletAction->setEnabled(false); // TODO: decrypt currently not supported
+        encryptWalletAction->setEnabled(false); // Scash: decrypt of already encrypted wallet is not possible
         changePassphraseAction->setEnabled(true);
         lockWalletToggleAction->setVisible(true);
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_open"));
@@ -890,8 +890,10 @@ void BitcoinGUI::lockWalletToggle()
         dlg.setModel(walletModel);
         dlg.exec();
     }
-	else
+    else
+    {
         walletModel->setWalletLocked(true);
+    }
 }
 
 void BitcoinGUI::unlockWallet()
