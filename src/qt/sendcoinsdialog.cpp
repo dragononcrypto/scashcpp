@@ -180,6 +180,11 @@ void SendCoinsDialog::on_sendButton_clicked()
             tr("The recipient address is not valid, please recheck."),
             QMessageBox::Ok, QMessageBox::Ok);
         break;
+    case WalletModel::WalletLocked:
+        QMessageBox::warning(this, tr("Send Coins"),
+            tr("Wallet is locked. Unlock wallet before send."),
+            QMessageBox::Ok, QMessageBox::Ok);
+        break;
     case WalletModel::InvalidAmount:
         QMessageBox::warning(this, tr("Send Coins"),
             tr("The amount to pay must be larger than 0."),

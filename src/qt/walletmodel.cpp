@@ -140,6 +140,11 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(const QList<SendCoinsRecipie
         return OK;
     }
 
+    if(wallet->IsLocked())
+    {
+        return WalletLocked;
+    }
+
     // Pre-check input data for validity
     foreach(const SendCoinsRecipient &rcp, recipients)
     {

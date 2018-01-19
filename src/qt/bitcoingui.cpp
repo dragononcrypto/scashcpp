@@ -894,6 +894,20 @@ void BitcoinGUI::lockWalletToggle()
         walletModel->setWalletLocked(true);
 }
 
+void BitcoinGUI::unlockWallet()
+{
+    if(!walletModel)
+        return;
+    // Unlock wallet when requested by wallet model
+    if(walletModel->getEncryptionStatus() == WalletModel::Locked)
+    {
+        AskPassphraseDialog::Mode mode = AskPassphraseDialog::UnlockMinting;
+        AskPassphraseDialog dlg(mode, this);
+        dlg.setModel(walletModel);
+        dlg.exec();
+    }
+}
+
 void BitcoinGUI::showNormalIfMinimized(bool fToggleHidden)
 {
     // activateWindow() (sometimes) helps with keyboard focus on Windows
