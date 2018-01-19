@@ -23,7 +23,7 @@ using namespace boost;
 
 unsigned int nWalletDBUpdated;
 
-
+extern int nBestHeightOverride;
 
 //
 // CDB
@@ -649,7 +649,9 @@ bool CTxDB::LoadBlockIndex()
     if (!mapBlockIndex.count(hashBestChain))
         return error("CTxDB::LoadBlockIndex() : hashBestChain not found in the block index");
     pindexBest = mapBlockIndex[hashBestChain];
-    nBestHeight = pindexBest->nHeight;
+    nBestHeightOverride = GetArg("-resyncchaintail", 0);
+    nBestHeight = nBestHeightOverride ? nBestHeightOverride : pindexBest->nHeight;
+    int skipBlocks = pindexBest->nHeight - nBestHeightOverride;
     bnBestChainTrust = pindexBest->bnChainTrust;
     printf("LoadBlockIndex(): hashBestChain=%s  height=%d  trust=%s  date=%s\n",
       hashBestChain.ToString().substr(0,20).c_str(), nBestHeight, bnBestChainTrust.ToString().c_str(),
@@ -675,6 +677,7 @@ bool CTxDB::LoadBlockIndex()
     map<pair<unsigned int, unsigned int>, CBlockIndex*> mapBlockPos;
     for (CBlockIndex* pindex = pindexBest; pindex && pindex->pprev; pindex = pindex->pprev)
     {
+	if (skipBlocks-- >= 0) continue;
         if (fRequestShutdown || pindex->nHeight < nBestHeight-nCheckDepth)
             break;
         CBlock block;

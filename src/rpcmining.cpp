@@ -1,5 +1,6 @@
 // Copyright (c) 2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
+// Copyright (c) 2017-2018 Scash developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -77,7 +78,7 @@ Value getmininginfo(const Array& params, bool fHelp)
     obj.push_back(Pair("generate",      GetBoolArg("-gen")));
     obj.push_back(Pair("genproclimit",  (int)GetArg("-genproclimit", -1)));
     obj.push_back(Pair("hashespersec",  gethashespersec(params, false)));
-	obj.push_back(Pair("networkhashps", getnetworkhashps(params, false)));
+    obj.push_back(Pair("networkhashps", getnetworkhashps(params, false)));
     obj.push_back(Pair("pooledtx",      (uint64_t)mempool.size()));
     obj.push_back(Pair("testnet",       fTestNet));
     return obj;
@@ -92,18 +93,24 @@ Value GetNetworkHashPS(int lookup) {
     if (lookup <= 0)
         lookup = pindexBest->nHeight % 2016 + 1;
 
+
     // If lookup is larger than chain, then set it to chain length.
     if (lookup > pindexBest->nHeight)
         lookup = pindexBest->nHeight;
+
 
     CBlockIndex* pindexPrev = pindexBest;
     for (int i = 0; i < lookup; i++)
         pindexPrev = pindexPrev->pprev;
 
+    if (lookup <= 0) { lookup = 1; }
+
     double timeDiff = pindexBest->GetBlockTime() - pindexPrev->GetBlockTime();
+    if (timeDiff <= 0.00001) timeDiff = 1.0;
+
     double timePerBlock = timeDiff / lookup;
 
-    return (boost::int64_t)(((double)GetDifficulty() * pow(2.0, 32)) / timePerBlock);
+    return (((double)GetDifficulty() * pow(2.0, 32)) / timePerBlock);
 }
 
 Value getnetworkhashps(const Array& params, bool fHelp)

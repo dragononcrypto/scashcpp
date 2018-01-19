@@ -34,15 +34,18 @@ unsigned int nTransactionsUpdated = 0;
 map<uint256, CBlockIndex*> mapBlockIndex;
 set<pair<COutPoint, unsigned int> > setStakeSeen;
 uint256 hashGenesisBlock = hashGenesisBlockOfficial;
-static CBigNum bnProofOfWorkLimit(~uint256(0) >> 20);
+static CBigNum bnProofOfWorkLimit(~uint256(0) >> 0);
 static CBigNum bnProofOfStakeLimit(~uint256(0) >> 2);
 
-static CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 16);
+static CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 0);
 static CBigNum bnProofOfStakeLimitTestNet(~uint256(0) >> 30);
 
-unsigned int nStakeMinAge = 60 * 60 * 1 * 1;	//1H, minimum age for coin age: 
-unsigned int nStakeMaxAge = 60 * 60 * 4 * 1;	//4H, stake age of full weight:
-unsigned int nStakeTargetSpacing = 60;			// 60 sec block spacing
+unsigned int nStakeMinAge = 60 * 60 * 1 * 1; //1H, minimum age for coin age
+unsigned int nStakeMaxAge = 60 * 60 * 4 * 1; //4H, stake age of full weigh
+unsigned int nStakeTargetSpacing = 40; // 40 sec block spacing
+
+static const int64 nTargetTimespan = 30 * nStakeTargetSpacing; // 30 blocks
+static const int64 nTargetSpacingWorkMax = 3 * nStakeTargetSpacing;
 
 int64 nChainStartTime = 1404020125;
 int nCoinbaseMaturity = 40;
@@ -75,6 +78,7 @@ int64 nHPSTimerStart;
 // Settings
 int64 nTransactionFee = MIN_TX_FEE;
 
+int nBestHeightOverride = 0;
 
 //////////////////////////////////////////////////////////////////////////////
 //
@@ -938,11 +942,12 @@ static const int64 nMinSubsidy = 1 * COIN;
 // miner's coin base reward based on nBits
 int64 GetProofOfWorkReward(int nHeight, int64 nFees, uint256 prevHash)
 {
-    int64_t nSubsidy = 5 * COIN;
+    int64_t nSubsidy = 1 * COIN;
 
-    if(nHeight <= 50)
-	nSubsidy = 5000 * COIN; // first 50 blocks are 5000 coin reward
-    
+    if (nHeight <= CUTOFF_POW_BLOCK / 8) nSubsidy = 8 * nMinSubsidy;
+    else if (nHeight <= CUTOFF_POW_BLOCK / 4) nSubsidy = 4 * nMinSubsidy;
+    else if (nHeight <= CUTOFF_POW_BLOCK / 2) nSubsidy = 2 * nMinSubsidy;
+
     return nSubsidy + nFees;
 }
 
@@ -960,8 +965,6 @@ int64 GetProofOfStakeReward(int64 nCoinAge, unsigned int nBits, unsigned int nTi
     return nSubsidy;
 }
 
-static const int64 nTargetTimespan = 60 * 30; // 30 blocks  
-static const int64 nTargetSpacingWorkMax = 3 * nStakeTargetSpacing; 
 
 //
 // maximum nBits value could possible be required nTime after
@@ -2518,7 +2521,7 @@ bool LoadBlockIndex(bool fAllowNew)
         bnProofOfWorkLimit = bnProofOfWorkLimitTestNet; // 0x0000ffff PoW base target is fixed in testnet
         nStakeMinAge = 15 * 60; // test net min age is 20 min
         nStakeMaxAge = 60 * 60; // test net min age is 60 min
-		nModifierInterval = 60; // test modifier interval is 2 minutes
+        nModifierInterval = 60; // test modifier interval is 2 minutes
         nCoinbaseMaturity = 10; // test maturity is 10 blocks
         nStakeTargetSpacing = 3 * 60; // test block spacing is 3 minutes
     }
@@ -4009,7 +4012,7 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
                     if (!mempool.mapTx.count(txin.prevout.hash))
                     {
                         printf("ERROR: mempool transaction missing input\n");
-                        if (fDebug) assert("mempool transaction missing input" == 0);
+//                        if (fDebug) assert("mempool transaction missing input" == 0);
                         fMissingInputs = true;
                         if (porphan)
                             vOrphan.pop_back();
@@ -4306,7 +4309,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
         if (fShutdown)
             return;
 
-        while (vNodes.empty() || IsInitialBlockDownload() || pwallet->IsLocked())
+        while (((GetArg("-localmining", 0) == 0) && vNodes.empty()) || IsInitialBlockDownload() || pwallet->IsLocked())
         {
             nLastCoinStakeSearchInterval = 0;
             Sleep(1000);

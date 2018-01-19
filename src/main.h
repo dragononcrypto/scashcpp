@@ -26,18 +26,18 @@ class CInv;
 class CRequestTracker;
 class CNode;
 
-static const unsigned int MAX_BLOCK_SIZE = 600000;
+static const unsigned int MAX_BLOCK_SIZE = 1800000;
 static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
 static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
 static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
 static const unsigned int MAX_INV_SZ = 50000;
 static const int64 MIN_TX_FEE = 1 * CENT;
 static const int64 MIN_RELAY_TX_FEE = 1 * CENT;
-static const int64 MAX_MONEY = 5249750 * COIN;			//
+static const int64 MAX_MONEY = 476918 * COIN;//
 static const int64 CIRCULATION_MONEY = MAX_MONEY;
 static const double TAX_PERCENTAGE = 0.00; //no tax
-static const int64 MAX_CLOAK_PROOF_OF_STAKE = 0.10 * COIN;	// 10% annual interest
-static const int CUTOFF_POW_BLOCK = 1000000;
+static const int64 MAX_CLOAK_PROOF_OF_STAKE = 0.08 * COIN;	// 8% annual interest, 6 years min saturation
+static const int CUTOFF_POW_BLOCK = 300000;
 
 static const int64 MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
@@ -51,8 +51,8 @@ static const int fHaveUPnP = true;
 static const int fHaveUPnP = false;
 #endif
 
-static const uint256 hashGenesisBlockOfficial("0x00000228e4094e748d9803c8c92563b54425fe869bfecfea060445965754aa73");
-static const uint256 hashGenesisBlockTestNet ("0x00000228e4094e748d9803c8c92563b54425fe869bfecfea060445965754aa73");
+static const uint256 hashGenesisBlockOfficial("0x7e1060b413b00461d5d01fc9ab00adc82079152e894977868b7d15cf8175eefc");
+static const uint256 hashGenesisBlockTestNet = hashGenesisBlockOfficial;
 
 static const int64 nMaxClockDrift = 1 * 60 * 60;        // two hours
 
