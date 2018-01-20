@@ -2509,7 +2509,7 @@ FILE* AppendBlockFile(unsigned int& nFileRet)
 }
 
 
-bool LoadBlockIndex(bool fAllowNew)
+LoadBlockIndexResult LoadBlockIndex(bool fAllowNew)
 {
     if (fTestNet)
     {
@@ -2531,8 +2531,9 @@ bool LoadBlockIndex(bool fAllowNew)
     // Load block index
     //
     CTxDB txdb("cr");
-    if (!txdb.LoadBlockIndex())
-        return false;
+    LoadBlockIndexResult res = txdb.LoadBlockIndex();
+    if (res != LOAD_BI_OK && res != LOAD_BI_SHUTDOWN)
+        return res;
     txdb.Close();
 
     //
@@ -2541,7 +2542,7 @@ bool LoadBlockIndex(bool fAllowNew)
     if (mapBlockIndex.empty())
     {
         if (!fAllowNew)
-            return false;
+            return LOAD_BI_WRONG_CHAIN;
 
         // Genesis block
         const char* pszTimestamp = "Scash start 10.04.17";
@@ -2585,19 +2586,28 @@ bool LoadBlockIndex(bool fAllowNew)
         printf("block.nNonce = %u \n", block.nNonce);
 
         assert(block.hashMerkleRoot == uint256("0xfe88c1d382156012a1755f030fb7b18547f00f6507792ab0815a9e3bf7f25a6d"));
-		assert(block.GetHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet));
+        assert(block.GetHash() == (!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet));
 
         // Start new block file
         unsigned int nFile;
         unsigned int nBlockPos;
         if (!block.WriteToDisk(nFile, nBlockPos))
-            return error("LoadBlockIndex() : writing genesis block to disk failed");
+        {
+            printf("LoadBlockIndex() : writing genesis block to disk failed");
+            return LOAD_BI_DISK_ERR;
+        }
         if (!block.AddToBlockIndex(nFile, nBlockPos))
-            return error("LoadBlockIndex() : genesis block not accepted");
+        {
+            printf("LoadBlockIndex() : genesis block not accepted");
+            return LOAD_BI_WRONG_CHAIN;
+        }
 
         // Scash: initialize synchronized checkpoint
         if (!Checkpoints::WriteSyncCheckpoint((!fTestNet ? hashGenesisBlock : hashGenesisBlockTestNet)))
-            return error("LoadBlockIndex() : failed to init sync checkpoint");
+        {
+            printf("LoadBlockIndex() : failed to init sync checkpoint");
+            return LOAD_BI_WRONG_CHECKPOINT;
+        }
     }
 
     // Scash: if checkpoint master key changed must reset sync-checkpoint
@@ -2609,16 +2619,25 @@ bool LoadBlockIndex(bool fAllowNew)
             // write checkpoint master key to db
             txdb.TxnBegin();
             if (!txdb.WriteCheckpointPubKey(CSyncCheckpoint::strMasterPubKey))
-                return error("LoadBlockIndex() : failed to write new checkpoint master key to db");
+            {
+                printf("LoadBlockIndex() : failed to write new checkpoint master key to db");
+                return LOAD_BI_WRITE_ERR;
+            }
             if (!txdb.TxnCommit())
-                return error("LoadBlockIndex() : failed to commit new checkpoint master key to db");
+            {
+                printf("LoadBlockIndex() : failed to commit new checkpoint master key to db");
+                return LOAD_BI_COMMIT_ERR;
+            }
             if ((!fTestNet) && !Checkpoints::ResetSyncCheckpoint())
-                return error("LoadBlockIndex() : failed to reset sync-checkpoint");
+            {
+                printf("LoadBlockIndex() : failed to reset sync-checkpoint");
+                return LOAD_BI_CHECKPOINT_ERR;
+            }
         }
         txdb.Close();
     }
 
-    return true;
+    return LOAD_BI_OK;
 }
 
 

@@ -60,7 +60,7 @@ void CDBEnv::Close()
     EnvShutdown();
 }
 
-bool CDBEnv::Open(boost::filesystem::path pathEnv_)
+bool CDBEnv::Open(boost::filesystem::path pathEnv_, int DatabaseRecoveryAttempt)
 {
     if (fDbEnvInit)
         return true;
@@ -72,9 +72,41 @@ bool CDBEnv::Open(boost::filesystem::path pathEnv_)
     filesystem::path pathDataDir = pathEnv;
     strPath = pathDataDir.string();
     filesystem::path pathLogDir = pathDataDir / "database";
-    filesystem::create_directory(pathLogDir);
     filesystem::path pathErrorFile = pathDataDir / "db.log";
-    printf("dbenv.open LogDir=%s ErrorFile=%s\n", pathLogDir.string().c_str(), pathErrorFile.string().c_str());
+
+recoveryCheckpoint:
+
+
+    printf("dbenv.open attempt %i; LogDir=%s ErrorFile=%s\n", DatabaseRecoveryAttempt, pathLogDir.string().c_str(), pathErrorFile.string().c_str());
+
+    if (DatabaseRecoveryAttempt == 1)
+    {
+         try
+         {
+             filesystem::path dbIndex = pathDataDir / "blkindex.dat";
+             filesystem::remove(dbIndex); // can be reconstructed
+             filesystem::remove_all(pathLogDir); // temporary
+         }
+         catch (std::exception &ex)
+         {
+             printf("Exception while database recovery: %s\n", ex.what());
+         }
+    }
+    else if (DatabaseRecoveryAttempt == 2)
+    {
+         try
+         {
+             filesystem::path dbIndexDat = pathDataDir / "blk0001.dat";
+             filesystem::remove(dbIndexDat); // can be synchronized if deleted
+             filesystem::remove_all(pathLogDir); // temporary
+         }
+         catch (std::exception &ex)
+         {
+             printf("Exception while database recovery: %s\n", ex.what());
+         }
+    }
+
+    filesystem::create_directory(pathLogDir);
 
     unsigned int nEnvFlags = 0;
     if (GetBoolArg("-privdb", true))
@@ -90,7 +122,6 @@ bool CDBEnv::Open(boost::filesystem::path pathEnv_)
     dbenv.set_errfile(fopen(pathErrorFile.string().c_str(), "a")); /// debug
     dbenv.set_flags(DB_AUTO_COMMIT, 1);
     dbenv.set_flags(DB_TXN_WRITE_NOSYNC, 1);
-//    dbenv.log_set_config(DB_LOG_AUTO_REMOVE, 1);
     int ret = dbenv.open(strPath.c_str(),
                      DB_CREATE     |
                      DB_INIT_LOCK  |
@@ -101,8 +132,16 @@ bool CDBEnv::Open(boost::filesystem::path pathEnv_)
                      DB_RECOVER    |
                      nEnvFlags,
                      S_IRUSR | S_IWUSR);
+
     if (ret != 0)
-        return error("CDB() : error %s (%d) opening database environment", DbEnv::strerror(ret), ret);
+    {
+        if (DatabaseRecoveryAttempt < 2)
+        {
+            DatabaseRecoveryAttempt++;
+            goto recoveryCheckpoint;
+        }
+        return error("CDBEnv() : error %s (%d) opening database environment", DbEnv::strerror(ret), ret);
+    }
 
     fDbEnvInit = true;
     fMockDb = false;
@@ -217,7 +256,26 @@ void CDBEnv::CheckpointLSN(std::string strFile)
 CDB::CDB(const char *pszFile, const char* pszMode) :
     pdb(NULL), activeTxn(NULL)
 {
-    int ret;
+
+    int DatabaseRecoveryAttempt = 0;
+recoveryCheckpoint:
+    if (DatabaseRecoveryAttempt > 0 && pszFile)
+    {
+         try
+         {
+             std::string tmpName = pszFile;
+             boost::filesystem::path pathSrc = GetDataDir() / tmpName;
+             tmpName += ".~" + std::to_string(DatabaseRecoveryAttempt);
+             boost::filesystem::path pathDst = GetDataDir() / tmpName;
+             boost::filesystem::rename(pathSrc, pathDst);
+         }
+         catch (std::exception &ex)
+         {
+             printf("Exception while database recovery: %s\n", ex.what());
+         }
+    }
+
+    int ret = 0;
     if (pszFile == NULL)
         return;
 
@@ -235,6 +293,8 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
         strFile = pszFile;
         ++bitdb.mapFileUseCount[strFile];
         pdb = bitdb.mapDb[strFile];
+        printf("Database open attempt %i\n", DatabaseRecoveryAttempt);
+
         if (pdb == NULL)
         {
             pdb = new Db(&bitdb.dbenv, 0);
@@ -245,7 +305,14 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
                 DbMpoolFile*mpf = pdb->get_mpf();
                 ret = mpf->set_flags(DB_MPOOL_NOFILE, 1);
                 if (ret != 0)
-                    throw runtime_error(strprintf("CDB() : failed to configure for no temp file backing for database %s", pszFile));
+                {
+                    printf("CDB() : failed to configure for no temp file backing for database %s", pszFile);
+                    if (DatabaseRecoveryAttempt < 1)
+                    {
+                        DatabaseRecoveryAttempt++;
+                        goto recoveryCheckpoint;
+                    }
+                }
             }
 
             ret = pdb->open(NULL,      // Txn pointer
@@ -254,6 +321,7 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
                             DB_BTREE,  // Database type
                             nFlags,    // Flags
                             0);
+            printf("pdb->open result %i\n", ret);
 
             if (ret != 0)
             {
@@ -261,7 +329,12 @@ CDB::CDB(const char *pszFile, const char* pszMode) :
                 pdb = NULL;
                 --bitdb.mapFileUseCount[strFile];
                 strFile = "";
-                throw runtime_error(strprintf("CDB() : can't open database file %s, error %d", pszFile, ret));
+                printf("CDB() : can't open database file %s, error %d", pszFile, ret);
+                if (DatabaseRecoveryAttempt < 1)
+                {
+                    DatabaseRecoveryAttempt++;
+                    goto recoveryCheckpoint;
+                }
             }
 
             if (fCreate && !Exists(string("version")))
@@ -612,21 +685,29 @@ CBlockIndex static * InsertBlockIndex(uint256 hash)
     return pindexNew;
 }
 
-bool CTxDB::LoadBlockIndex()
+LoadBlockIndexResult CTxDB::LoadBlockIndex()
 {
     if (!LoadBlockIndexGuts())
-        return false;
+        return LOAD_BI_GUTS_ERR;
 
     if (fRequestShutdown)
-        return true;
+        return LOAD_BI_SHUTDOWN;
 
     // Calculate bnChainTrust
     vector<pair<int, CBlockIndex*> > vSortedByHeight;
     vSortedByHeight.reserve(mapBlockIndex.size());
-    BOOST_FOREACH(const PAIRTYPE(uint256, CBlockIndex*)& item, mapBlockIndex)
+    try
     {
-        CBlockIndex* pindex = item.second;
-        vSortedByHeight.push_back(make_pair(pindex->nHeight, pindex));
+        BOOST_FOREACH(const PAIRTYPE(uint256, CBlockIndex*)& item, mapBlockIndex)
+        {
+            CBlockIndex* pindex = item.second;
+            vSortedByHeight.push_back(make_pair(pindex->nHeight, pindex));
+        }
+    }
+    catch (std::exception& ex)
+    {
+      printf("Exception: %s\n", ex.what());
+      return LOAD_BI_CHECKPOINT_ERR;
     }
     sort(vSortedByHeight.begin(), vSortedByHeight.end());
     BOOST_FOREACH(const PAIRTYPE(int, CBlockIndex*)& item, vSortedByHeight)
@@ -636,18 +717,25 @@ bool CTxDB::LoadBlockIndex()
         // Scash: calculate stake modifier checksum
         pindex->nStakeModifierChecksum = GetStakeModifierChecksum(pindex);
         if (!CheckStakeModifierCheckpoints(pindex->nHeight, pindex->nStakeModifierChecksum))
-            return error("CTxDB::LoadBlockIndex() : Failed stake modifier checkpoint height=%d, modifier=0x%016"PRI64x, pindex->nHeight, pindex->nStakeModifier);
+        {
+            printf("CTxDB::LoadBlockIndex() : Failed stake modifier checkpoint height=%d, modifier=0x%016"PRI64x, pindex->nHeight, pindex->nStakeModifier);
+            return LOAD_BI_STAKE_ERR;
+        }
     }
 
     // Load hashBestChain pointer to end of best chain
     if (!ReadHashBestChain(hashBestChain))
     {
         if (pindexGenesisBlock == NULL)
-            return true;
-        return error("CTxDB::LoadBlockIndex() : hashBestChain not loaded");
+            return LOAD_BI_OK;
+        printf("CTxDB::LoadBlockIndex() : hashBestChain not loaded");
+        return LOAD_BI_NO_CHAIN;
     }
     if (!mapBlockIndex.count(hashBestChain))
-        return error("CTxDB::LoadBlockIndex() : hashBestChain not found in the block index");
+    {
+       printf("CTxDB::LoadBlockIndex() : hashBestChain not found in the block index");
+       return LOAD_BI_NO_INDEX;
+    }
     pindexBest = mapBlockIndex[hashBestChain];
     nBestHeightOverride = GetArg("-resyncchaintail", 0);
     nBestHeight = nBestHeightOverride ? nBestHeightOverride : pindexBest->nHeight;
@@ -659,7 +747,10 @@ bool CTxDB::LoadBlockIndex()
 
     // Scash: load hashSyncCheckpoint
     if (!ReadSyncCheckpoint(Checkpoints::hashSyncCheckpoint))
-        return error("CTxDB::LoadBlockIndex() : hashSyncCheckpoint not loaded");
+    {
+        printf("CTxDB::LoadBlockIndex() : hashSyncCheckpoint not loaded");
+        return LOAD_BI_NO_CHECKPOINT;
+    }
     printf("LoadBlockIndex(): synchronized checkpoint %s\n", Checkpoints::hashSyncCheckpoint.ToString().c_str());
 
     // Load bnBestInvalidTrust, OK if it doesn't exist
@@ -667,7 +758,7 @@ bool CTxDB::LoadBlockIndex()
 
     // Verify blocks in the best chain
     int nCheckLevel = GetArg("-checklevel", 1);
-    int nCheckDepth = GetArg( "-checkblocks", 2500);
+    int nCheckDepth = GetArg("-checkblocks", 2500);
     if (nCheckDepth == 0)
         nCheckDepth = 1000000000; // suffices until the year 19000
     if (nCheckDepth > nBestHeight)
@@ -677,12 +768,15 @@ bool CTxDB::LoadBlockIndex()
     map<pair<unsigned int, unsigned int>, CBlockIndex*> mapBlockPos;
     for (CBlockIndex* pindex = pindexBest; pindex && pindex->pprev; pindex = pindex->pprev)
     {
-	if (skipBlocks-- >= 0) continue;
+        if (skipBlocks-- >= 0) continue;
         if (fRequestShutdown || pindex->nHeight < nBestHeight-nCheckDepth)
             break;
         CBlock block;
         if (!block.ReadFromDisk(pindex))
-            return error("LoadBlockIndex() : block.ReadFromDisk failed");
+        {
+            printf("LoadBlockIndex() : block.ReadFromDisk failed");
+            return LOAD_BI_DISK_ERR;
+        }
         // check level 1: verify block validity
         if (nCheckLevel>0 && !block.CheckBlock())
         {
@@ -786,12 +880,15 @@ bool CTxDB::LoadBlockIndex()
         printf("LoadBlockIndex() : *** moving best chain pointer back to block %d\n", pindexFork->nHeight);
         CBlock block;
         if (!block.ReadFromDisk(pindexFork))
-            return error("LoadBlockIndex() : block.ReadFromDisk failed");
+        {
+            printf("LoadBlockIndex() : block.ReadFromDisk failed");
+            return LOAD_BI_DISK_ERR;
+        }
         CTxDB txdb;
         block.SetBestChain(txdb, pindexFork);
     }
 
-    return true;
+    return LOAD_BI_OK;
 }
 
 

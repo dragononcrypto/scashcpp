@@ -26,17 +26,18 @@ class CInv;
 class CRequestTracker;
 class CNode;
 
-static const unsigned int MAX_BLOCK_SIZE = 1800000;
-static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE/2;
-static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE/50;
-static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE/100;
+static const unsigned int MAX_BLOCK_SIZE = 2*1024*1024; // 2 Mb
+static const unsigned int MAX_BLOCK_SIZE_GEN = MAX_BLOCK_SIZE / 2;
+static const unsigned int MAX_BLOCK_SIGOPS = MAX_BLOCK_SIZE / 50;
+static const unsigned int MAX_ORPHAN_TRANSACTIONS = MAX_BLOCK_SIZE / 100;
 static const unsigned int MAX_INV_SZ = 50000;
-static const int64 MIN_TX_FEE = 1 * CENT;
-static const int64 MIN_RELAY_TX_FEE = 1 * CENT;
-static const int64 MAX_MONEY = 476918 * COIN;//
+
+static const int64 MIN_TX_FEE = CENT / 10;
+static const int64 MIN_RELAY_TX_FEE = MIN_TX_FEE;
+static const int64 MAX_MONEY = 476918 * COIN; // Max PoW supply
 static const int64 CIRCULATION_MONEY = MAX_MONEY;
-static const double TAX_PERCENTAGE = 0.00; //no tax
-static const int64 MAX_CLOAK_PROOF_OF_STAKE = 0.08 * COIN;	// 8% annual interest, 6 years min saturation
+static const double TAX_PERCENTAGE = 0.00; // no tax by default
+static const int64 MAX_CLOAK_PROOF_OF_STAKE = 0.08 * COIN; // 8% annual interest
 static const int CUTOFF_POW_BLOCK = 300000;
 
 static const int64 MIN_TXOUT_AMOUNT = MIN_TX_FEE;
@@ -102,7 +103,15 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock);
 bool CheckDiskSpace(uint64 nAdditionalBytes=0);
 FILE* OpenBlockFile(unsigned int nFile, unsigned int nBlockPos, const char* pszMode="rb");
 FILE* AppendBlockFile(unsigned int& nFileRet);
-bool LoadBlockIndex(bool fAllowNew=true);
+
+enum LoadBlockIndexResult { LOAD_BI_OK, LOAD_BI_SHUTDOWN, // no errors
+               LOAD_BI_GUTS_ERR, LOAD_BI_STAKE_ERR,  // errors
+               LOAD_BI_NO_CHAIN, LOAD_BI_NO_INDEX, LOAD_BI_NO_CHECKPOINT,
+               LOAD_BI_DISK_ERR, LOAD_BI_WRONG_CHAIN, 
+               LOAD_BI_WRONG_BLOCK, LOAD_BI_WRONG_CHECKPOINT, LOAD_BI_CHECKPOINT_ERR,
+               LOAD_BI_WRITE_ERR, LOAD_BI_COMMIT_ERR, LOAD_BI_RESET_ERR };
+
+LoadBlockIndexResult LoadBlockIndex(bool fAllowNew=true);
 void PrintBlockTree();
 CBlockIndex* FindBlockByHeight(int nHeight);
 bool ProcessMessages(CNode* pfrom);

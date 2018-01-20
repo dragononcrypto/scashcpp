@@ -341,11 +341,13 @@ void RPCConsole::setNumConnections(int count)
 void RPCConsole::setNumBlocks(int count, int countOfPeers)
 {
     ui->numberOfBlocks->setText(QString::number(count));
-    ui->totalBlocks->setText(QString::number(countOfPeers));
+    int maxTotal = countOfPeers;
+    if (count > maxTotal) maxTotal = count;
+    ui->totalBlocks->setText(QString::number(maxTotal));
     if(clientModel)
     {
         // If there is no current number available display N/A instead of 0, which can't ever be true
-        ui->totalBlocks->setText(clientModel->getNumBlocksOfPeers() == 0 ? tr("N/A") : QString::number(clientModel->getNumBlocksOfPeers()));
+        ui->totalBlocks->setText(clientModel->getNumBlocksOfPeers() == 0 ? tr("N/A") : QString::number(maxTotal));
         ui->lastBlockTime->setText(clientModel->getLastBlockDate().toString());
     }
 }

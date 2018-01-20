@@ -653,8 +653,10 @@ bool AppInit2()
     // AddOneShot(string(""));
 
     // ********************************************************* Step 7: load blockchain
+    int recoveryAttempt = 0;
+recoveryCheckpoint:
 
-    if (!bitdb.Open(GetDataDir()))
+    if (!bitdb.Open(GetDataDir()), recoveryAttempt)
     {
         string msg = strprintf(_("Error initializing database environment %s!"
                                  " To recover, BACKUP THAT DIRECTORY, then remove"
@@ -673,13 +675,23 @@ bool AppInit2()
     uiInterface.InitMessage(_("Loading block index..."));
     printf("Loading block index...\n");
     nStart = GetTimeMillis();
-    if (!LoadBlockIndex())
+    LoadBlockIndexResult result = LoadBlockIndex();
+    printf("Result code = %i\n", result);
+    if (result != LOAD_BI_OK && result != LOAD_BI_SHUTDOWN)
+    {
+        // TODO: handle errors differently
+        if (recoveryAttempt < 2)
+        {
+            recoveryAttempt++;
+            goto recoveryCheckpoint;
+        }
         return InitError(_("Error loading blkindex.dat"));
+    }
 
     // as LoadBlockIndex can take several minutes, it's possible the user
     // requested to kill bitcoin-qt during the last operation. If so, exit.
     // As the program has not fully started yet, Shutdown() is possibly overkill.
-    if (fRequestShutdown)
+    if (fRequestShutdown) // TODO: check result is LOAD_BI_SHUTDOWN
     {
         printf("Shutdown requested. Exiting.\n");
         return false;
