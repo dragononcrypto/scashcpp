@@ -293,7 +293,10 @@ recoveryCheckpoint:
         strFile = pszFile;
         ++bitdb.mapFileUseCount[strFile];
         pdb = bitdb.mapDb[strFile];
-        printf("Database open attempt %i\n", DatabaseRecoveryAttempt);
+        if (DatabaseRecoveryAttempt > 0)
+        {
+            printf("Database open attempt %i\n", DatabaseRecoveryAttempt);
+        }
 
         if (pdb == NULL)
         {
