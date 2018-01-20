@@ -238,13 +238,12 @@ static bool GetKernelStakeModifier(uint256 hashBlockFrom, uint64& nStakeModifier
                 return error("GetKernelStakeModifier() : reached best block %s at height %d from block %s",
                     pindex->GetBlockHash().ToString().c_str(), pindex->nHeight, hashBlockFrom.ToString().c_str());
             else
-  	    {
-		if(fDebug)
-			printf(">> nStakeModifierTime = %"PRI64d", pindexFrom->GetBlockTime() = %"PRI64d", nStakeModifierSelectionInterval = %"PRI64d"\n", 
-				nStakeModifierTime, pindexFrom->GetBlockTime(), nStakeModifierSelectionInterval);
-
+            {
+                if(fDebug && fPrintProofOfStake)
+                    printf(">> nStakeModifierTime = %"PRI64d", pindexFrom->GetBlockTime() = %"PRI64d", nStakeModifierSelectionInterval = %"PRI64d"\n", 
+                       nStakeModifierTime, pindexFrom->GetBlockTime(), nStakeModifierSelectionInterval);
                 return false;
-	    }
+            }
         }
         pindex = pindex->pnext;
         if (pindex->GeneratedStakeModifier())
@@ -299,7 +298,6 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock& blockFrom, unsigned 
     int64 nTimeWeight = min((int64)nTimeTx - txPrev.nTime, (int64)nStakeMaxAge) - nStakeMinAge;
     CBigNum bnCoinDayWeight = CBigNum(nValueIn) * nTimeWeight / COIN / (24 * 60 * 60);
 
-	// printf(">>> CheckStakeKernelHash: nTimeWeight = %"PRI64d"\n", nTimeWeight);
     // Calculate hash
     CDataStream ss(SER_GETHASH, 0);
     uint64 nStakeModifier = 0;
@@ -307,13 +305,14 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock& blockFrom, unsigned 
     int64 nStakeModifierTime = 0;
 
     if (!GetKernelStakeModifier(blockFrom.GetHash(), nStakeModifier, nStakeModifierHeight, nStakeModifierTime, fPrintProofOfStake))
-	{
-		if(fDebug)
-		    printf(">>> CheckStakeKernelHash: GetKernelStakeModifier return false\n");
-        
-		return false;
-	}
-    
+    {
+          if (fDebug && GetArg("-dumpall", 0) == 1)
+          {
+              printf(">>> CheckStakeKernelHash: GetKernelStakeModifier return false\n");
+          }
+          return false;
+    }
+
     ss << nStakeModifier;
 
     ss << nTimeBlockFrom << nTxPrevOffset << txPrev.nTime << prevout.n << nTimeTx;
@@ -334,18 +333,18 @@ bool CheckStakeKernelHash(unsigned int nBits, const CBlock& blockFrom, unsigned 
 
     // Now check if proof-of-stake hash meets target protocol
     if (CBigNum(hashProofOfStake) > bnCoinDayWeight * bnTargetPerCoinDay)
-	{
-		if(fDebug)
-		{
-		 printf(">>> bnCoinDayWeight = %s, bnTargetPerCoinDay=%s\n", 
-			bnCoinDayWeight.ToString().c_str(), bnTargetPerCoinDay.ToString().c_str()); 
-		 printf(">>> CheckStakeKernelHash - hashProofOfStake too much\n");
-		}
+    {
+        if (fDebug && GetArg("-dumpall", 0) == 1)
+        {
+            printf(">>> bnCoinDayWeight = %s, bnTargetPerCoinDay=%s\n", 
+            bnCoinDayWeight.ToString().c_str(), bnTargetPerCoinDay.ToString().c_str()); 
+            printf(">>> CheckStakeKernelHash - hashProofOfStake too much\n");
+        }
         return false;
-	}
+    }
 
 
-    if (fDebug && !fPrintProofOfStake)
+    if (fDebug && fPrintProofOfStake)
     {
         printf("CheckStakeKernelHash() : using modifier 0x%016"PRI64x" at height=%d timestamp=%s for block from height=%d timestamp=%s\n",
             nStakeModifier, nStakeModifierHeight, 

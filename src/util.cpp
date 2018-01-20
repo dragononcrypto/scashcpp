@@ -9,6 +9,7 @@
 #include "version.h"
 #include "ui_interface.h"
 #include <boost/algorithm/string/join.hpp>
+#include "log/spdlog.h"
 
 // Work around clang compilation problem in Boost 1.46:
 // /usr/include/boost/program_options/detail/config_file.hpp:163:17: error: call to function 'to_internal' that is neither visible in the template definition nor found by argument-dependent lookup
@@ -195,14 +196,15 @@ uint256 GetRandHash()
 }
 
 
-
-
-
-
-static FILE* fileout = NULL;
+static std::shared_ptr<spdlog::logger> _log;
 
 inline int OutputDebugStringF(const char* pszFormat, ...)
 {
+    bool isWindows = false;
+#ifdef WIN32
+    isWindows = true;
+#endif
+
     int ret = 0;
     if (fPrintToConsole)
     {
@@ -212,48 +214,28 @@ inline int OutputDebugStringF(const char* pszFormat, ...)
         ret = vprintf(pszFormat, arg_ptr);
         va_end(arg_ptr);
     }
-    else if (!fPrintToDebugger)
+    else if (!fPrintToDebugger || !isWindows) // debugger is supported only on windows
     {
         // print to debug.log
 
-        if (!fileout)
+        if (!_log)
         {
             boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
-            fileout = fopen(pathDebug.string().c_str(), "a");
-            if (fileout) setbuf(fileout, NULL); // unbuffered
+            _log = spdlog::rotating_logger_mt("1", pathDebug.string(), 1048576 * 5, 3);
         }
-        if (fileout)
+        if (_log)
         {
-            static bool fStartedNewLine = true;
-
-            // This routine may be called by global destructors during shutdown.
-            // Since the order of destruction of static/global objects is undefined,
-            // allocate mutexDebugLog on the heap the first time this routine
-            // is called to avoid crashes during shutdown.
-            static boost::mutex* mutexDebugLog = NULL;
-            if (mutexDebugLog == NULL) mutexDebugLog = new boost::mutex();
-            boost::mutex::scoped_lock scoped_lock(*mutexDebugLog);
-
-            // reopen the log file, if requested
-            if (fReopenDebugLog) {
-                fReopenDebugLog = false;
-                boost::filesystem::path pathDebug = GetDataDir() / "debug.log";
-                if (freopen(pathDebug.string().c_str(),"a",fileout) != NULL)
-                    setbuf(fileout, NULL); // unbuffered
-            }
-
-            // Debug print useful for profiling
-            if (fLogTimestamps && fStartedNewLine)
-                fprintf(fileout, "%s ", DateTimeStrFormat("%x %H:%M:%S", GetTime()).c_str());
-            if (pszFormat[strlen(pszFormat) - 1] == '\n')
-                fStartedNewLine = true;
-            else
-                fStartedNewLine = false;
-
+            char buffer[2048];
             va_list arg_ptr;
             va_start(arg_ptr, pszFormat);
-            ret = vfprintf(fileout, pszFormat, arg_ptr);
+            vsnprintf(buffer, sizeof(buffer), pszFormat, arg_ptr);
             va_end(arg_ptr);
+            int len = strlen(buffer);
+            if (len > 0)
+            {
+                if (buffer[len-1]=='\n') buffer[len-1] = 0;
+                _log->info(buffer);
+            }
         }
     }
 
@@ -1034,15 +1016,12 @@ void PrintException(std::exception* pex, const char* pszThread)
 
 void LogStackTrace() {
     printf("\n\n******* exception encountered *******\n");
-    if (fileout)
-    {
 #ifndef WIN32
         void* pszBuffer[32];
         size_t size;
         size = backtrace(pszBuffer, 32);
-        backtrace_symbols_fd(pszBuffer, size, fileno(fileout));
+        backtrace_symbols(pszBuffer, size);
 #endif
-    }
 }
 
 void PrintExceptionContinue(std::exception* pex, const char* pszThread)
