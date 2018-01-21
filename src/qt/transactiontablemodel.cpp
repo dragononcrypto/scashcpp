@@ -289,11 +289,25 @@ QString TransactionTableModel::formatTxStatus(const TransactionRecord *wtx) cons
         status = tr("Offline (%1 confirmations)").arg(wtx->status.depth);
         break;
     case TransactionStatus::Unconfirmed:
-        status = tr("Unconfirmed (%1 of %2 confirmations)").arg(wtx->status.depth)
-             .arg(CalculateRequiredConfirmations(wtx->credit + wtx->debit));
+        if(!(wtx->type == TransactionRecord::Generated  || wtx->type == TransactionRecord::StakeMint))
+        {
+            status = tr("Unconfirmed (%1 of %2 confirmations)").arg(wtx->status.depth)
+               .arg(CalculateRequiredConfirmations(wtx->credit + wtx->debit));
+        }
+        else
+        {
+            status = tr("Unconfirmed");
+        }
         break;
     case TransactionStatus::HaveConfirmations:
-        status = tr("Confirmed (%1 confirmations)").arg(wtx->status.depth);
+        if(!(wtx->type == TransactionRecord::Generated  || wtx->type == TransactionRecord::StakeMint))
+        {
+            status = tr("Confirmed (%1 confirmations)").arg(wtx->status.depth);
+        }
+        else
+        {
+            status = tr("Have %1 confirmations").arg(wtx->status.depth);
+        }
         break;
     }
     if(wtx->type == TransactionRecord::Generated  || wtx->type == TransactionRecord::StakeMint)
@@ -374,11 +388,11 @@ QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx
     {
     case TransactionRecord::Generated:
     case TransactionRecord::StakeMint:
-		{
-			QString str = BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), wtx->credit + wtx->debit);
-			float dd = str.toFloat();
-			return QIcon(":/icons/tx_mined");
-		}
+        {
+            QString str = BitcoinUnits::format(walletModel->getOptionsModel()->getDisplayUnit(), wtx->credit + wtx->debit);
+            float dd = str.toFloat();
+            return QIcon(":/icons/tx_mined");
+        }
     case TransactionRecord::RecvWithAddress:
     case TransactionRecord::RecvFromOther:
         return QIcon(":/icons/tx_input");
@@ -456,9 +470,10 @@ QVariant TransactionTableModel::txStatusDecoration(const TransactionRecord *wtx)
             }
         case TransactionStatus::Mature:
             return QIcon(":/icons/transaction_confirmed");
-        case TransactionStatus::MaturesWarning:
         case TransactionStatus::NotAccepted:
             return QIcon(":/icons/transaction_0");
+        case TransactionStatus::MaturesWarning:
+            return QIcon(":/icons/offlinetx");
         }
     }
     else
@@ -467,10 +482,9 @@ QVariant TransactionTableModel::txStatusDecoration(const TransactionRecord *wtx)
         {
         case TransactionStatus::OpenUntilBlock:
         case TransactionStatus::OpenUntilDate:
-            return QColor(64,64,255);
-            break;
+            return QIcon(":/icons/notsyncedtx");
         case TransactionStatus::Offline:
-            return QColor(192,192,192);
+            return QIcon(":/icons/offlinetx");
         case TransactionStatus::Unconfirmed:
             switch(wtx->status.depth)
             {
