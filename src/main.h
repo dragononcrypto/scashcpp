@@ -34,6 +34,7 @@ static const unsigned int MAX_INV_SZ = 50000;
 
 static const int64 MIN_TX_FEE = CENT / 10;
 static const int64 MIN_RELAY_TX_FEE = MIN_TX_FEE;
+static const int64 MIN_NONDUST_PAYMENT = MIN_TX_FEE + 1;
 static const int64 MAX_MONEY = 476918 * COIN; // Max PoW supply
 static const int64 CIRCULATION_MONEY = MAX_MONEY;
 static const double TAX_PERCENTAGE = 0.00; // no tax by default

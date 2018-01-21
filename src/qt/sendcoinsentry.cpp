@@ -6,6 +6,7 @@
 #include "walletmodel.h"
 #include "optionsmodel.h"
 #include "addresstablemodel.h"
+#include "main.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -107,9 +108,9 @@ bool SendCoinsEntry::validate()
     }
     else
     {
-        if(ui->payAmount->value() <= 0)
+        if(ui->payAmount->value() <= MIN_NONDUST_PAYMENT)
         {
-            // Cannot send 0 coins or less
+            // Cannot send too small/dust amounts
             ui->payAmount->setValid(false);
             retval = false;
         }
