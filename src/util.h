@@ -613,6 +613,61 @@ public:
     }
 };
 
+
+// Series generators
+struct ExpMulGenerator
+{
+    ExpMulGenerator(int value, int factor) : m_value(value), m_factor(factor) { }
+    int operator()() { int res = m_value;  m_value *= m_factor;  return res; }
+    int m_value;
+    int m_factor;
+};
+
+struct ExpDivGenerator
+{
+    ExpDivGenerator(int value, int factor) : m_value(value), m_factor(factor) { }
+    int operator()() { int res = m_value; m_value /= m_factor;  return res;  }
+    int m_value;
+    int m_factor;
+};
+
+struct IncGenerator
+{
+    IncGenerator(int start, int addition) : m_value(start), m_addition(addition) {}
+    int operator() () { int res = m_value;  m_value += m_addition; return res; }
+    int m_value;
+    int m_addition;
+};
+
+template <int WINDOW_LENGTH>
+class RollingAverage
+{
+  public:
+     RollingAverage(): index(0), total(0.0)
+     {
+         // initialize all the readings to 0:
+         for (int thisReading = 0; thisReading < WINDOW_LENGTH; thisReading++)
+             readings[thisReading] = 0.0;
+     }
+
+     float next(float input) // returns average on specified window
+     {
+         // out with the old
+         total -= readings[index];  // in with the new
+         total +=  input;
+         readings[index] = input;
+         // advance and wrap index
+         ++index &= WINDOW_LENGTH -1;
+         // calculate the average:
+         return total/WINDOW_LENGTH;
+     }
+
+  private:
+     float readings[WINDOW_LENGTH];      // the readings from the analog input
+     unsigned int index;                  // the index of the current reading
+     float total;               // the running total
+};
+
 bool NewThread(void(*pfn)(void*), void* parg);
 
 #ifdef WIN32
