@@ -410,7 +410,7 @@ unsigned int GetStakeModifierChecksum(const CBlockIndex* pindex)
     ss << pindex->nFlags << pindex->hashProofOfStake << pindex->nStakeModifier;
     uint256 hashChecksum = Hash(ss.begin(), ss.end());
     hashChecksum >>= (256 - 32);
-    if(fDebug)
+    if(fDebug && GetArg("-dumpall", 0) == 1)
 	printf("stake checksum: 0x%016"PRI64x"", hashChecksum.Get64());
     return hashChecksum.Get64();
 }

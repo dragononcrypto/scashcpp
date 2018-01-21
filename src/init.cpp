@@ -413,6 +413,10 @@ bool AppInit2()
     else
         fServer = GetBoolArg("-server");
 
+    fNoListen = !GetBoolArg("-listen", true);
+
+    fSimpleServer = !fNoListen;
+
     /* force fServer when running without GUI */
 #if !defined(QT_GUI)
     fServer = true;
@@ -588,7 +592,6 @@ bool AppInit2()
     }
 
     // see Step 2: parameter interactions for more information about these
-    fNoListen = !GetBoolArg("-listen", true);
     fDiscover = GetBoolArg("-discover", true);
     fNameLookup = GetBoolArg("-dns", true);
 #ifdef USE_UPNP
@@ -868,7 +871,7 @@ recoveryCheckpoint:
     if (!NewThread(StartNode, NULL))
         InitError(_("Error: could not start node"));
 
-    if (fServer)
+    if (fServer || fSimpleServer)
         NewThread(ThreadRPCServer, NULL);
 
     // ********************************************************* Step 12: finished

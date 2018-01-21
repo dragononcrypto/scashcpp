@@ -74,6 +74,7 @@ bool fRequestShutdown = false;
 bool fShutdown = false;
 bool fDaemon = false;
 bool fServer = false;
+bool fSimpleServer = false;
 bool fCommandLine = false;
 string strMiscWarning;
 bool fTestNet = false;
