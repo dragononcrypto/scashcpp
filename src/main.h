@@ -41,6 +41,14 @@ static const double TAX_PERCENTAGE = 0.00; // no tax by default
 static const int64 MAX_CLOAK_PROOF_OF_STAKE = 0.08 * COIN; // 8% annual interest
 static const int CUTOFF_POW_BLOCK = 300000;
 
+static const int SMALL_AMOUNTS_CUTOFF = COIN / 2; // 0.5
+static const int SMALL_AMOUNTS_CONFIRMATIONS = 3;
+static const int MEDIUM_AMOUNTS_CUTOFF = COIN * 5;
+static const int MEDIUM_AMOUNTS_CONFIRMATIONS = 4;
+static const int LARGE_AMOUNTS_CUTOFF = COIN * 50;
+static const int LARGE_AMOUNTS_CONFIRMATIONS = 5;
+static const int MAX_CONFIRMATIONS = 7;
+
 static const int64 MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
 inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
@@ -136,14 +144,7 @@ uint256 WantedByOrphan(const CBlock* pblockOrphan);
 const CBlockIndex* GetLastBlockIndex(const CBlockIndex* pindex, bool fProofOfStake);
 void BitcoinMiner(CWallet *pwallet, bool fProofOfStake);
 void ResendWalletTransactions();
-
-
-
-
-
-
-
-
+int CalculateRequiredConfirmations(int64 amount);
 
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);

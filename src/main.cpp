@@ -506,6 +506,15 @@ bool CTransaction::CheckTransaction() const
 }
 
 
+int CalculateRequiredConfirmations(int64 amount)
+{
+    if (amount < SMALL_AMOUNTS_CUTOFF) return SMALL_AMOUNTS_CONFIRMATIONS;
+    if (amount < MEDIUM_AMOUNTS_CUTOFF) return MEDIUM_AMOUNTS_CONFIRMATIONS;
+    if (amount < LARGE_AMOUNTS_CUTOFF) return LARGE_AMOUNTS_CONFIRMATIONS;
+    return MAX_CONFIRMATIONS;
+}
+
+
 int64 CTransaction::GetMinFee(unsigned int nBlockSize, bool fAllowFree,
                               enum GetMinFee_mode mode, unsigned int nBytes) const
 {

@@ -165,6 +165,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
         idx);
     status.confirmed = wtx.IsConfirmed();
     status.depth = wtx.GetDepthInMainChain();
+    status.minConfirmations = CalculateRequiredConfirmations(credit + debit);
     status.cur_num_blocks = nBestHeight;
 
     if (!wtx.IsFinal())
@@ -186,7 +187,7 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
         {
             status.status = TransactionStatus::Offline;
         }
-        else if (status.depth < NumConfirmations)
+        else if (status.depth < status.minConfirmations)
         {
             status.status = TransactionStatus::Unconfirmed;
         }

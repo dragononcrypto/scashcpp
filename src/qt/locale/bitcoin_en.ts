@@ -16,20 +16,16 @@
     </message>
     <message>
         <location line="+41"/>
-        <source>Copyright © 2009-2012 The Scash developers</source>
-        <translation>Copyright © 2009-2012 The Scash developers</translation>
+        <source>Copyright © 2017-2018 The Scash developers</source>
+        <translation>Copyright © 2017-2018 The Scash developers</translation>
     </message>
     <message>
         <location line="+13"/>
         <source>
-This is experimental software.
-
 Distributed under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/) and cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP software written by Thomas Bernard.</source>
         <translation>
-This is experimental software.
-
 Distributed under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
 This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/) and cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP software written by Thomas Bernard.</translation>

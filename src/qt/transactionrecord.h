@@ -15,7 +15,9 @@ class TransactionStatus
 public:
     TransactionStatus():
             confirmed(false), sortKey(""), maturity(Mature),
-            matures_in(0), status(Offline), depth(0), open_for(0), cur_num_blocks(-1)
+            matures_in(0), status(Offline), depth(0), 
+            minConfirmations(7), // default, will be overriden on getting details
+            open_for(0), cur_num_blocks(-1)
     { }
 
     enum Maturity
@@ -47,6 +49,7 @@ public:
        @{*/
     Status status;
     int64 depth;
+    int minConfirmations;
     int64 open_for; /**< Timestamp if status==OpenUntilDate, otherwise number of blocks */
     /**@}*/
 
@@ -71,9 +74,6 @@ public:
         SendToSelf,
         StakeMint
     };
-
-    /** Number of confirmation needed for transaction */
-    static const int NumConfirmations = 7;
 
     TransactionRecord():
             hash(), time(0), type(Other), address(""), debit(0), credit(0), idx(0)

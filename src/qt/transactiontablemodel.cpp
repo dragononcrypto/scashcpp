@@ -289,7 +289,8 @@ QString TransactionTableModel::formatTxStatus(const TransactionRecord *wtx) cons
         status = tr("Offline (%1 confirmations)").arg(wtx->status.depth);
         break;
     case TransactionStatus::Unconfirmed:
-        status = tr("Unconfirmed (%1 of %2 confirmations)").arg(wtx->status.depth).arg(TransactionRecord::NumConfirmations);
+        status = tr("Unconfirmed (%1 of %2 confirmations)").arg(wtx->status.depth)
+             .arg(CalculateRequiredConfirmations(wtx->credit + wtx->debit));
         break;
     case TransactionStatus::HaveConfirmations:
         status = tr("Confirmed (%1 confirmations)").arg(wtx->status.depth);
