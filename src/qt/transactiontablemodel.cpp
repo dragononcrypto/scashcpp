@@ -306,7 +306,7 @@ QString TransactionTableModel::formatTxStatus(const TransactionRecord *wtx) cons
         }
         else
         {
-            status = tr("Have %1 confirmations").arg(wtx->status.depth);
+            status = tr("Has %1 confirmations").arg(wtx->status.depth);
         }
         break;
     }
