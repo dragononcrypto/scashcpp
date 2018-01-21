@@ -265,7 +265,7 @@ recoveryCheckpoint:
          {
              std::string tmpName = pszFile;
              boost::filesystem::path pathSrc = GetDataDir() / tmpName;
-             tmpName += ".~" + std::to_string(DatabaseRecoveryAttempt);
+             tmpName += (std::string)(".~") + (DatabaseRecoveryAttempt == 1 ? "1" : "2");
              boost::filesystem::path pathDst = GetDataDir() / tmpName;
              boost::filesystem::rename(pathSrc, pathDst);
          }
