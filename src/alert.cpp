@@ -16,7 +16,8 @@ using namespace std;
 map<uint256, CAlert> mapAlerts;
 CCriticalSection cs_mapAlerts;
 
-static const char* pszMainKey = "04f7588644485641221aa2e15e6dd11e1c75a1ced52e719b425e520e7f84e31bb0fc0a361fefa1fd423659fd8b204104dd046c2b3d60e42b0769ddd9fb0469ba91";
+// This functionality is disabled. No one can send signed alerts.
+static const char* pszMainKey = "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff";
 
 // TestNet alerts pubKey
 static const char* pszTestKey = "04f7588644485641221aa2e15e6dd11e1c75a1ced52e719b425e520e7f84e31bb0fc0a361fefa1fd423659fd8b204104dd046c2b3d60e42b0769ddd9fb0469ba91";
@@ -53,8 +54,8 @@ std::string CUnsignedAlert::ToString() const
     return strprintf(
         "CAlert(\n"
         "    nVersion     = %d\n"
-        "    nRelayUntil  = %"PRI64d"\n"
-        "    nExpiration  = %"PRI64d"\n"
+        "    nRelayUntil  = %" PRI64d "\n"
+        "    nExpiration  = %" PRI64d "\n"
         "    nID          = %d\n"
         "    nCancel      = %d\n"
         "    setCancel    = %s\n"
