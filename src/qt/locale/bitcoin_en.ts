@@ -791,7 +791,7 @@ Address: %4
     <message>
         <location line="+6"/>
         <source>Optional transaction fee per kB that helps make sure your transactions are processed quickly. Most transactions are 1 kB. Fee 0.01 recommended.</source>
-        <translation>Optional transaction fee per kB that helps make sure your transactions are processed quickly. Most transactions are 1 kB. Fee 0.01 recommended.</translation>
+        <translation>Unlike Bitcoin network Scash transactions fees are fixed. You may add up some amount to process them even quickly but this is not recommended. Additional fee per kB:</translation>
     </message>
     <message>
         <location line="+15"/>
@@ -1759,8 +1759,8 @@ Address: %4
     </message>
     <message>
         <location line="+7"/>
-        <source>Debug information</source>
-        <translation>Debug information</translation>
+        <source>Detailed view</source>
+        <translation>Detailed view</translation>
     </message>
     <message>
         <location line="+8"/>

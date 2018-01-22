@@ -13,9 +13,7 @@
 #include <QMessageBox>
 #include <QMenu>
 
-#ifdef USE_QRCODE
 #include "qrcodedialog.h"
-#endif
 
 AddressBookPage::AddressBookPage(Mode mode, Tabs tab, QWidget *parent) :
     QDialog(parent),
@@ -33,9 +31,7 @@ AddressBookPage::AddressBookPage(Mode mode, Tabs tab, QWidget *parent) :
     ui->deleteButton->setIcon(QIcon());
 #endif
 
-#ifndef USE_QRCODE
     ui->showQRCode->setVisible(false);
-#endif
 
     switch(mode)
     {
@@ -335,7 +331,6 @@ void AddressBookPage::exportClicked()
 
 void AddressBookPage::on_showQRCode_clicked()
 {
-#ifdef USE_QRCODE
     QTableView *table = ui->tableView;
     QModelIndexList indexes = table->selectionModel()->selectedRows(AddressTableModel::Address);
 
@@ -349,7 +344,6 @@ void AddressBookPage::on_showQRCode_clicked()
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         dialog->show();
     }
-#endif
 }
 
 void AddressBookPage::contextualMenu(const QPoint &point)

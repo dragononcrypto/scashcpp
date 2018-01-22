@@ -4,9 +4,11 @@
 #include <QDialog>
 #include <QImage>
 
-namespace Ui {
+namespace Ui
+{
     class QRCodeDialog;
 }
+
 class OptionsModel;
 
 class QRCodeDialog : public QDialog
