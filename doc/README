@@ -1,10 +1,10 @@
 
-Copyright (c) 2013-2014 Scash Developers
+Copyright (c) 2017-2018 Scash Developers
 
 
-Scash 0.3.0 BETA
+Scash 1.2.0
 
-Copyright (c) 2013-2014 Scash Developers
+Copyright (c) 2017-2018 Scash Developers
 Copyright (c) 2013 NovaCoin Developers
 Copyright (c) 2011-2012 Bitcoin Developers
 Distributed under the MIT/X11 software license, see the accompanying
@@ -17,15 +17,15 @@ cryptographic software written by Eric Young (eay@cryptsoft.com).
 Intro
 -----
 Scash is a free open source project derived from NovaCoin, with
-the goal of providing a long-term energy-efficient scrypt-based crypto-currency.
+the goal of providing a long-term energy-efficient x13-based crypto-currency.
 Built on the foundation of Bitcoin and NovaCoin, innovations such as proof-of-stake
 help further advance the field of crypto-currency.
 
 Setup
 -----
 Unpack the files into a directory and run:
- bin/32/scashd (headless, 32-bit)
- bin/64/scashd (headless, 64-bit)
+ bin/scashd (headless, 64-bit)
+ (32-bit version is deprecated and removed)
 
 The software automatically finds other nodes to connect to.  You can
 enable Universal Plug and Play (UPnP) with your router/firewall
@@ -43,8 +43,7 @@ Then shutdown scashd by
 scashd stop
 Start up the new scashd.
 
-
 See the documentation/wiki at the Scash site:
-  http://scash.ml/
+  https://www.scash.ml/
 for help and more information.
 
