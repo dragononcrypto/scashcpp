@@ -1,3 +1,6 @@
+WARNING: This file is outdated and details should not be used in release process.
+TODO: update
+
 * update translations (ping tcatm on IRC for now)
 
 * update (commit) version in sources
