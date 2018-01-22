@@ -1,7 +1,7 @@
 Translations
 ============
 
-The Qt GUI can be easily translated into other languages. Here's how we
+The Scash GUI can be easily translated into other languages. Here's how we
 handle those translations.
 
 Files and Folders
@@ -10,7 +10,7 @@ Files and Folders
 ### bitcoin-qt.pro
 
 This file takes care of generating `.qm` files from `.ts` files. It is mostly
-automated.
+automated by qmake.
 
 ### src/qt/bitcoin.qrc
 
