@@ -1,8 +1,8 @@
 // Copyright (c) 2017-2018 The Scash developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
-#ifndef PPCOIN_KERNEL_H
-#define PPCOIN_KERNEL_H
+#ifndef SCASH_KERNEL_H
+#define SCASH_KERNEL_H
 
 #include "main.h"
 
@@ -37,4 +37,4 @@ bool CheckStakeModifierCheckpoints(int nHeight, unsigned int nStakeModifierCheck
 // Get time weight using supplied timestamps
 int64 GetWeight(int64 nIntervalBeginning, int64 nIntervalEnd);
 
-#endif // PPCOIN_KERNEL_H
+#endif // SCASH_KERNEL_H

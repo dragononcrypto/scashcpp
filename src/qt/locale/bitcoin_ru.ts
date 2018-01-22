@@ -1768,8 +1768,8 @@ Address: %4
     </message>
     <message>
         <location line="+7"/>
-        <source>Debug information</source>
-        <translation>Отладочная информация</translation>
+        <source>Detailed view</source>
+        <translation>Детали транзакции</translation>
     </message>
     <message>
         <location line="+8"/>

@@ -222,11 +222,11 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx)
             strHTML += "<br>" + tr("Generated coins must mature 50 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to \"not accepted\" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.") + "<br>";
 
         //
-        // Debug view
+        // Detailed view
         //
-        if (fDebug)
+        if (true)
         {
-            strHTML += "<hr><br>" + tr("Debug information") + "<br><br>";
+            strHTML += "<hr><br>" + tr("Detailed view") + "<br><br>";
             BOOST_FOREACH(const CTxIn& txin, wtx.vin)
                 if(wallet->IsMine(txin))
                     strHTML += "<b>" + tr("Debit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, -wallet->GetDebit(txin)) + "<br>";
@@ -243,6 +243,7 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx)
             strHTML += "<ul>";
 
             {
+                bool hasInputs = false;
                 LOCK(wallet->cs_wallet);
                 BOOST_FOREACH(const CTxIn& txin, wtx.vin)
                 {
@@ -264,9 +265,11 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx)
                             }
                             strHTML = strHTML + " " + tr("Amount") + "=" + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, vout.nValue);
                             strHTML = strHTML + " IsMine=" + (wallet->IsMine(vout) ? tr("true") : tr("false")) + "</li>";
+                            hasInputs = true;
                         }
                     }
                 }
+                if (!hasInputs) strHTML += "<br>No inputs<br>";
             }
 
             strHTML += "</ul>";
