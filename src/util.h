@@ -146,6 +146,7 @@ extern std::map<std::string, std::vector<std::string> > mapMultiArgs;
 extern bool fDebug;
 extern bool fStaking;
 extern bool fDebugNet;
+extern bool fDumpAll;
 extern bool fPrintToConsole;
 extern bool fPrintToDebugger;
 extern bool fRequestShutdown;
@@ -157,7 +158,6 @@ extern bool fCommandLine;
 extern std::string strMiscWarning;
 extern bool fTestNet;
 extern bool fNoListen;
-extern bool fLogTimestamps;
 extern bool fReopenDebugLog;
 
 void RandAddSeed();
@@ -223,7 +223,6 @@ void ReadConfigFile(std::map<std::string, std::string>& mapSettingsRet, std::map
 #ifdef WIN32
 boost::filesystem::path GetSpecialFolderPath(int nFolder, bool fCreate = true);
 #endif
-void ShrinkDebugFile();
 int GetRandInt(int nMax);
 uint64 GetRand(uint64 nMax);
 uint256 GetRandHash();
@@ -237,16 +236,9 @@ void AddTimeData(const CNetAddr& ip, int64 nTime);
 void runCommand(std::string strCommand);
 
 
-
-
-
-
-
-
-
 inline std::string i64tostr(int64 n)
 {
-    return strprintf("%"PRI64d, n);
+    return strprintf("%" PRI64d, n);
 }
 
 inline std::string itostr(int n)

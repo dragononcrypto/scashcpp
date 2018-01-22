@@ -3,7 +3,6 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "irc.h"
 #include "db.h"
 #include "net.h"
 #include "init.h"
@@ -346,7 +345,8 @@ bool GetMyExternalIP2(const CService& addrConnect, const char* pszGet, const cha
     return error("GetMyExternalIP() : connection closed");
 }
 
-// We now get our external IP from the IRC server first and only use this as a backup
+// We now get our external IP from some servers first and only use this as a backup
+// TODO: improve
 bool GetMyExternalIP(CNetAddr& ipRet)
 {
     CService addrConnect;
@@ -891,7 +891,7 @@ void ThreadSocketHandler2(void* parg)
 
                     if (nPos > ReceiveBufferSize()) {
                         if (!pnode->fDisconnect)
-                            printf("socket recv flood control disconnect (%"PRIszu" bytes)\n", vRecv.size());
+                            printf("socket recv flood control disconnect (%" PRIszu " bytes)\n", vRecv.size());
                         pnode->CloseSocketDisconnect();
                     }
                     else {
@@ -1148,9 +1148,9 @@ void MapPort()
 // The first name is used as information source for addrman.
 // The second name should resolve to a list of seed addresses.
 static const char *strDNSSeed[][2] = {
-    {"node001.scash.ml", "node001.scash.ml"},
-    {"node002.scash.ml", "node002.scash.ml"},
-    {"node003.scash.ml", "node003.scash.ml"},
+//    {"node001.scash.ml", "node001.scash.ml"},
+//    {"node002.scash.ml", "node002.scash.ml"},
+//    {"node003.scash.ml", "node003.scash.ml"},
 };
 
 void ThreadDNSAddressSeed(void* parg)
@@ -1230,7 +1230,7 @@ void DumpAddresses()
     CAddrDB adb;
     adb.Write(addrman);
 
-    printf("Flushed %d addresses to peers.dat  %"PRI64d"ms\n",
+    printf("Flushed %d addresses to peers.dat  %" PRI64d "ms\n",
            addrman.size(), GetTimeMillis() - nStart);
 }
 
@@ -1366,7 +1366,7 @@ void ThreadOpenConnections2(void* parg)
         if (fShutdown)
             return;
 
-        // Add seed nodes if IRC isn't working
+        // Add seed nodes if external ip not got
         if (addrman.size()==0 && (GetTime() - nStart > 60) && !fTestNet)
         {
             std::vector<CAddress> vAdd;
@@ -1855,10 +1855,6 @@ void StartNode(void* parg)
     // Map ports with UPnP
     if (fUseUPnP)
         MapPort();
-
-    // Get addresses from IRC and advertise ours
-    //if (!NewThread(ThreadIRCSeed, NULL))
-    //    printf("Error: NewThread(ThreadIRCSeed) failed\n");
 
     // Send and receive from sockets, accept connections
     if (!NewThread(ThreadSocketHandler, NULL))

@@ -2809,11 +2809,14 @@ groestl_small_core(sph_groestl_small_context *sc, const void *data, size_t len)
 	sc->ptr = ptr;
 }
 
+#define SOME_GCC_VERSIONS_COMPLAINS_ABOUT_UNUSED(expr) do { (void)(expr); } while (0)
+
 static void
 groestl_small_close(sph_groestl_small_context *sc,
 	unsigned ub, unsigned n, void *dst, size_t out_len)
 {
-	unsigned char *buf;
+        unsigned char *buf = 0;
+        SOME_GCC_VERSIONS_COMPLAINS_ABOUT_UNUSED(buf);
 	unsigned char pad[72];
 	size_t u, ptr, pad_len;
 #if SPH_64
@@ -2949,7 +2952,8 @@ static void
 groestl_big_close(sph_groestl_big_context *sc,
 	unsigned ub, unsigned n, void *dst, size_t out_len)
 {
-	unsigned char *buf;
+        unsigned char *buf = 0; 
+        SOME_GCC_VERSIONS_COMPLAINS_ABOUT_UNUSED(buf);
 	unsigned char pad[136];
 	size_t ptr, pad_len, u;
 #if SPH_64

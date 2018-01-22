@@ -239,7 +239,6 @@ std::string HelpMessage()
         "  -externalip=<ip>       " + _("Specify your own public address") + "\n" +
         "  -onlynet=<net>         " + _("Only connect to nodes in network <net> (IPv4, IPv6 or Tor)") + "\n" +
         "  -discover              " + _("Discover own IP address (default: 1 when listening and no -externalip)") + "\n" +
-        "  -irc                   " + _("Find peers using internet relay chat (default: 1)") + "\n" +
         "  -listen                " + _("Accept connections from outside (default: 1 if no -proxy or -connect)") + "\n" +
         "  -bind=<addr>           " + _("Bind to given address. Use [host]:port notation for IPv6") + "\n" +
         "  -dnsseed               " + _("Find peers using DNS lookup (default: 1)") + "\n" +
@@ -265,9 +264,8 @@ std::string HelpMessage()
 #endif
         "  -testnet               " + _("Use the test network") + "\n" +
         "  -debug                 " + _("Output extra debugging information. Implies all other -debug* options") + "\n" +
+        "  -dumpall               " + _("Dumps all possible debug information (Warning: debug file grows way too fast)") + "\n" +
         "  -debugnet              " + _("Output extra network debugging information") + "\n" +
-        "  -logtimestamps         " + _("Prepend debug output with timestamp") + "\n" +
-        "  -shrinkdebugfile       " + _("Shrink debug.log file on client startup (default: 1 when no -debug)") + "\n" +
         "  -printtoconsole        " + _("Send trace/debug info to console instead of debug.log file") + "\n" +
 #ifdef WIN32
         "  -printtodebugger       " + _("Send trace/debug info to debugger") + "\n" +
@@ -278,7 +276,7 @@ std::string HelpMessage()
         "  -rpcallowip=<ip>       " + _("Allow JSON-RPC connections from specified IP address") + "\n" +
         "  -rpcconnect=<ip>       " + _("Send commands to node running on <ip> (default: 127.0.0.1)") + "\n" +
         "  -blocknotify=<cmd>     " + _("Execute command when the best block changes (%s in cmd is replaced by block hash)") + "\n" +
-		"  -walletnotify=<cmd>    " + _("Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)") + "\n" +
+        "  -walletnotify=<cmd>    " + _("Execute command when a wallet transaction changes (%s in cmd is replaced by TxID)") + "\n" +
         "  -upgradewallet         " + _("Upgrade wallet to latest format") + "\n" +
         "  -keypool=<n>           " + _("Set key pool size to <n> (default: 100)") + "\n" +
         "  -rescan                " + _("Rescan the block chain for missing wallet transactions") + "\n" +
@@ -351,9 +349,6 @@ bool AppInit2()
     // ********************************************************* Step 2: parameter interactions
 
     fTestNet = GetBoolArg("-testnet");
-    if (fTestNet) {
-        SoftSetBoolArg("-irc", true);
-    }
 
     if (mapArgs.count("-bind")) {
         // when specifying an explicit binding address, you want to listen on it
@@ -398,6 +393,8 @@ bool AppInit2()
     else
         fDebugNet = GetBoolArg("-debugnet");
 
+    fDumpAll = GetBoolArg("-dumpall");
+
     fStaking = GetBoolArg("-staking", true);
 
     bitdb.SetDetach(GetBoolArg("-detachdb", false));
@@ -423,7 +420,6 @@ bool AppInit2()
 #endif
     fPrintToConsole = GetBoolArg("-printtoconsole");
     fPrintToDebugger = GetBoolArg("-printtodebugger");
-    fLogTimestamps = GetBoolArg("-logtimestamps");
 
     if (mapArgs.count("-timeout"))
     {
@@ -448,6 +444,8 @@ bool AppInit2()
     }
 
     // ********************************************************* Step 4: application initialization: dir lock, daemonize, pidfile, debug log
+
+    InitializeConstants();
 
     std::string strDataDir = GetDataDir().string();
 
@@ -481,13 +479,9 @@ bool AppInit2()
     }
 #endif
 
-    if (GetBoolArg("-shrinkdebugfile", !fDebug))
-        ShrinkDebugFile();
     printf("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
     printf("Scash version %s (%s)\n", FormatFullVersion().c_str(), CLIENT_DATE.c_str());
     printf("Using OpenSSL version %s\n", SSLeay_version(SSLEAY_VERSION));
-    if (!fLogTimestamps)
-        printf("Startup time: %s\n", DateTimeStrFormat("%x %H:%M:%S", GetTime()).c_str());
     printf("Default data directory %s\n", GetDefaultDataDir().string().c_str());
     printf("Used data directory %s\n", strDataDir.c_str());
     std::ostringstream strErrors;
@@ -699,12 +693,16 @@ recoveryCheckpoint:
         printf("Shutdown requested. Exiting.\n");
         return false;
     }
-    printf(" block index %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    printf(" block index %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 
-    if (GetBoolArg("-printblockindex") || GetBoolArg("-printblocktree"))
+    if (GetBoolArg("-printblockindex") || GetBoolArg("-printblocktree") || fDumpAll)
     {
         PrintBlockTree();
-        return false;
+        if (!fDumpAll)
+        {
+             printf("Application exited since printblockindex/printblocktree is specified\n");
+             return false;
+        }
     }
 
     if (mapArgs.count("-printblock"))
@@ -790,7 +788,7 @@ recoveryCheckpoint:
     }
 
     printf("%s", strErrors.str().c_str());
-    printf(" wallet      %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+    printf(" wallet      %15" PRI64d "ms\n", GetTimeMillis() - nStart);
 
     RegisterWallet(pwalletMain);
 
@@ -810,7 +808,7 @@ recoveryCheckpoint:
         printf("Rescanning last %i blocks (from block %i)...\n", pindexBest->nHeight - pindexRescan->nHeight, pindexRescan->nHeight);
         nStart = GetTimeMillis();
         pwalletMain->ScanForWalletTransactions(pindexRescan, true);
-        printf(" rescan      %15"PRI64d"ms\n", GetTimeMillis() - nStart);
+        printf(" rescan      %15" PRI64d "ms\n", GetTimeMillis() - nStart);
     }
 
     // ********************************************************* Step 9: import blocks
@@ -851,7 +849,7 @@ recoveryCheckpoint:
             printf("Invalid or missing peers.dat; recreating\n");
     }
 
-    printf("Loaded %i addresses from peers.dat  %"PRI64d"ms\n",
+    printf("Loaded %i addresses from peers.dat  %" PRI64d "ms\n",
            addrman.size(), GetTimeMillis() - nStart);
 
     // ********************************************************* Step 11: start node
@@ -862,11 +860,11 @@ recoveryCheckpoint:
     RandAddSeedPerfmon();
 
     //// debug print
-    printf("mapBlockIndex.size() = %"PRIszu"\n",   mapBlockIndex.size());
+    printf("mapBlockIndex.size() = %" PRIszu "\n",   mapBlockIndex.size());
     printf("nBestHeight = %d\n",            nBestHeight);
-    printf("setKeyPool.size() = %"PRIszu"\n",      pwalletMain->setKeyPool.size());
-    printf("mapWallet.size() = %"PRIszu"\n",       pwalletMain->mapWallet.size());
-    printf("mapAddressBook.size() = %"PRIszu"\n",  pwalletMain->mapAddressBook.size());
+    printf("setKeyPool.size() = %" PRIszu "\n",      pwalletMain->setKeyPool.size());
+    printf("mapWallet.size() = %" PRIszu "\n",       pwalletMain->mapWallet.size());
+    printf("mapAddressBook.size() = %" PRIszu "\n",  pwalletMain->mapAddressBook.size());
 
     if (!NewThread(StartNode, NULL))
         InitError(_("Error: could not start node"));

@@ -538,7 +538,7 @@ void CDBEnv::Flush(bool fShutdown)
             else
                 mi++;
         }
-        printf("DBFlush(%s)%s ended %15"PRI64d"ms\n", fShutdown ? "true" : "false", fDbEnvInit ? "" : " db not started", GetTimeMillis() - nStart);
+        printf("DBFlush(%s)%s ended %15" PRI64d"ms\n", fShutdown ? "true" : "false", fDbEnvInit ? "" : " db not started", GetTimeMillis() - nStart);
         if (fShutdown)
         {
             char** listp;
@@ -721,7 +721,7 @@ LoadBlockIndexResult CTxDB::LoadBlockIndex()
         pindex->nStakeModifierChecksum = GetStakeModifierChecksum(pindex);
         if (!CheckStakeModifierCheckpoints(pindex->nHeight, pindex->nStakeModifierChecksum))
         {
-            printf("CTxDB::LoadBlockIndex() : Failed stake modifier checkpoint height=%d, modifier=0x%016"PRI64x, pindex->nHeight, pindex->nStakeModifier);
+            printf("CTxDB::LoadBlockIndex() : Failed stake modifier checkpoint height=%d, modifier=0x%016" PRI64x, pindex->nHeight, pindex->nStakeModifier);
             return LOAD_BI_STAKE_ERR;
         }
     }
