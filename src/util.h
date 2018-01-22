@@ -159,6 +159,8 @@ extern std::string strMiscWarning;
 extern bool fTestNet;
 extern bool fNoListen;
 extern bool fReopenDebugLog;
+extern bool fWalletLoadWarn;
+extern bool fWalletLoadErr;
 
 void RandAddSeed();
 void RandAddSeedPerfmon();

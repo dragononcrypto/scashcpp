@@ -730,6 +730,31 @@ recoveryCheckpoint:
 
     // ********************************************************* Step 8: load wallet
 
+    // DO AUTO BACKUP BEFORE TOUCHING WALLET!
+    boost::filesystem::path walletPathSrc = GetDataDir() / "wallet.dat";
+    boost::filesystem::path walletPathBackup = GetDataDir() / "wallet.dat.backup";
+    bool walletExists = false;
+    try
+    {
+        boost::filesystem::path pathWalletBackups = GetDataDir() / "backups";
+        filesystem::create_directory(pathWalletBackups);
+        std::time_t now = std::time(nullptr);
+        std::ostringstream tmp;
+        tmp << std::put_time(std::localtime(&now), "%y-%m-%d %OH %OM %OS");
+        std::string nowStr = tmp.str();
+        walletPathBackup = pathWalletBackups / ("wallet " + nowStr);
+        if (boost::filesystem::exists(walletPathSrc))
+        {
+            walletExists = true;
+            boost::filesystem::copy(walletPathSrc, walletPathBackup);
+            printf("Wallet backup done.");
+        }
+    }
+    catch (std::exception& ex)
+    {
+        printf("Wallet backup failed: %s\n", ex.what());
+    }
+
     uiInterface.InitMessage(_("Loading wallet..."));
     printf("Loading wallet...\n");
     nStart = GetTimeMillis();
@@ -739,23 +764,34 @@ recoveryCheckpoint:
     if (nLoadWalletRet != DB_LOAD_OK)
     {
         if (nLoadWalletRet == DB_CORRUPT)
+        {
             strErrors << _("Error loading wallet.dat: Wallet corrupted") << "\n";
+            fWalletLoadErr = true;
+        }
         else if (nLoadWalletRet == DB_NONCRITICAL_ERROR)
         {
             string msg(_("Warning: error reading wallet.dat! All keys read correctly, but transaction data"
                          " or address book entries might be missing or incorrect."));
             uiInterface.ThreadSafeMessageBox(msg, _("Scash"), CClientUIInterface::OK | CClientUIInterface::ICON_EXCLAMATION | CClientUIInterface::MODAL);
+            fWalletLoadWarn = true;
         }
         else if (nLoadWalletRet == DB_TOO_NEW)
+        {
             strErrors << _("Error loading wallet.dat: Wallet requires newer version of Scash") << "\n";
+            fWalletLoadErr = true;
+        }
         else if (nLoadWalletRet == DB_NEED_REWRITE)
         {
             strErrors << _("Wallet needed to be rewritten: restart Scash to complete") << "\n";
             printf("%s", strErrors.str().c_str());
             return InitError(strErrors.str());
+            fWalletLoadWarn = true;
         }
         else
+        {
             strErrors << _("Error loading wallet.dat") << "\n";
+            fWalletLoadErr = true;
+        }
     }
 
     if (GetBoolArg("-upgradewallet", fFirstRun))
@@ -770,7 +806,10 @@ recoveryCheckpoint:
         else
             printf("Allowing wallet upgrade up to %i\n", nMaxVersion);
         if (nMaxVersion < pwalletMain->GetVersion())
+        {
             strErrors << _("Cannot downgrade wallet") << "\n";
+            fWalletLoadErr = true;
+        }
         pwalletMain->SetMaxVersion(nMaxVersion);
     }
 
@@ -809,6 +848,25 @@ recoveryCheckpoint:
         nStart = GetTimeMillis();
         pwalletMain->ScanForWalletTransactions(pindexRescan, true);
         printf(" rescan      %15" PRI64d "ms\n", GetTimeMillis() - nStart);
+    }
+
+
+    if (walletExists)
+    {
+        try
+        {
+            std::string stateString = "OK.dat";
+            if (fWalletLoadWarn) stateString = "WARN.dat";
+            if (fWalletLoadErr) stateString = "ERR.dat";
+            boost::filesystem::path renameWalletTo = walletPathBackup.string() + " " + stateString;
+            boost::filesystem::rename(walletPathBackup, renameWalletTo);
+            printf("Wallet backup renamed.");
+    }
+    catch (std::exception& ex)
+    {
+        printf("Wallet backup rename failed: %s\n", ex.what());
+    }
+
     }
 
     // ********************************************************* Step 9: import blocks
