@@ -1,5 +1,14 @@
-Building Scash
+Building Scash QT UI on Linux
 
-See doc/readme-qt.rst for instructions on building Scash QT, the intended-for-end-users, nice-graphical-interface, reference implementation of Scash Wallet UI.
+Just use following command:
+qmake "USE_UPNP=-"
+Should be executed from the root source directory. 
+Some prerequisites are required (TODO: describe).
+./scash-qt file should be produced.
 
-See doc/build-*.txt for instructions on building Scashd,the intended-for-services, no-graphical-interface, reference implementation of Scash.
+Building Scash daemon on Linux
+
+Just use following commands:
+cd src
+make
+./scashd file should be produced.
