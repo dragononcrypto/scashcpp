@@ -698,7 +698,11 @@ recoveryCheckpoint:
     if (GetBoolArg("-printblockindex") || GetBoolArg("-printblocktree") || fDumpAll)
     {
         PrintBlockTree();
-        return false;
+        if (!fDumpAll)
+        {
+             printf("Application exited since printblockindex/printblocktree is specified\n");
+             return false;
+        }
     }
 
     if (mapArgs.count("-printblock"))
