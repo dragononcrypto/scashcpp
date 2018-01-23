@@ -134,6 +134,9 @@ OBJS= \
     obj/rpcwallet.o \
     obj/rpcblockchain.o \
     obj/rpcrawtransaction.o \
+    obj/blockexplorerstyle.o \
+    obj/blockexplorerserver.o \
+    obj/blockexplorer.o \
     obj/script.o \
     obj/sync.o \
     obj/util.o \
