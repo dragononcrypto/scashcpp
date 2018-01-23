@@ -33,6 +33,8 @@ public:
     void pasteEntry(const SendCoinsRecipient &rv);
     bool handleURI(const QString &uri);
 
+    void coinControlFeatureDisplayToggle();
+
 public slots:
     void clear();
     void reject();
@@ -45,9 +47,11 @@ private:
     Ui::SendCoinsDialog *ui;
     WalletModel *model;
     bool fNewRecipientAllowed;
+    bool fCoinControlShow;
 
 private slots:
     void on_sendButton_clicked();
+    void on_toggleCoinControlButton_clicked();
     void removeEntry(SendCoinsEntry* entry);
     void updateDisplayUnit();
     void coinControlFeatureChanged(bool);

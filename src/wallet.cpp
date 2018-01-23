@@ -1221,13 +1221,18 @@ bool CWallet::SelectCoins(int64 nTargetValue, unsigned int nSpendTime, set<pair<
     // coin control -> return all selected outputs (we want all selected to go into the transaction for sure)
     if (coinControl && coinControl->HasSelected())
     {
+        printf("=== COIN CONTROL HAS BEEN SELECTED ===\n");
         BOOST_FOREACH(const COutput& out, vCoins)
         {
             nValueRet += out.tx->vout[out.i].nValue;
+            printf("nValueRet = %" PRI64d " nValue = %" PRI64d, nValueRet, out.tx->vout[out.i].nValue);
             setCoinsRet.insert(make_pair(out.tx, out.i));
+            printf("  pair(%" PRI64d ", %i)\n", out.tx->GetDebit(), out.i);
         }
         return (nValueRet >= nTargetValue);
     }
+
+    printf("Processing without coin control\n");
 
     return (SelectCoinsMinConf(nTargetValue, nSpendTime, 1, 6, vCoins, setCoinsRet, nValueRet) ||
             SelectCoinsMinConf(nTargetValue, nSpendTime, 1, 1, vCoins, setCoinsRet, nValueRet) ||

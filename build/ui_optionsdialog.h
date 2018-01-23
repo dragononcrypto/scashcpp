@@ -327,7 +327,7 @@ public:
 
         retranslateUi(OptionsDialog);
 
-        tabWidget->setCurrentIndex(0);
+        tabWidget->setCurrentIndex(3);
 
 
         QMetaObject::connectSlotsByName(OptionsDialog);
@@ -336,7 +336,7 @@ public:
     void retranslateUi(QDialog *OptionsDialog)
     {
         OptionsDialog->setWindowTitle(QApplication::translate("OptionsDialog", "Options", 0, QApplication::UnicodeUTF8));
-        transactionFeeInfoLabel->setText(QApplication::translate("OptionsDialog", "Optional transaction fee per kB that helps make sure your transactions are processed quickly. Most transactions are 1 kB. Fee 0.01 recommended.", 0, QApplication::UnicodeUTF8));
+        transactionFeeInfoLabel->setText(QApplication::translate("OptionsDialog", "Unlike Bitcoin network in Scash the transactions fees are fixed. You may add up some amount to process them even quicker but this is not recommended. Additional fee per kB:", 0, QApplication::UnicodeUTF8));
         transactionFeeLabel->setText(QApplication::translate("OptionsDialog", "Pay transaction &fee", 0, QApplication::UnicodeUTF8));
 #ifndef QT_NO_TOOLTIP
         bitcoinAtStartup->setToolTip(QApplication::translate("OptionsDialog", "Automatically start Scash after logging in to the system.", 0, QApplication::UnicodeUTF8));
@@ -392,7 +392,7 @@ public:
 #ifndef QT_NO_TOOLTIP
         coinControlFeatures->setToolTip(QApplication::translate("OptionsDialog", "Whether to show coin control features or not.", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
-        coinControlFeatures->setText(QApplication::translate("OptionsDialog", "Display coin &control features (experts only!)", 0, QApplication::UnicodeUTF8));
+        coinControlFeatures->setText(QApplication::translate("OptionsDialog", "Display coin &control settings (experimental feature)", 0, QApplication::UnicodeUTF8));
         tabWidget->setTabText(tabWidget->indexOf(tabDisplay), QApplication::translate("OptionsDialog", "&Display", 0, QApplication::UnicodeUTF8));
         statusLabel->setText(QString());
         okButton->setText(QApplication::translate("OptionsDialog", "&OK", 0, QApplication::UnicodeUTF8));

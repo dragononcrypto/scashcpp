@@ -79,6 +79,7 @@ public:
     QHBoxLayout *horizontalLayout;
     QPushButton *addButton;
     QPushButton *clearButton;
+    QPushButton *toggleCoinControlButton;
     QHBoxLayout *horizontalLayout_2;
     QLabel *label;
     QLabel *labelBalance;
@@ -173,8 +174,8 @@ public:
         widgetCoinControl->setMinimumSize(QSize(0, 0));
         widgetCoinControl->setStyleSheet(QString::fromUtf8(""));
         horizontalLayoutCoinControl5 = new QHBoxLayout(widgetCoinControl);
-        horizontalLayoutCoinControl5->setContentsMargins(0, 0, 0, 0);
         horizontalLayoutCoinControl5->setObjectName(QString::fromUtf8("horizontalLayoutCoinControl5"));
+        horizontalLayoutCoinControl5->setContentsMargins(0, 0, 0, 0);
         horizontalLayoutCoinControl3 = new QHBoxLayout();
         horizontalLayoutCoinControl3->setSpacing(20);
         horizontalLayoutCoinControl3->setObjectName(QString::fromUtf8("horizontalLayoutCoinControl3"));
@@ -398,10 +399,10 @@ public:
         scrollArea->setWidgetResizable(true);
         scrollAreaWidgetContents = new QWidget();
         scrollAreaWidgetContents->setObjectName(QString::fromUtf8("scrollAreaWidgetContents"));
-        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 830, 172));
+        scrollAreaWidgetContents->setGeometry(QRect(0, 0, 830, 156));
         verticalLayout_2 = new QVBoxLayout(scrollAreaWidgetContents);
-        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
         verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+        verticalLayout_2->setContentsMargins(0, 0, 0, 0);
         entries = new QVBoxLayout();
         entries->setSpacing(6);
         entries->setObjectName(QString::fromUtf8("entries"));
@@ -442,6 +443,18 @@ public:
 
         horizontalLayout->addWidget(clearButton);
 
+        toggleCoinControlButton = new QPushButton(SendCoinsDialog);
+        toggleCoinControlButton->setObjectName(QString::fromUtf8("toggleCoinControlButton"));
+        sizePolicy5.setHeightForWidth(toggleCoinControlButton->sizePolicy().hasHeightForWidth());
+        toggleCoinControlButton->setSizePolicy(sizePolicy5);
+        QIcon icon2;
+        icon2.addFile(QString::fromUtf8(":/icons/control"), QSize(), QIcon::Normal, QIcon::Off);
+        toggleCoinControlButton->setIcon(icon2);
+        toggleCoinControlButton->setAutoRepeatDelay(300);
+        toggleCoinControlButton->setAutoDefault(false);
+
+        horizontalLayout->addWidget(toggleCoinControlButton);
+
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setSpacing(3);
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
@@ -474,9 +487,9 @@ public:
         sendButton = new QPushButton(SendCoinsDialog);
         sendButton->setObjectName(QString::fromUtf8("sendButton"));
         sendButton->setMinimumSize(QSize(150, 0));
-        QIcon icon2;
-        icon2.addFile(QString::fromUtf8(":/icons/send"), QSize(), QIcon::Normal, QIcon::Off);
-        sendButton->setIcon(icon2);
+        QIcon icon3;
+        icon3.addFile(QString::fromUtf8(":/icons/send"), QSize(), QIcon::Normal, QIcon::Off);
+        sendButton->setIcon(icon3);
         sendButton->setDefault(true);
 
         horizontalLayout->addWidget(sendButton);
@@ -495,6 +508,9 @@ public:
     {
         SendCoinsDialog->setWindowTitle(QApplication::translate("SendCoinsDialog", "Send Coins", 0, QApplication::UnicodeUTF8));
         labelCoinControlFeatures->setText(QApplication::translate("SendCoinsDialog", "Coin Control Features", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        pushButtonCoinControl->setToolTip(QApplication::translate("SendCoinsDialog", "Source addresses for payment", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
         pushButtonCoinControl->setText(QApplication::translate("SendCoinsDialog", "Inputs...", 0, QApplication::UnicodeUTF8));
         labelCoinControlAutomaticallySelected->setText(QApplication::translate("SendCoinsDialog", "automatically selected", 0, QApplication::UnicodeUTF8));
         labelCoinControlInsuffFunds->setText(QApplication::translate("SendCoinsDialog", "Insufficient funds!", 0, QApplication::UnicodeUTF8));
@@ -514,7 +530,14 @@ public:
         labelCoinControlAfterFee->setText(QApplication::translate("SendCoinsDialog", "0.00 SCS", 0, QApplication::UnicodeUTF8));
         labelCoinControlChangeText->setText(QApplication::translate("SendCoinsDialog", "Change", 0, QApplication::UnicodeUTF8));
         labelCoinControlChange->setText(QApplication::translate("SendCoinsDialog", "0.00 SCS", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        checkBoxCoinControlChange->setToolTip(QApplication::translate("SendCoinsDialog", "DO NOT ENABLE UNLESS YOU ARE FULLY UNDERSTAND WHAT ARE YOU DOING! YOU MAY LOSE FUNDS OTHEWISE!", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
         checkBoxCoinControlChange->setText(QApplication::translate("SendCoinsDialog", "custom change address", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        lineEditCoinControlChange->setToolTip(QApplication::translate("SendCoinsDialog", "DO NOT FILL UNLESS YOU ARE FULLY UNDERSTAND WHAT ARE YOU DOING! YOU MAY LOSE FUNDS OTHEWISE!", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+        lineEditCoinControlChange->setText(QApplication::translate("SendCoinsDialog", "Your Scash address", 0, QApplication::UnicodeUTF8));
         labelCoinControlChangeLabel->setText(QString());
 #ifndef QT_NO_TOOLTIP
         addButton->setToolTip(QApplication::translate("SendCoinsDialog", "Send to multiple recipients at once", 0, QApplication::UnicodeUTF8));
@@ -524,6 +547,10 @@ public:
         clearButton->setToolTip(QApplication::translate("SendCoinsDialog", "Remove all transaction fields", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
         clearButton->setText(QApplication::translate("SendCoinsDialog", "Clear &All", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        toggleCoinControlButton->setToolTip(QApplication::translate("SendCoinsDialog", "Show or hide additional transaction params", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+        toggleCoinControlButton->setText(QApplication::translate("SendCoinsDialog", "Toggle &Coin Control", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("SendCoinsDialog", "Balance:", 0, QApplication::UnicodeUTF8));
         labelBalance->setText(QApplication::translate("SendCoinsDialog", "123.456 SCS", 0, QApplication::UnicodeUTF8));
 #ifndef QT_NO_TOOLTIP
