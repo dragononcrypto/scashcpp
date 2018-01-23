@@ -1,0 +1,10 @@
+Blockchain parser tool with parameters defaulted to Scash
+
+TO BUILD:
+
+run ./make
+to generate ./parser
+
+USAGE DETAILS:
+./parser --help
+

@@ -121,7 +121,7 @@ static double getMem() {
 
 #if defined SCASH
     static const size_t gHeaderSize = 80;
-    static auto kCoinDirName = ".SCS";
+    static auto kCoinDirName = ".Scash";
     static const uint32_t gExpectedMagic = 86127984;
 #endif
 

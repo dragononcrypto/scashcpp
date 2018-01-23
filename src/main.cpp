@@ -1,6 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2012 The Bitcoin developers
-// Copyright (c) 2017-2018 SpeedCash developers
+// Copyright (c) 2017-2018 Scash developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -1066,16 +1066,22 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
         return bnTargetLimit.GetCompact(); // second block
 
     int64 nActualSpacing = pindexPrev->GetBlockTime() - pindexPrevPrev->GetBlockTime();
-	if(nActualSpacing < 0)
-	{
-		// printf(">> nActualSpacing = %" PRI64d " corrected to 1.\n", nActualSpacing);
-		nActualSpacing = 1;
-	}
-	else if(nActualSpacing > nTargetTimespan)
-	{
-		// printf(">> nActualSpacing = %" PRI64d " corrected to nTargetTimespan (900).\n", nActualSpacing);
-		nActualSpacing = nTargetTimespan;
-	}
+    if(nActualSpacing < 0)
+    {
+        if (fDebug && fDumpAll)
+        {
+            printf(">> nActualSpacing = %" PRI64d " corrected to 1.\n", nActualSpacing);
+        }
+        nActualSpacing = 1;
+    }
+    else if(nActualSpacing > nTargetTimespan)
+    {
+        if (fDebug && fDumpAll)
+        {
+            printf(">> nActualSpacing = %" PRI64d " corrected to nTargetTimespan (900).\n", nActualSpacing);
+        }
+        nActualSpacing = nTargetTimespan;
+    }
 
     // Scash: target change every block
     // retarget with exponential moving toward target spacing
@@ -1087,12 +1093,13 @@ unsigned int GetNextTargetRequired(const CBlockIndex* pindexLast, bool fProofOfS
     bnNew *= ((nInterval - 1) * nTargetSpacing + nActualSpacing + nActualSpacing);
     bnNew /= ((nInterval + 1) * nTargetSpacing);
 	
-	/*
-	printf(">> Height = %d, fProofOfStake = %d, nInterval = %" PRI64d ", nTargetSpacing = %" PRI64d ", nActualSpacing = %"PRI64d"\n", 
-		pindexPrev->nHeight, fProofOfStake, nInterval, nTargetSpacing, nActualSpacing);  
-	printf(">> pindexPrev->GetBlockTime() = %" PRI64d ", pindexPrev->nHeight = %d, pindexPrevPrev->GetBlockTime() = %" PRI64d ", pindexPrevPrev->nHeight = %d\n", 
-		pindexPrev->GetBlockTime(), pindexPrev->nHeight, pindexPrevPrev->GetBlockTime(), pindexPrevPrev->nHeight);  
-	*/
+    if (fDebug && fDumpAll)
+    {
+        printf(">> Height = %d, fProofOfStake = %d, nInterval = %" PRI64d ", nTargetSpacing = %" PRI64d ", nActualSpacing = %" PRI64d "\n",
+            pindexPrev->nHeight, fProofOfStake, nInterval, nTargetSpacing, nActualSpacing);
+        printf(">> pindexPrev->GetBlockTime() = %" PRI64d ", pindexPrev->nHeight = %d, pindexPrevPrev->GetBlockTime() = %" PRI64d ", pindexPrevPrev->nHeight = %d\n",
+            pindexPrev->GetBlockTime(), pindexPrev->nHeight, pindexPrevPrev->GetBlockTime(), pindexPrevPrev->nHeight);
+    }
 
     if (bnNew > bnTargetLimit)
         bnNew = bnTargetLimit;
@@ -1617,7 +1624,10 @@ bool CBlock::ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck)
 	if(pindex->pprev)
 	{
 		prevHash = pindex->pprev->GetBlockHash();
-		// printf("==> Got prevHash = %s\n", prevHash.ToString().c_str());
+        if (fDebug && fDumpAll)
+        {
+            printf("==> Got prevHash = %s\n", prevHash.ToString().c_str());
+        }
 	}
 
 	if (vtx[0].GetValueOut() > GetProofOfWorkReward(pindex->nHeight, nFees, prevHash))
@@ -4020,7 +4030,6 @@ CBlock* CreateNewBlock(CWallet* pwallet, bool fProofOfStake)
         int64 nSearchTime = txCoinStake.nTime; // search to current time
         if (nSearchTime > nLastCoinStakeSearchTime)
         {
-			// printf(">>> OK1\n");
             if (pwallet->CreateCoinStake(*pwallet, pblock->nBits, nSearchTime-nLastCoinStakeSearchTime, txCoinStake))
             {
 				if (txCoinStake.nTime >= max(pindexPrev->GetMedianTimePast()+1, pindexPrev->GetBlockTime() - nMaxClockDrift))
@@ -4361,7 +4370,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
     SetThreadPriority(THREAD_PRIORITY_LOWEST);
 
     // Make this thread recognisable as the mining thread
-    RenameThread("bitcoin-miner");
+    RenameThread("scash-miner");
 
     // Each thread has its own key and counter
     CReserveKey reservekey(pwallet);
@@ -4411,7 +4420,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
         if (fDumpAll)
         {
-              printf("Running BitcoinMiner with %" PRIszu " transactions in block (%u bytes)\n", pblock->vtx.size(),
+              printf("Running PoW miner with %" PRIszu " transactions in block (%u bytes)\n", pblock->vtx.size(),
                ::GetSerializeSize(*pblock, SER_NETWORK, PROTOCOL_VERSION));
         }
 
