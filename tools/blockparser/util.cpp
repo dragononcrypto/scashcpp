@@ -1010,7 +1010,7 @@ const char *getInterestingAddr() {
 
     #elif defined(SCASH)
 
-        "SP6Thf2zMAJY4tywF75oCUAM8fS2whdfmM"
+        "SQTt7TNjchsstoNeyCAVWgHVmXN5zPZmSt"
 
     #elif defined(JUMBUCKS)
 
