@@ -26,7 +26,8 @@
 SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SendCoinsDialog),
-    model(0)
+    model(0),
+    fCoinControlShow(false)
 {
     ui->setupUi(this);
 
@@ -103,7 +104,8 @@ void SendCoinsDialog::setModel(WalletModel *model)
         connect(model->getOptionsModel(), SIGNAL(displayUnitChanged(int)), this, SLOT(coinControlUpdateLabels()));
         connect(model->getOptionsModel(), SIGNAL(coinControlFeaturesChanged(bool)), this, SLOT(coinControlFeatureChanged(bool)));
         connect(model->getOptionsModel(), SIGNAL(transactionFeeChanged(qint64)), this, SLOT(coinControlUpdateLabels()));
-        ui->frameCoinControl->setVisible(model->getOptionsModel()->getCoinControlFeatures());
+        ui->frameCoinControl->setVisible(fCoinControlShow);
+        ui->toggleCoinControlButton->setVisible(model->getOptionsModel()->getCoinControlFeatures());
         coinControlUpdateLabels();
     }
 }
@@ -172,10 +174,16 @@ void SendCoinsDialog::on_sendButton_clicked()
 
     WalletModel::SendCoinsReturn sendstatus;
 
-    if (!model->getOptionsModel() || !model->getOptionsModel()->getCoinControlFeatures())
+    if (!fCoinControlShow)
+    {
+        printf("Started sendCoins() without coin control branch\n");
         sendstatus = model->sendCoins(recipients);
+    }
     else
+    {
+        printf("Started sendCoins() with coin control branch\n");
         sendstatus = model->sendCoins(recipients, CoinControlDialog::coinControl);
+    }
 
     switch(sendstatus.status)
     {
@@ -424,9 +432,21 @@ void SendCoinsDialog::coinControlClipboardChange()
 // Coin Control: settings menu - coin control enabled/disabled by user
 void SendCoinsDialog::coinControlFeatureChanged(bool checked)
 {
-    ui->frameCoinControl->setVisible(checked);
+    ui->toggleCoinControlButton->setShown(checked);
+    if (!checked && fCoinControlShow)
+    {
+        // hide already opened coin control
+        on_toggleCoinControlButton_clicked();
+    }
+}
 
-    if (!checked && model) // coin control features disabled
+void SendCoinsDialog::on_toggleCoinControlButton_clicked()
+{
+    fCoinControlShow = !fCoinControlShow;
+
+    ui->frameCoinControl->setVisible(fCoinControlShow);
+
+    if (!fCoinControlShow && model) // coin control features disabled
         CoinControlDialog::coinControl->SetNull();
 }
 
@@ -468,7 +488,7 @@ void SendCoinsDialog::coinControlChangeEdited(const QString & text)
         else if (!CBitcoinAddress(text.toStdString()).IsValid())
         {
             ui->labelCoinControlChangeLabel->setStyleSheet("QLabel{color:red;}");
-            ui->labelCoinControlChangeLabel->setText(tr("WARNING: Invalid Bitcoin address"));
+            ui->labelCoinControlChangeLabel->setText(tr("WARNING: Invalid Scash address"));
         }
         else
         {

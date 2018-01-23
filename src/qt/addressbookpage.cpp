@@ -35,7 +35,8 @@ AddressBookPage::AddressBookPage(Mode mode, Tabs tab, QWidget *parent) :
     ui->deleteButton->setIcon(QIcon());
 #endif
 
-    ui->showQRCode->setVisible(false);
+    ui->showQRCode->setVisible(true);
+    ui->showQRCode->setEnabled(false);
 
     switch(mode)
     {

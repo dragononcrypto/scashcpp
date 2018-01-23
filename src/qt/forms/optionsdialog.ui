@@ -23,7 +23,7 @@
       <enum>QTabWidget::North</enum>
      </property>
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="tabMain">
       <attribute name="title">
@@ -33,7 +33,7 @@
        <item>
         <widget class="QLabel" name="transactionFeeInfoLabel">
          <property name="text">
-          <string>Optional transaction fee per kB that helps make sure your transactions are processed quickly. Most transactions are 1 kB. Fee 0.01 recommended.</string>
+          <string>Unlike Bitcoin network in Scash the transactions fees are fixed. You may add up some amount to process them even quicker but this is not recommended. Additional fee per kB:</string>
          </property>
          <property name="textFormat">
           <enum>Qt::PlainText</enum>
@@ -349,7 +349,7 @@
           <string>Whether to show coin control features or not.</string>
          </property>
          <property name="text">
-          <string>Display coin &amp;control features (experts only!)</string>
+          <string>Display coin &amp;control settings (experimental feature)</string>
          </property>
         </widget>
        </item>
@@ -453,6 +453,7 @@
    <class>BitcoinAmountField</class>
    <extends>QSpinBox</extends>
    <header>bitcoinamountfield.h</header>
+   <container>1</container>
   </customwidget>
   <customwidget>
    <class>QValueComboBox</class>

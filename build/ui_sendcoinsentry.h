@@ -18,6 +18,7 @@
 #include <QtGui/QHBoxLayout>
 #include <QtGui/QHeaderView>
 #include <QtGui/QLabel>
+#include <QtGui/QSpacerItem>
 #include <QtGui/QToolButton>
 #include "bitcoinamountfield.h"
 #include "qvalidatedlineedit.h"
@@ -38,6 +39,9 @@ public:
     QValidatedLineEdit *payTo;
     QToolButton *addressBookButton;
     QToolButton *pasteButton;
+    QSpacerItem *horizontalSpacer_2;
+    QToolButton *messageButton;
+    QSpacerItem *horizontalSpacer;
     QToolButton *deleteButton;
 
     void setupUi(QFrame *SendCoinsEntry)
@@ -110,11 +114,27 @@ public:
 
         payToLayout->addWidget(pasteButton);
 
+        horizontalSpacer_2 = new QSpacerItem(10, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
+
+        payToLayout->addItem(horizontalSpacer_2);
+
+        messageButton = new QToolButton(SendCoinsEntry);
+        messageButton->setObjectName(QString::fromUtf8("messageButton"));
+        QIcon icon2;
+        icon2.addFile(QString::fromUtf8(":/icons/message"), QSize(), QIcon::Normal, QIcon::Off);
+        messageButton->setIcon(icon2);
+
+        payToLayout->addWidget(messageButton);
+
+        horizontalSpacer = new QSpacerItem(10, 20, QSizePolicy::Fixed, QSizePolicy::Minimum);
+
+        payToLayout->addItem(horizontalSpacer);
+
         deleteButton = new QToolButton(SendCoinsEntry);
         deleteButton->setObjectName(QString::fromUtf8("deleteButton"));
-        QIcon icon2;
-        icon2.addFile(QString::fromUtf8(":/icons/remove"), QSize(), QIcon::Normal, QIcon::Off);
-        deleteButton->setIcon(icon2);
+        QIcon icon3;
+        icon3.addFile(QString::fromUtf8(":/icons/remove"), QSize(), QIcon::Normal, QIcon::Off);
+        deleteButton->setIcon(icon3);
 
         payToLayout->addWidget(deleteButton);
 
@@ -142,7 +162,7 @@ public:
 #endif // QT_NO_TOOLTIP
         label_4->setText(QApplication::translate("SendCoinsEntry", "&Label:", 0, QApplication::UnicodeUTF8));
 #ifndef QT_NO_TOOLTIP
-        payTo->setToolTip(QApplication::translate("SendCoinsEntry", "The address to send the payment to  (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)", 0, QApplication::UnicodeUTF8));
+        payTo->setToolTip(QApplication::translate("SendCoinsEntry", "The address to send the payment to  (e.g. SQTt7TNjchsstoNeyCAVWgHVmXN5zPZmSt)", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
 #ifndef QT_NO_TOOLTIP
         addressBookButton->setToolTip(QApplication::translate("SendCoinsEntry", "Choose address from address book", 0, QApplication::UnicodeUTF8));
@@ -154,6 +174,10 @@ public:
 #endif // QT_NO_TOOLTIP
         pasteButton->setText(QString());
         pasteButton->setShortcut(QApplication::translate("SendCoinsEntry", "Alt+P", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        messageButton->setToolTip(QApplication::translate("SendCoinsEntry", "Show message form.", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+        messageButton->setText(QString());
 #ifndef QT_NO_TOOLTIP
         deleteButton->setToolTip(QApplication::translate("SendCoinsEntry", "Remove this recipient", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP

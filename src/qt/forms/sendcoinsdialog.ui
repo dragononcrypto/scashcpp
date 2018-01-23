@@ -103,6 +103,9 @@
           </property>
           <item>
            <widget class="QPushButton" name="pushButtonCoinControl">
+            <property name="toolTip">
+             <string>Source addresses for payment</string>
+            </property>
             <property name="styleSheet">
              <string notr="true"/>
             </property>
@@ -173,7 +176,16 @@
            <string notr="true"/>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayoutCoinControl5">
-           <property name="margin">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
             <number>0</number>
            </property>
            <item>
@@ -555,6 +567,9 @@
           </property>
           <item>
            <widget class="QCheckBox" name="checkBoxCoinControlChange">
+            <property name="toolTip">
+             <string>DO NOT ENABLE UNLESS YOU ARE FULLY UNDERSTAND WHAT ARE YOU DOING! YOU MAY LOSE FUNDS OTHEWISE!</string>
+            </property>
             <property name="text">
              <string>custom change address</string>
             </property>
@@ -570,6 +585,12 @@
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>DO NOT FILL UNLESS YOU ARE FULLY UNDERSTAND WHAT ARE YOU DOING! YOU MAY LOSE FUNDS OTHEWISE!</string>
+            </property>
+            <property name="text">
+             <string>Your Scash address</string>
             </property>
            </widget>
           </item>
@@ -626,11 +647,20 @@
         <x>0</x>
         <y>0</y>
         <width>830</width>
-        <height>172</height>
+        <height>156</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="margin">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>0</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
         <number>0</number>
        </property>
        <item>
@@ -693,6 +723,32 @@
        <property name="icon">
         <iconset resource="../bitcoin.qrc">
          <normaloff>:/icons/remove</normaloff>:/icons/remove</iconset>
+       </property>
+       <property name="autoRepeatDelay">
+        <number>300</number>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="toggleCoinControlButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Show or hide additional transaction params</string>
+       </property>
+       <property name="text">
+        <string>Toggle &amp;Coin Control</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../bitcoin.qrc">
+         <normaloff>:/icons/control</normaloff>:/icons/control</iconset>
        </property>
        <property name="autoRepeatDelay">
         <number>300</number>

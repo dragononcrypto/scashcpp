@@ -221,8 +221,8 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             proxy.first.SetIP(addr);
             settings.setValue("addrProxy", proxy.first.ToStringIPPort().c_str());
             successful = ApplyProxySettings();
-        }
-        break;
+            }
+            break;
         case ProxyPort: {
             proxyType proxy;
             proxy.first = CService("127.0.0.1", 9050);
@@ -231,8 +231,8 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             proxy.first.SetPort(value.toInt());
             settings.setValue("addrProxy", proxy.first.ToStringIPPort().c_str());
             successful = ApplyProxySettings();
-        }
-        break;
+            }
+            break;
         case ProxySocksVersion: {
             proxyType proxy;
             proxy.second = 5;
@@ -241,8 +241,8 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             proxy.second = value.toInt();
             settings.setValue("nSocksVersion", proxy.second);
             successful = ApplyProxySettings();
-        }
-        break;
+            }
+            break;
         case Fee:
             nTransactionFee = value.toLongLong();
             settings.setValue("nTransactionFee", nTransactionFee);
@@ -268,6 +268,7 @@ bool OptionsModel::setData(const QModelIndex & index, const QVariant & value, in
             break;
         case CoinControlFeatures: {
             fCoinControlFeatures = value.toBool();
+            printf("fCoinControlFeatures is set to %u\n", fCoinControlFeatures);
             settings.setValue("fCoinControlFeatures", fCoinControlFeatures);
             emit coinControlFeaturesChanged(fCoinControlFeatures);
             }

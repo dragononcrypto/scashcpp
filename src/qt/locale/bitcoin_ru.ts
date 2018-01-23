@@ -796,8 +796,8 @@ Address: %4
     </message>
     <message>
         <location line="+6"/>
-        <source>Optional transaction fee per kB that helps make sure your transactions are processed quickly. Most transactions are 1 kB. Fee 0.01 recommended.</source>
-        <translation>Опциональная комиссия за каждый КБ транзакции, которая позволяет быть уверенным, что Ваша транзакция будет обработана быстро.  Большинство транзакций занимают 1КБ.  Рекомендуется комиссия 0.01.</translation>
+        <source>Unlike Bitcoin network in Scash the transactions fees are fixed. You may add up some amount to process them even quicker but this is not recommended. Additional fee per kB:</source>
+        <translation>В отличие от сети Биткоина в Scash транзакционные сборы фиксированы. Вы можете добавить некоторую сумму, чтобы обработать их еще быстрее, но это не рекомендуется. Дополнительная плата за КБ:</translation>
     </message>
     <message>
         <location line="+15"/>

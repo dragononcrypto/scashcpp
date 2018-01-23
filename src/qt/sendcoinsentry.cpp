@@ -101,6 +101,11 @@ void SendCoinsEntry::on_deleteButton_clicked()
     emit removeEntry(this);
 }
 
+void SendCoinsEntry::on_messageButton_clicked()
+{
+    ui->payTo->setText("TODO");
+}
+
 bool SendCoinsEntry::validate()
 {
     // Check input validity

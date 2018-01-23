@@ -30,8 +30,9 @@ public:
         DisplayAddresses,  // bool
         DetachDatabases,   // bool
         Language,          // QString
-        OptionIDRowCount,
-		CoinControlFeatures, // bool
+        CoinControlFeatures, // bool
+
+        OptionIDRowCount // end marker
     };
 
     void Init();
