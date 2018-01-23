@@ -110,6 +110,7 @@ OBJS= \
     obj/shavite.o \
     obj/jh.o \
     obj/luffa.o \
+    obj/msha3.o \
     obj/cubehash.o \
     obj/echo.o \
     obj/simd.o \
