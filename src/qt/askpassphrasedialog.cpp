@@ -150,7 +150,7 @@ void AskPassphraseDialog::accept()
         if(!model->setWalletLocked(false, oldpass))
         {
             QMessageBox::critical(this, tr("Wallet unlock failed"),
-                                  tr("The passphrase entered for the wallet decryption was incorrect."));
+                                  tr("The passphrase entered for the wallet decryption was incorrect."));            
         }
         else
         {

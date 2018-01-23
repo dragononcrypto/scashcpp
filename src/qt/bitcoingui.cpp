@@ -810,8 +810,10 @@ void BitcoinGUI::handleURI(QString strURI)
         notificator->notify(Notificator::Warning, tr("URI handling"), tr("URI can not be parsed! This can be caused by an invalid Scash address or malformed URI parameters."));
 }
 
+static bool bFirstLockAttempt = true;
 void BitcoinGUI::setEncryptionStatus(int status)
 {
+    QString timeNow = QDateTime::currentDateTime().toString();
     switch(status)
     {
     case WalletModel::Unencrypted:
@@ -832,6 +834,7 @@ void BitcoinGUI::setEncryptionStatus(int status)
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_closed"));
         lockWalletToggleAction->setText(tr("&Lock Wallet"));
         lockWalletToggleAction->setToolTip(tr("Lock wallet"));
+        notificator->notify(Notificator::Information, tr("Wallet unlocked!"), tr("Time: %1\n").arg(timeNow), QIcon(":/icons/lock_open"));
         break;
     case WalletModel::Locked:
         labelEncryptionIcon->show();
@@ -844,6 +847,11 @@ void BitcoinGUI::setEncryptionStatus(int status)
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_open"));
         lockWalletToggleAction->setText(tr("&Unlock Wallet..."));
         lockWalletToggleAction->setToolTip(tr("Unlock wallet"));
+        if (!bFirstLockAttempt)
+        {
+            notificator->notify(Notificator::Information, tr("Wallet locked!"), tr("Time: %1\n").arg(timeNow), QIcon(":/icons/lock_closed"));
+        }
+        bFirstLockAttempt = false;
         break;
     }
 }

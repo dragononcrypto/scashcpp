@@ -235,13 +235,14 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
             if (wtx.nOrderPos == -1)
                 fAnyUnordered = true;
 
-            //// debug print
-            //printf("LoadWallet  %s\n", wtx.GetHash().ToString().c_str());
-            //printf(" %12" PRI64d"  %s  %s  %s\n",
-            //    wtx.vout[0].nValue,
-            //    DateTimeStrFormat("%x %H:%M:%S", wtx.GetBlockTime()).c_str(),
-            //    wtx.hashBlock.ToString().substr(0,20).c_str(),
-            //    wtx.mapValue["message"].c_str());
+            if (fDebug && fDumpAll)
+            {
+                printf("LoadWallet  %s\n", wtx.GetHash().ToString().c_str());
+                printf(" %12" PRI64d "   %s  %s\n",
+                    wtx.vout[0].nValue,
+                    wtx.hashBlock.ToString().substr(0,20).c_str(),
+                    wtx.mapValue["message"].c_str());
+            }
         }
         else if (strType == "acentry")
         {
@@ -485,7 +486,7 @@ DBErrors CWalletDB::LoadWallet(CWallet* pwallet)
 void ThreadFlushWalletDB(void* parg)
 {
     // Make this thread recognisable as the wallet flushing thread
-    RenameThread("bitcoin-wallet");
+    RenameThread("scash-wallet");
 
     const string& strFile = ((const string*)parg)[0];
     static bool fOneThread;
