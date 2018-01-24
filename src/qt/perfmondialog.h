@@ -42,6 +42,11 @@ private:
     QImage imgInConnections;
     QImage imgOutConnections;
     QImage imgBanCount;
+    QImage imgMemUtil;
+    QImage imgDatabaseQueries;
+    QImage imgDatabaseTimes;
+    QImage imgBlocksAdded;
+    QImage imgBlocksRejected;
 };
 
 #endif // PERFMONDIALOG_H

@@ -745,25 +745,29 @@ recoveryCheckpoint:
     boost::filesystem::path walletPathSrc = GetDataDir() / "wallet.dat";
     boost::filesystem::path walletPathBackup = GetDataDir() / "wallet.dat.backup";
     bool walletExists = false;
-    try
+
+    if(!GetBoolArg("-nowalletbackup"))
     {
-        boost::filesystem::path pathWalletBackups = GetDataDir() / "backups";
-        filesystem::create_directory(pathWalletBackups);
-        std::time_t now = std::time(nullptr);
-        std::ostringstream tmp;
-        tmp << std::put_time(std::localtime(&now), "%y-%m-%d %OH %OM %OS");
-        std::string nowStr = tmp.str();
-        walletPathBackup = pathWalletBackups / ("wallet " + nowStr);
-        if (boost::filesystem::exists(walletPathSrc))
+        try
         {
-            walletExists = true;
-            boost::filesystem::copy(walletPathSrc, walletPathBackup);
-            printf("Wallet backup done.");
+            boost::filesystem::path pathWalletBackups = GetDataDir() / "backups";
+            filesystem::create_directory(pathWalletBackups);
+            std::time_t now = std::time(nullptr);
+            std::ostringstream tmp;
+            tmp << std::put_time(std::localtime(&now), "%y-%m-%d %OH %OM %OS");
+            std::string nowStr = tmp.str();
+            walletPathBackup = pathWalletBackups / ("wallet " + nowStr);
+            if (boost::filesystem::exists(walletPathSrc))
+            {
+                walletExists = true;
+                boost::filesystem::copy(walletPathSrc, walletPathBackup);
+                printf("Wallet backup done.");
+            }
         }
-    }
-    catch (std::exception& ex)
-    {
-        printf("Wallet backup failed: %s\n", ex.what());
+        catch (std::exception& ex)
+        {
+            printf("Wallet backup failed: %s\n", ex.what());
+        }
     }
 
     uiInterface.InitMessage(_("Loading wallet..."));
@@ -861,23 +865,24 @@ recoveryCheckpoint:
         printf(" rescan      %15" PRI64d "ms\n", GetTimeMillis() - nStart);
     }
 
-
-    if (walletExists)
+    if(!GetBoolArg("-nowalletbackup"))
     {
-        try
+        if (walletExists)
         {
-            std::string stateString = "OK.dat";
-            if (fWalletLoadWarn) stateString = "WARN.dat";
-            if (fWalletLoadErr) stateString = "ERR.dat";
-            boost::filesystem::path renameWalletTo = walletPathBackup.string() + " " + stateString;
-            boost::filesystem::rename(walletPathBackup, renameWalletTo);
-            printf("Wallet backup renamed.");
-    }
-    catch (std::exception& ex)
-    {
-        printf("Wallet backup rename failed: %s\n", ex.what());
-    }
-
+            try
+            {
+                std::string stateString = "OK.dat";
+                if (fWalletLoadWarn) stateString = "WARN.dat";
+                if (fWalletLoadErr) stateString = "ERR.dat";
+                boost::filesystem::path renameWalletTo = walletPathBackup.string() + " " + stateString;
+                boost::filesystem::rename(walletPathBackup, renameWalletTo);
+                printf("Wallet backup renamed.");
+            }
+            catch (std::exception& ex)
+            {
+                printf("Wallet backup rename failed: %s\n", ex.what());
+            }
+        }
     }
 
     // ********************************************************* Step 9: import blocks

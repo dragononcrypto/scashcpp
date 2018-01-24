@@ -14,8 +14,12 @@ static ChartData cChartNetworkOutBytes(CHART_HOUR_POINTS, ChartData::ChartAddMod
 static ChartData cChartNetworkInConnections(CHART_HOUR_POINTS, ChartData::ChartAddMode_SumLocal);
 static ChartData cChartNetworkOutConnections(CHART_HOUR_POINTS, ChartData::ChartAddMode_SumLocal);
 static ChartData cChartNetworkBannedConnections(CHART_HOUR_POINTS, ChartData::ChartAddMode_SumLocal);
+
 static ChartData cChartMemoryUtilization(CHART_HOUR_POINTS, ChartData::ChartAddMode_Maximum);
-static ChartData cChartDiskOps(CHART_HOUR_POINTS, ChartData::ChartAddMode_SumLocal);
+static ChartData cDatabaseQueries(CHART_HOUR_POINTS, ChartData::ChartAddMode_Maximum);
+static ChartData cDatabageAvgTime(CHART_HOUR_POINTS, ChartData::ChartAddMode_Average);
+static ChartData cBlocksAdded(CHART_HOUR_POINTS, ChartData::ChartAddMode_SumLocal);
+static ChartData cBlocksRejected(CHART_HOUR_POINTS, ChartData::ChartAddMode_SumLocal);
 
 bool fChartsEnabled = true;
 
@@ -49,9 +53,24 @@ ChartData& Charts::MemoryUtilization()
     return cChartMemoryUtilization;
 }
 
-ChartData& Charts::DiskOps()
+ChartData& Charts::DatabaseQueries()
 {
-    return cChartDiskOps;
+    return cDatabaseQueries;
+}
+
+ChartData& Charts::DatabaseAvgTime()
+{
+    return cDatabageAvgTime;
+}
+
+ChartData& Charts::BlocksAdded()
+{
+    return cBlocksAdded;
+}
+
+ChartData& Charts::BlocksRejected()
+{
+    return cBlocksRejected;
 }
 
 static int UnixTimeNowToPoint()

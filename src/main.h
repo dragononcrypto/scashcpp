@@ -11,6 +11,7 @@
 #include "script.h"
 #include "scrypt.h"
 #include "hashblock.h"
+#include "chartdata.h"
 
 #include <list>
 
@@ -845,7 +846,7 @@ public:
 };
 
 
-
+unsigned int getTicksCountToMeasure();
 
 
 /** Nodes collect new transactions into a block, hash them into a hash tree,
@@ -1030,6 +1031,9 @@ public:
 
     bool WriteToDisk(unsigned int& nFileRet, unsigned int& nBlockPosRet)
     {
+        unsigned int startTime = getTicksCountToMeasure();
+        if (fChartsEnabled) Charts::DatabaseQueries().AddData(1);
+
         // Open history file to append
         CAutoFile fileout = CAutoFile(AppendBlockFile(nFileRet), SER_DISK, CLIENT_VERSION);
         if (!fileout)
@@ -1051,11 +1055,16 @@ public:
         if (!IsInitialBlockDownload() || (nBestHeight+1) % 500 == 0)
             FileCommit(fileout);
 
+        if (fChartsEnabled) Charts::DatabaseAvgTime().AddData(getTicksCountToMeasure() - startTime);
+
         return true;
     }
 
     bool ReadFromDisk(unsigned int nFile, unsigned int nBlockPos, bool fReadTransactions=true)
     {
+        unsigned int startTime = getTicksCountToMeasure();
+        if (fChartsEnabled) Charts::DatabaseQueries().AddData(1);
+
         SetNull();
 
         // Open history file to read
@@ -1076,6 +1085,8 @@ public:
         // Check the header
         if (fReadTransactions && IsProofOfWork() && !CheckProofOfWork(GetHash(), nBits))
             return error("CBlock::ReadFromDisk() : errors in block header");
+
+        if (fChartsEnabled) Charts::DatabaseAvgTime().AddData(getTicksCountToMeasure() - startTime);
 
         return true;
     }
