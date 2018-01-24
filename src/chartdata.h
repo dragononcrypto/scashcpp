@@ -53,8 +53,12 @@ public:
     static ChartData& NetworkInConnections();
     static ChartData& NetworkOutConnections();
     static ChartData& NetworkBannedConnections();
+
     static ChartData& MemoryUtilization();
-    static ChartData& DiskOps();
+    static ChartData& DatabaseQueries();
+    static ChartData& DatabaseAvgTime();
+    static ChartData& BlocksAdded();
+    static ChartData& BlocksRejected();
 };
 
 #endif

@@ -12,6 +12,11 @@
 #include "chartdata.h"
 #include "net.h"
 
+#include <unistd.h>
+#include <ios>
+#include <iostream>
+#include <fstream>
+
 #include <QPixmap>
 #include <QUrl>
 #include <QPainter>
@@ -159,6 +164,37 @@ static void prepareAndDrawChartData(QImage &img, QLabel &label, ChartData &data,
     label.setPixmap(QPixmap::fromImage(img));
 }
 
+int64 getMemUsage()
+{
+    // 'file' stat seems to give the most reliable results
+    std::ifstream stat_stream("/proc/self/stat", std::ifstream::ios_base::in);
+
+    // dummy vars for leading entries in stat that we don't care about
+    std::string pid, comm, state, ppid, pgrp, session, tty_nr;
+    std::string tpgid, flags, minflt, cminflt, majflt, cmajflt;
+    std::string utime, stime, cutime, cstime, priority, nice;
+    std::string O_, itrealvalue, starttime;
+
+    // the two fields we want
+    //
+    unsigned long vsize;
+    long rss;
+
+    stat_stream >> pid >> comm >> state >> ppid >> pgrp >> session >> tty_nr
+              >> tpgid >> flags >> minflt >> cminflt >> majflt >> cmajflt
+              >> utime >> stime >> cutime >> cstime >> priority >> nice
+              >> O_ >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
+
+    stat_stream.close();
+
+    // unsigned long vm_usage     = vsize / 1024.0;
+
+    long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
+     unsigned long resident_set = rss * page_size_kb;
+
+    return resident_set;
+}
+
 void PerfMonDialog::updateNow()
 {
     if (!fChartsEnabled) return;
@@ -167,6 +203,7 @@ void PerfMonDialog::updateNow()
     CNetStatus::GetNodesStats(inbound, outbound);
     Charts::NetworkInConnections().AddData(inbound);
     Charts::NetworkOutConnections().AddData(outbound);
+    Charts::MemoryUtilization().AddData(getMemUsage());
 
     prepareAndDrawChartData(imgIncomingTraffic, *(ui->labelIncomingTraffic),
                             Charts::NetworkInBytes(), 1024, "Kb/s");
@@ -181,17 +218,29 @@ void PerfMonDialog::updateNow()
     prepareAndDrawChartData(imgBanCount, *(ui->labelBannedCount),
                             Charts::NetworkBannedConnections(), 1, "nodes/s");
 
+    prepareAndDrawChartData(imgMemUtil, *(ui->labelMemoryUsage),
+                            Charts::MemoryUtilization(), 1024, "MB");
+
+    prepareAndDrawChartData(imgDatabaseQueries, *(ui->labelDatabaseQueries),
+                            Charts::DatabaseQueries(), 1, "q/s");
+
+    prepareAndDrawChartData(imgDatabaseTimes, *(ui->labelDatabaseAvgTime),
+                            Charts::DatabaseAvgTime(), 1, "ms");
+
+    prepareAndDrawChartData(imgBlocksAdded, *(ui->labelBlocksAdded),
+                            Charts::BlocksAdded(), 1, "blocks/s");
+
+    prepareAndDrawChartData(imgBlocksRejected, *(ui->labelBlocksRejected),
+                            Charts::BlocksRejected(), 1, "blocks/s");
+
     // Trick to scroll graphic
     Charts::NetworkInBytes().AddData(0);
     Charts::NetworkOutBytes().AddData(0);
     Charts::NetworkBannedConnections().AddData(0);
+    Charts::DatabaseQueries().AddData(0);
+    Charts::BlocksAdded().AddData(0);
+    Charts::BlocksRejected().AddData(0);
 }
 
-/*void PerfMonDialog::on_btnSaveAs_clicked()
-{
-    QString fn = GUIUtil::getSaveFileName(this, tr("Save Chart"), QString(), tr("PNG Images (*.png)"));
-    if (!fn.isEmpty())
-        myImage.scaled(EXPORT_IMAGE_SIZE, EXPORT_IMAGE_SIZE).save(fn);
-}*/
 
 

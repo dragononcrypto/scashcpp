@@ -11,6 +11,9 @@
 #include "init.h" 
 #include "ui_interface.h"
 #include "kernel.h"
+
+#include <sys/time.h>
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -262,7 +265,6 @@ unsigned int LimitOrphanTxSize(unsigned int nMaxOrphans)
     }
     return nEvicted;
 }
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -666,7 +668,9 @@ bool CTxMemPool::accept(CTxDB& txdb, CTransaction &tx, bool fCheckInputs,
                 // -limitfreerelay unit is thousand-bytes-per-minute
                 // At default rate it would take over a month to fill 1GB
                 if (dFreeCount > GetArg("-limitfreerelay", 15)*10*1000 && !IsFromMe(tx))
+                {
                     return error("CTxMemPool::accept() : free transaction rejected by rate limiter");
+                }
                 if (fDebug)
                     printf("Rate limit dFreeCount: %g => %g\n", dFreeCount, dFreeCount+nSize);
                 dFreeCount += nSize;
@@ -1999,8 +2003,11 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     pindexNew->SetStakeModifier(nStakeModifier, fGeneratedStakeModifier);
     pindexNew->nStakeModifierChecksum = GetStakeModifierChecksum(pindexNew);
     if (!CheckStakeModifierCheckpoints(pindexNew->nHeight, pindexNew->nStakeModifierChecksum))
+    {
+        if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
         return error("AddToBlockIndex() : Rejected by stake modifier checkpoint height=%d, modifier=0x%016" PRI64x " pindexNew->nStakeModifierChecksum=0x%08x",
                         pindexNew->nHeight, nStakeModifier, pindexNew->nStakeModifierChecksum);
+    }
 
     // Add to mapBlockIndex
     map<uint256, CBlockIndex*>::iterator mi = mapBlockIndex.insert(make_pair(hash, pindexNew)).first;
@@ -2150,13 +2157,17 @@ bool CBlock::AcceptBlock()
 
     // Check that the block chain matches the known block chain up to a checkpoint
     if (!Checkpoints::CheckHardened(nHeight, hash))
+    {
+        if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
         return DoS(100, error("AcceptBlock() : rejected by hardened checkpoint lock-in at %d", nHeight));
+    }
 
     // Scash: check that the block satisfies synchronized checkpoint
     if (!Checkpoints::CheckSync(hash, pindexPrev))
     {
         if(!GetBoolArg("-nosynccheckpoints", false))
         {
+            if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
             return error("AcceptBlock() : rejected by synchronized checkpoint");
         }
         else
@@ -2167,12 +2178,18 @@ bool CBlock::AcceptBlock()
 
     // Reject block.nVersion < 3 blocks since 95% threshold on mainNet and always on testNet:
     if (nVersion < 3 && ((!fTestNet && nHeight > 14060) || (fTestNet && nHeight > 0)))
+    {
+        if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
         return error("CheckBlock() : rejected nVersion < 3 block");
+    }
 
     // Enforce rule that the coinbase starts with serialized block height
     CScript expect = CScript() << nHeight;
     if (!std::equal(expect.begin(), expect.end(), vtx[0].vin[0].scriptSig.begin()))
+    {
+        if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
         return DoS(100, error("AcceptBlock() : block height mismatch in coinbase"));
+    }
 
     // Write block to history file
     if (!CheckDiskSpace(::GetSerializeSize(*this, SER_DISK, CLIENT_VERSION)))
@@ -2247,11 +2264,17 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     // Limited duplicity on stake: prevents block flood attack
     // Duplicate stake allowed only when there is orphan child block
     if (pblock->IsProofOfStake() && setStakeSeen.count(pblock->GetProofOfStake()) && !mapOrphanBlocksByPrev.count(hash) && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
+    {
+        if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
         return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for block %s", pblock->GetProofOfStake().first.ToString().c_str(), pblock->GetProofOfStake().second, hash.ToString().c_str());
+    }
 
     // Preliminary checks
     if (!pblock->CheckBlock())
+    {
+        if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
         return error("ProcessBlock() : CheckBlock FAILED");
+    }
 
     // Scash: verify hash target and signature of coinstake tx
     if (pblock->IsProofOfStake())
@@ -2270,15 +2293,15 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
 
     if(pcheckpoint && fDebug)
     {
-	const CBlockIndex* pindexLastPos = GetLastBlockIndex(pcheckpoint, true);
+        const CBlockIndex* pindexLastPos = GetLastBlockIndex(pcheckpoint, true);
         if(pindexLastPos)
-	{
-            printf("ProcessBlock(): Last POS Block Height: %d \n", pindexLastPos->nHeight);
-	}
-	else
-	{
-	    printf("ProcessBlock(): Previous POS block not found.\n");
-	}
+        {
+                printf("ProcessBlock(): Last POS Block Height: %d \n", pindexLastPos->nHeight);
+        }
+        else
+        {
+            printf("ProcessBlock(): Previous POS block not found.\n");
+        }
     }
 
     if (pcheckpoint && pblock->hashPrevBlock != hashBestChain && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
@@ -2289,7 +2312,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         bnNewBlock.SetCompact(pblock->nBits);
         CBigNum bnRequired;
 
-		if (pblock->IsProofOfStake())
+if (pblock->IsProofOfStake())
             bnRequired.SetCompact(ComputeMinStake(GetLastBlockIndex(pcheckpoint, true)->nBits, deltaTime, pblock->nTime));
         else
             bnRequired.SetCompact(ComputeMinWork(GetLastBlockIndex(pcheckpoint, false)->nBits, deltaTime));
@@ -2298,6 +2321,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         {
             if (pfrom)
                 pfrom->Misbehaving(100);
+            if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
             return error("ProcessBlock() : block with too little %s", pblock->IsProofOfStake()? "proof-of-stake" : "proof-of-work");
         }
     }
@@ -2317,7 +2341,10 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
             // Limited duplicity on stake: prevents block flood attack
             // Duplicate stake allowed only when there is orphan child block
             if (setStakeSeenOrphan.count(pblock2->GetProofOfStake()) && !mapOrphanBlocksByPrev.count(hash) && !Checkpoints::WantedByPendingSyncCheckpoint(hash))
+            {
+                if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
                 return error("ProcessBlock() : duplicate proof-of-stake (%s, %d) for orphan block %s", pblock2->GetProofOfStake().first.ToString().c_str(), pblock2->GetProofOfStake().second, hash.ToString().c_str());
+            }
             else
                 setStakeSeenOrphan.insert(pblock2->GetProofOfStake());
         }
@@ -2337,8 +2364,12 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     }
 
     // Store to disk
+
     if (!pblock->AcceptBlock())
+    {
+        if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
         return error("ProcessBlock() : AcceptBlock FAILED");
+    }
 
     // Recursively process any orphan blocks that depended on this one
     vector<uint256> vWorkQueue;
@@ -2361,6 +2392,8 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     }
 
     printf("ProcessBlock: ACCEPTED\n");
+
+    if (fChartsEnabled) Charts::BlocksAdded().AddData(1);
 
     // Scash: if responsible for sync-checkpoint send it
     if (pfrom && !CSyncCheckpoint::strMasterPrivKey.empty())
@@ -4567,3 +4600,14 @@ void GenerateBitcoins(bool fGenerate, CWallet* pwallet)
         }
     }
 }
+
+unsigned int getTicksCountToMeasure()
+{
+    struct timeval tv;
+    if(gettimeofday(&tv, NULL) != 0)
+        return 0;
+
+    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+}
+
+
