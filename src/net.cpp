@@ -10,6 +10,7 @@
 #include "strlcpy.h"
 #include "addrman.h"
 #include "ui_interface.h"
+#include "chartdata.h"
 
 #ifdef WIN32
 #include <string.h>
@@ -21,6 +22,8 @@
 #include <upnpcommands.h>
 #include <upnperrors.h>
 #endif
+
+#include "chartdata.h"
 
 using namespace std;
 using namespace boost;
@@ -75,6 +78,25 @@ set<CNetAddr> setservAddNodeAddresses;
 CCriticalSection cs_setservAddNodeAddresses;
 
 static CSemaphore *semOutbound = NULL;
+
+
+void CNetStatus::GetNodesStats(int& inboundCount, int& outboundCount)
+{
+    LOCK(cs_vNodes);
+    inboundCount = 0;
+    outboundCount = 0;
+    for (size_t i = 0; i < vNodes.size(); i++)
+    {
+        if (vNodes[i])
+        {
+            if (vNodes[i]->fInbound)
+                inboundCount++;
+            else
+                outboundCount++;
+        }
+    }
+}
+
 
 void AddOneShot(string strDest)
 {
@@ -146,6 +168,8 @@ bool RecvLine(SOCKET hSocket, string& strLine)
         int nBytes = recv(hSocket, &c, 1, 0);
         if (nBytes > 0)
         {
+            if (fChartsEnabled) Charts::NetworkInBytes().AddData(nBytes);
+
             if (c == '\n')
                 continue;
             if (c == '\r')
@@ -838,6 +862,7 @@ void ThreadSocketHandler2(void* parg)
             }
             else if (CNode::IsBanned(addr))
             {
+                if (fChartsEnabled) Charts::NetworkBannedConnections().AddData(1);
                 printf("connection from %s dropped (banned)\n", addr.ToString().c_str());
                 closesocket(hSocket);
             }
@@ -915,6 +940,7 @@ void ThreadSocketHandler2(void* parg)
                                 pnode->CloseSocketDisconnect();
                             }
                         }
+                        if (fChartsEnabled) Charts::NetworkInBytes().AddData(nBytes);
                     }
                 }
             }
@@ -948,6 +974,7 @@ void ThreadSocketHandler2(void* parg)
                                 pnode->CloseSocketDisconnect();
                             }
                         }
+                        if (fChartsEnabled) Charts::NetworkOutBytes().AddData(nBytes);
                     }
                 }
             }

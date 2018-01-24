@@ -51,6 +51,8 @@ static const int MAX_CONFIRMATIONS = 7;
 
 static const int64 MIN_TXOUT_AMOUNT = MIN_TX_FEE;
 
+static const int COINBASE_MATURITY_SAFE_GAP = 20;
+
 inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONEY); }
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
@@ -64,10 +66,12 @@ static const int fHaveUPnP = false;
 static const uint256 hashGenesisBlockOfficial("0x7e1060b413b00461d5d01fc9ab00adc82079152e894977868b7d15cf8175eefc");
 static const uint256 hashGenesisBlockTestNet = hashGenesisBlockOfficial;
 
-static const int64 nMaxClockDrift = 1 * 60 * 60;        // two hours
+static const int64 nMaxClockDrift = 90 * 60; // one and half hour
 
 extern CScript COINBASE_FLAGS;
 
+static const double SendMessageCostPerChar = 1; // additional over base TX size
+static const int SendMessageMaxChars = 10000;
 
 extern CCriticalSection cs_main;
 extern std::map<uint256, CBlockIndex*> mapBlockIndex;

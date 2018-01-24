@@ -30,21 +30,17 @@ QMAKE_LFLAGS *= -fstack-protector-all --param ssp-buffer-size=1
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
 
-# use: qmake "USE_UPNP=1" ( enabled by default; default)
-#  or: qmake "USE_UPNP=0" (disabled by default)
-#  or: qmake "USE_UPNP=-" (not supported)
+# use: qmake "USE_UPNP=1" (enabled)
+#  or: qmake "USE_UPNP=0" (disabled, default)
 # miniupnpc (http://miniupnp.free.fr/files/) must be installed for support
-contains(USE_UPNP, -) {
-    message(Building without UPNP support)
-} else {
+contains(USE_UPNP, 1) {
     message(Building with UPNP support)
-    count(USE_UPNP, 0) {
-        USE_UPNP=1
-    }
     DEFINES += USE_UPNP=$$USE_UPNP STATICLIB
     INCLUDEPATH += $$MINIUPNPC_INCLUDE_PATH
     LIBS += $$join(MINIUPNPC_LIB_PATH,,-L,) -lminiupnpc
     win32:LIBS += -liphlpapi
+} else {
+    message(Building without UPNP support)
 }
 
 
@@ -103,9 +99,11 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/editaddressdialog.h \
     src/qt/bitcoinaddressvalidator.h \
     src/qt/qrcodedialog.h \
+    src/qt/perfmondialog.h \
     src/qt/qrcodegen.h \
     src/alert.h \
     src/addrman.h \
+    src/chartdata.h \
     src/base58.h \
     src/bignum.h \
     src/checkpoints.h \
@@ -113,6 +111,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/coincontrol.h \
     src/sync.h \
     src/util.h \
+    src/chartdata.h \
     src/uint256.h \
     src/kernel.h \
     src/scrypt_mine.h \
@@ -159,6 +158,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/qt/csvmodelwriter.h \
     src/crypter.h \
     src/qt/sendcoinsentry.h \
+    src/qt/messageentry.h \
     src/qt/qvalidatedlineedit.h \
     src/qt/bitcoinunits.h \
     src/qt/qvaluecombobox.h \
@@ -201,11 +201,13 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/editaddressdialog.cpp \
     src/qt/bitcoinaddressvalidator.cpp \
     src/qt/qrcodedialog.cpp \
+    src/qt/perfmondialog.cpp \
     src/qt/qrcodegen.cpp \
     src/alert.cpp \
     src/version.cpp \
     src/sync.cpp \
     src/util.cpp \
+    src/chartdata.cpp \
     src/netbase.cpp \
     src/key.cpp \
     src/script.cpp \
@@ -245,6 +247,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/csvmodelwriter.cpp \
     src/crypter.cpp \
     src/qt/sendcoinsentry.cpp \
+    src/qt/messageentry.cpp \
     src/qt/qvalidatedlineedit.cpp \
     src/qt/bitcoinunits.cpp \
     src/qt/qvaluecombobox.cpp \
@@ -279,7 +282,7 @@ RESOURCES += \
     src/qt/bitcoin.qrc
 
 FORMS += \
-	src/qt/forms/coincontroldialog.ui \
+    src/qt/forms/coincontroldialog.ui \
     src/qt/forms/sendcoinsdialog.ui \
     src/qt/forms/addressbookpage.ui \
     src/qt/forms/signverifymessagedialog.ui \
@@ -288,9 +291,11 @@ FORMS += \
     src/qt/forms/transactiondescdialog.ui \
     src/qt/forms/overviewpage.ui \
     src/qt/forms/sendcoinsentry.ui \
+    src/qt/forms/messageentry.ui \
     src/qt/forms/askpassphrasedialog.ui \
     src/qt/forms/rpcconsole.ui \
     src/qt/forms/optionsdialog.ui \
+    src/qt/forms/perfmondialog.ui \
     src/qt/forms/qrcodedialog.ui
 
 

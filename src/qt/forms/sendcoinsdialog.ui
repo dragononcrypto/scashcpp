@@ -759,6 +759,20 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="messageButton">
+       <property name="toolTip">
+        <string>Add message to transaction (will be visible to everyone)</string>
+       </property>
+       <property name="text">
+        <string>Message</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../bitcoin.qrc">
+         <normaloff>:/icons/message</normaloff>:/icons/message</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <property name="spacing">
         <number>3</number>

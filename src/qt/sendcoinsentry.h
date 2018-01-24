@@ -43,7 +43,6 @@ signals:
 
 private slots:    
     void on_deleteButton_clicked();
-    void on_messageButton_clicked();
     void on_payTo_textChanged(const QString &address);
     void on_addressBookButton_clicked();
     void on_pasteButton_clicked();

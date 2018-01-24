@@ -48,10 +48,12 @@ private:
     WalletModel *model;
     bool fNewRecipientAllowed;
     bool fCoinControlShow;
+    QWidget *messageEntry;
 
 private slots:
     void on_sendButton_clicked();
     void on_toggleCoinControlButton_clicked();
+    void on_messageButton_clicked();
     void removeEntry(SendCoinsEntry* entry);
     void updateDisplayUnit();
     void coinControlFeatureChanged(bool);

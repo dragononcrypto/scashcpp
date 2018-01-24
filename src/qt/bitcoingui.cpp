@@ -18,6 +18,7 @@
 #include "clientmodel.h"
 #include "walletmodel.h"
 #include "editaddressdialog.h"
+#include "perfmondialog.h"
 #include "optionsmodel.h"
 #include "transactiondescdialog.h"
 #include "addresstablemodel.h"
@@ -66,6 +67,15 @@
 extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
 extern unsigned int nStakeTargetSpacing;
+
+static BitcoinGUI *pGUIMain = NULL;
+void BitcoinGUI::switchToTransactionPage()
+{
+    if (pGUIMain)
+    {
+        pGUIMain->gotoHistoryPage();
+    }
+}
 
 BitcoinGUI::BitcoinGUI(QWidget *parent):
     QMainWindow(parent),
@@ -200,12 +210,17 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     rpcConsole = new RPCConsole(this);
     connect(openRPCConsoleAction, SIGNAL(triggered()), rpcConsole, SLOT(show()));
 
+    perfMonDlg = new PerfMonDialog(this);
+    connect(openPerfMonDlgAction, SIGNAL(triggered()), perfMonDlg, SLOT(show()));
+
     // Clicking on "Verify Message" in the address book sends you to the verify message tab
     connect(addressBookPage, SIGNAL(verifyMessage(QString)), this, SLOT(gotoVerifyMessageTab(QString)));
     // Clicking on "Sign Message" in the receive coins page sends you to the sign message tab
     connect(receiveCoinsPage, SIGNAL(signMessage(QString)), this, SLOT(gotoSignMessageTab(QString)));
 
     gotoOverviewPage();
+
+    if (!pGUIMain) pGUIMain = this;
 }
 
 BitcoinGUI::~BitcoinGUI()
@@ -289,8 +304,12 @@ void BitcoinGUI::createActions()
 
     exportAction = new QAction(QIcon(":/icons/export"), tr("&Export..."), this);
     exportAction->setToolTip(tr("Export the data in the current tab to a file"));
+
     openRPCConsoleAction = new QAction(QIcon(":/icons/debugwindow"), tr("&Debug window"), this);
     openRPCConsoleAction->setToolTip(tr("Open debugging and diagnostic console"));
+
+    openPerfMonDlgAction = new QAction(QIcon(":/icons/perfmon"), tr("&Performance monitor"), this);
+    openPerfMonDlgAction->setToolTip(tr("Open performance monitor window"));
 
     connect(quitAction, SIGNAL(triggered()), qApp, SLOT(quit()));
     connect(aboutAction, SIGNAL(triggered()), this, SLOT(aboutClicked()));
@@ -333,6 +352,7 @@ void BitcoinGUI::createMenuBar()
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
+    help->addAction(openPerfMonDlgAction);
     help->addSeparator();
     help->addAction(aboutAction);
     help->addAction(aboutQtAction);
@@ -661,15 +681,18 @@ void BitcoinGUI::closeEvent(QCloseEvent *event)
 
 void BitcoinGUI::askFee(qint64 nFeeRequired, bool *payFee)
 {
-    QString strMessage =
+    // Fees are always acceped. Unless you use Coint Control, lets assume you dont care on fees
+
+    /*QString strMessage =
         tr("This transaction is over the size limit.  You can still send it for a fee of %1, "
           "which goes to the nodes that process your transaction and helps to support the network.  "
           "Do you want to pay the fee?").arg(
                 BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, nFeeRequired));
     QMessageBox::StandardButton retval = QMessageBox::question(
           this, tr("Confirm transaction fee"), strMessage,
-          QMessageBox::Yes|QMessageBox::Cancel, QMessageBox::Yes);
-    *payFee = (retval == QMessageBox::Yes);
+          QMessageBox::Yes|QMessageBox::Cancel, QMessageBox::Yes);*/
+
+    *payFee = true; // (retval == QMessageBox::Yes);
 }
 
 void BitcoinGUI::incomingTransaction(const QModelIndex & parent, int start, int end)
@@ -692,6 +715,8 @@ void BitcoinGUI::incomingTransaction(const QModelIndex & parent, int start, int 
         QIcon icon = qvariant_cast<QIcon>(ttm->index(start,
                             TransactionTableModel::ToAddress, parent)
                         .data(Qt::DecorationRole));
+
+        QString message = ""; // TODO
 
         notificator->notify(Notificator::Information,
                             (amount)<0 ? tr("Sent transaction") :
