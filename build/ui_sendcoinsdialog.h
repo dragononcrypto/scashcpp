@@ -80,6 +80,7 @@ public:
     QPushButton *addButton;
     QPushButton *clearButton;
     QPushButton *toggleCoinControlButton;
+    QPushButton *messageButton;
     QHBoxLayout *horizontalLayout_2;
     QLabel *label;
     QLabel *labelBalance;
@@ -455,6 +456,14 @@ public:
 
         horizontalLayout->addWidget(toggleCoinControlButton);
 
+        messageButton = new QPushButton(SendCoinsDialog);
+        messageButton->setObjectName(QString::fromUtf8("messageButton"));
+        QIcon icon3;
+        icon3.addFile(QString::fromUtf8(":/icons/message"), QSize(), QIcon::Normal, QIcon::Off);
+        messageButton->setIcon(icon3);
+
+        horizontalLayout->addWidget(messageButton);
+
         horizontalLayout_2 = new QHBoxLayout();
         horizontalLayout_2->setSpacing(3);
         horizontalLayout_2->setObjectName(QString::fromUtf8("horizontalLayout_2"));
@@ -487,9 +496,9 @@ public:
         sendButton = new QPushButton(SendCoinsDialog);
         sendButton->setObjectName(QString::fromUtf8("sendButton"));
         sendButton->setMinimumSize(QSize(150, 0));
-        QIcon icon3;
-        icon3.addFile(QString::fromUtf8(":/icons/send"), QSize(), QIcon::Normal, QIcon::Off);
-        sendButton->setIcon(icon3);
+        QIcon icon4;
+        icon4.addFile(QString::fromUtf8(":/icons/send"), QSize(), QIcon::Normal, QIcon::Off);
+        sendButton->setIcon(icon4);
         sendButton->setDefault(true);
 
         horizontalLayout->addWidget(sendButton);
@@ -551,6 +560,10 @@ public:
         toggleCoinControlButton->setToolTip(QApplication::translate("SendCoinsDialog", "Show or hide additional transaction params", 0, QApplication::UnicodeUTF8));
 #endif // QT_NO_TOOLTIP
         toggleCoinControlButton->setText(QApplication::translate("SendCoinsDialog", "Toggle &Coin Control", 0, QApplication::UnicodeUTF8));
+#ifndef QT_NO_TOOLTIP
+        messageButton->setToolTip(QApplication::translate("SendCoinsDialog", "Add message to transaction (will be visible to everyone)", 0, QApplication::UnicodeUTF8));
+#endif // QT_NO_TOOLTIP
+        messageButton->setText(QApplication::translate("SendCoinsDialog", "Message", 0, QApplication::UnicodeUTF8));
         label->setText(QApplication::translate("SendCoinsDialog", "Balance:", 0, QApplication::UnicodeUTF8));
         labelBalance->setText(QApplication::translate("SendCoinsDialog", "123.456 SCS", 0, QApplication::UnicodeUTF8));
 #ifndef QT_NO_TOOLTIP

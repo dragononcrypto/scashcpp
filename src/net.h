@@ -128,7 +128,11 @@ extern CCriticalSection cs_mapRelay;
 extern std::map<CInv, int64> mapAlreadyAskedFor;
 
 
-
+class CNetStatus
+{
+public:
+    static void GetNodesStats(int& inboundCount, int& outboundCount);
+};
 
 class CNodeStats
 {
@@ -145,9 +149,6 @@ public:
     int nStartingHeight;
     int nMisbehavior;
 };
-
-
-
 
 
 /** Information about a peer */

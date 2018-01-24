@@ -137,6 +137,7 @@ OBJS= \
     obj/blockexplorerstyle.o \
     obj/blockexplorerserver.o \
     obj/blockexplorer.o \
+    obj/chartdata.o \
     obj/script.o \
     obj/sync.o \
     obj/util.o \

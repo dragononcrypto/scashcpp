@@ -11,6 +11,7 @@
 #include "util.h"
 #include "ui_interface.h"
 #include "checkpoints.h"
+#include "chartdata.h"
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -415,12 +416,21 @@ bool AppInit2()
 
     fSimpleServer = !fNoListen;
 
-    /* force fServer when running without GUI */
 #if !defined(QT_GUI)
+    /* force fServer when running without GUI */
     fServer = true;
+
+    // There's not ability to dump charts in text mode for now anyway
+    fChartsEnabled = false;
 #endif
+
     fPrintToConsole = GetBoolArg("-printtoconsole");
     fPrintToDebugger = GetBoolArg("-printtodebugger");
+
+    if (GetBoolArg("-disablecharts"))
+    {
+        fChartsEnabled = false;
+    }
 
     if (mapArgs.count("-timeout"))
     {

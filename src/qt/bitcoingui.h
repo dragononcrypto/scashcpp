@@ -16,6 +16,7 @@ class SendCoinsDialog;
 class SignVerifyMessageDialog;
 class Notificator;
 class RPCConsole;
+class PerfMonDialog;
 
 QT_BEGIN_NAMESPACE
 class QLabel;
@@ -48,6 +49,8 @@ public:
         functionality.
     */
     void setWalletModel(WalletModel *walletModel);
+
+    static void switchToTransactionPage();
 
 protected:
     void changeEvent(QEvent *e);
@@ -94,11 +97,13 @@ private:
 	QAction *lockWalletToggleAction;
     QAction *aboutQtAction;
     QAction *openRPCConsoleAction;
+    QAction *openPerfMonDlgAction;
 
     QSystemTrayIcon *trayIcon;
     Notificator *notificator;
     TransactionView *transactionView;
     RPCConsole *rpcConsole;
+    PerfMonDialog *perfMonDlg;
 
     QMovie *syncIconMovie;
 	

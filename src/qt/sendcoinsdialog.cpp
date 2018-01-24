@@ -12,10 +12,12 @@
 #include "addressbookpage.h"
 #include "optionsmodel.h"
 #include "sendcoinsentry.h"
+#include "messageentry.h"
 #include "guiutil.h"
 #include "askpassphrasedialog.h"
 #include "coincontrol.h"
 #include "coincontroldialog.h"
+#include "bitcoingui.h"
 
 #include <QMessageBox>
 #include <QLocale>
@@ -27,7 +29,8 @@ SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::SendCoinsDialog),
     model(0),
-    fCoinControlShow(false)
+    fCoinControlShow(false),
+    messageEntry(NULL)
 {
     ui->setupUi(this);
 
@@ -148,7 +151,10 @@ void SendCoinsDialog::on_sendButton_clicked()
     QStringList formatted;
     foreach(const SendCoinsRecipient &rcp, recipients)
     {
-        formatted.append(tr("<b>%1</b> to %2 (%3)").arg(BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, rcp.amount), Qt::escape(rcp.label), rcp.address));
+        formatted.append(tr("<b>%1</b> to <i>%2</i><font color=\"DarkRed\">%3</font>")
+                         .arg(BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, rcp.amount),
+                              Qt::escape(rcp.label),
+                              (rcp.label.length() == 0) ? rcp.address : " (" + rcp.address + ")"));
     }
 
     fNewRecipientAllowed = false;
@@ -174,15 +180,51 @@ void SendCoinsDialog::on_sendButton_clicked()
 
     WalletModel::SendCoinsReturn sendstatus;
 
-    if (!fCoinControlShow)
+    if (messageEntry)
     {
-        printf("Started sendCoins() without coin control branch\n");
-        sendstatus = model->sendCoins(recipients);
+        std::string messageText = "";
+
+        MessageEntry* messageEntryDetails = static_cast<MessageEntry*>(messageEntry);
+
+        if (messageEntryDetails->getTextCharactersCount() > SendMessageMaxChars)
+        {
+            QMessageBox::critical(this, tr("Send message error"),
+                tr("Message size is out of allowed constrains"),
+                QMessageBox::Ok, QMessageBox::Ok);
+            return;
+        }
+
+        // Text will be filtered in sending kernel, at this stage allow everything
+        messageText = messageEntryDetails->getText().toStdString();
+
+        if (messageText.length() == 0)
+        {
+            printf("Message text is empty.\n");
+        }
+
+        if (!fCoinControlShow)
+        {
+            printf("Started sendCoins() without coin control and with message branch\n");
+            sendstatus = model->sendCoins(recipients, NULL, messageText);
+        }
+        else
+        {
+            printf("Started sendCoins() with coin control and with message branch\n");
+            sendstatus = model->sendCoins(recipients, CoinControlDialog::coinControl, messageText);
+        }
     }
     else
     {
-        printf("Started sendCoins() with coin control branch\n");
-        sendstatus = model->sendCoins(recipients, CoinControlDialog::coinControl);
+        if (!fCoinControlShow)
+        {
+            printf("Started sendCoins() without coin control and no message branch\n");
+            sendstatus = model->sendCoins(recipients);
+        }
+        else
+        {
+            printf("Started sendCoins() with coin control and no message branch\n");
+            sendstatus = model->sendCoins(recipients, CoinControlDialog::coinControl);
+        }
     }
 
     switch(sendstatus.status)
@@ -232,8 +274,11 @@ void SendCoinsDialog::on_sendButton_clicked()
         break;
     case WalletModel::OK:
         accept();
-		CoinControlDialog::coinControl->UnSelectAll();
+        CoinControlDialog::coinControl->UnSelectAll();
         coinControlUpdateLabels();
+
+        BitcoinGUI::switchToTransactionPage();
+
         break;
     }
     fNewRecipientAllowed = true;
@@ -437,6 +482,22 @@ void SendCoinsDialog::coinControlFeatureChanged(bool checked)
     {
         // hide already opened coin control
         on_toggleCoinControlButton_clicked();
+    }
+}
+
+
+void SendCoinsDialog::on_messageButton_clicked()
+{
+    if (!messageEntry)
+    {
+        MessageEntry *entry = new MessageEntry(this);
+        messageEntry = entry;
+        entry->setModel(model);
+        ui->entries->addWidget(entry);
+    }
+    else
+    {
+        // TODO: now toggle does not work
     }
 }
 

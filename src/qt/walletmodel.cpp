@@ -133,7 +133,10 @@ bool WalletModel::validateAddress(const QString &address)
     return addressParsed.IsValid();
 }
 
-WalletModel::SendCoinsReturn WalletModel::sendCoins(const QList<SendCoinsRecipient> &recipients, const CCoinControl *coinControl)
+WalletModel::SendCoinsReturn WalletModel::sendCoins(
+        const QList<SendCoinsRecipient> &recipients,
+        const CCoinControl *coinControl,
+        std::string messageText)
 {
     qint64 total = 0;
     QSet<QString> setAddress;
