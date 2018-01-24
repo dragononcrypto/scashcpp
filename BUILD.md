@@ -5,7 +5,8 @@ Some notes on how to build Scash in Linux/Unix.
 To Build
 ---------------------
 
-```cd src
+```
+cd src
 make
 make install
 ```
