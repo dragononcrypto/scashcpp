@@ -8,6 +8,7 @@
 #include "blockexplorerstyle.h"
 #include "main.h"
 
+#include <map>
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -20,6 +21,17 @@ bool fBlockExplorerEnabled = false;
 static CCriticalSection g_cs_blocks;
 static unsigned int g_lastUpdateTime = 0;
 
+static CCriticalSection g_cs_ids;
+
+enum ObjectTypes {
+    TYPE_NONE,
+    TYPE_TX,
+    TYPE_BLOCK,
+    TYPE_WALLET,
+};
+
+std::map<std::string, ObjectTypes> g_ids;
+
 struct BlockDataInfo
 {
     std::string id;
@@ -29,6 +41,12 @@ struct BlockDataInfo
 };
 
 static std::vector<BlockDataInfo> g_latestBlocksAdded;
+
+void reloadKnownObjects()
+{
+    LOCK(g_cs_ids);
+    // TODO
+}
 
 bool BlocksContainer::BlockExplorerInit()
 {
@@ -42,6 +60,8 @@ bool BlocksContainer::BlockExplorerInit()
         std::fstream fileStyle(pathStyleFile.c_str(), std::ios::out);
         fileStyle << Style::getStyleCssFileContent();
         fileStyle.close();
+
+        reloadKnownObjects();
     }
     catch (std::exception& ex)
     {
@@ -51,24 +71,118 @@ bool BlocksContainer::BlockExplorerInit()
     return true;
 }
 
+std::string fixupKnownObjects(const std::string& src)
+{
+    std::string result = "";
+
+    std::vector<std::string> tokenized;
+
+    std::string buffer = "";
+    for (size_t u = 0; u < src.length(); u++)
+    {
+        if (isalnum(src[u]))
+        {
+            buffer += src[u];
+        }
+        else
+        {
+            tokenized.push_back(buffer);
+            buffer = "";
+            tokenized.push_back(std::string("") + src[u]);
+        }
+    }
+
+    if (buffer != "")
+        tokenized.push_back(buffer);
+
+    {
+        LOCK(g_cs_ids);
+        for (size_t u = 0; u < tokenized.size(); u++)
+        {
+            if ((tokenized[u].length() == 64 || tokenized[u].length() == 34)
+                    && g_ids.find(tokenized[u]) != g_ids.end())
+            {
+                result += "<a href=\"" + tokenized[u] + ".html\">"
+                        + tokenized[u] + "</a>";
+            }
+            else
+                result += tokenized[u];
+        }
+    }
+
+    return result;
+}
+
+unsigned int getNowTime()
+{
+    return time(NULL);
+}
+
+std::string unixTimeToString(unsigned int ts)
+{
+    struct tm epoch_time;
+    long int tsLI = ts;
+    memcpy(&epoch_time, localtime(&tsLI), sizeof (struct tm));
+    char res[64];
+    strftime(res, sizeof(res), "%Y-%m-%d %H:%M:%S", &epoch_time);
+    return res;
+}
+
+std::string unixTimeToAgeFromNow(unsigned int ts, unsigned int from)
+{
+    if (from <= ts) return "now";
+    unsigned int diff = from - ts;
+    if (diff < 60) return std::to_string(diff) + "s";
+    if (diff < 60*60) return std::to_string(diff/60) + "m";
+    return std::to_string(diff/60/60) + "h";
+}
+
+static const std::string searchScript = + "<script>function nav() { window.location.href=\"search?q=\" + window.document.getElementById(\"search\").value; return false; }</script>";
+static const std::string searchForm = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
+     " <input type='text' id='search' placeholder='Search address, block, transaction, tag...' value='' width=\"588px\" required> "
+     " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
+
+std::string getHead(std::string titleAdd = "")
+{
+    std::string result =  "<html><head><title>Scash Block Explorer";
+    if (titleAdd != "") result += " - " + titleAdd;
+    result += "</title>"
+         + Style::getStyleCssLink()
+         + searchScript
+         + "</head><body>"
+         + searchForm;
+    return result;
+}
+
+std::string getTail()
+{
+    return "<br><br><i>Copyright &copy; 2017-2018 by Scash developers.</i></p></body></html>";
+}
+
 bool BlocksContainer::WriteBlockInfo(
         bool isPos,
         int height, unsigned int unixTs,
         const std::string& blockId,
         const std::string& blockContent)
 {
+    {
+        LOCK(g_cs_ids);
+        g_ids[blockId] = TYPE_BLOCK;
+    }
 
     try
     {
         boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
         boost::filesystem::create_directory(pathBe);
 
-        std::string blockFileName = "b_" + blockId + ".html";
+        std::string blockFileName = blockId + ".html";
 
         boost::filesystem::path pathStyleFile = pathBe / blockFileName;
 
         std::fstream fileBlock(pathStyleFile.c_str(), std::ios::out);
-        fileBlock << blockContent;
+        fileBlock << getHead("Block " + blockId);
+        fileBlock << fixupKnownObjects(blockContent);
+        fileBlock << getTail();
         fileBlock.close();
     }
     catch (std::exception& ex)
@@ -124,35 +238,7 @@ bool BlocksContainer::UpdateWalletInfo(const std::string walletId, const std::st
     return false;
 }
 
-unsigned int getNowTime()
-{
-    return time(NULL);
-}
 
-std::string unixTimeToString(unsigned int ts)
-{
-    struct tm epoch_time;
-    long int tsLI = ts;
-    memcpy(&epoch_time, localtime(&tsLI), sizeof (struct tm));
-    char res[64];
-    strftime(res, sizeof(res), "%Y-%m-%d %H:%M:%S", &epoch_time);
-    return res;
-}
-
-
-std::string unixTimeToAgeFromNow(unsigned int ts, unsigned int from)
-{
-    if (from <= ts) return "now";
-    unsigned int diff = from - ts;
-    if (diff < 60) return std::to_string(diff) + "s";
-    if (diff < 60*60) return std::to_string(diff/60) + "m";
-    return std::to_string(diff/60/60) + "h";
-}
-
-static const std::string searchScript = + "<script>function nav() { window.location.href=\"search?q=\" + window.document.getElementById(\"search\").value; return false; }</script>";
-static const std::string searchForm = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
-     " <input type='text' id='search' placeholder='Search address, block, transaction, tag...' value='' width=\"588px\" required> "
-     " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
 
 bool  BlocksContainer::UpdateIndex(bool force)
 {
@@ -171,12 +257,7 @@ bool  BlocksContainer::UpdateIndex(bool force)
         boost::filesystem::path pathStyleFile = pathBe / blockFileName;
 
         std::fstream fileIndex(pathStyleFile.c_str(), std::ios::out);
-        fileIndex << "<html><head><title>Scash Block Explorer</title>"
-                     + Style::getStyleCssLink()
-                     + searchScript
-                     + "</head><body>";
-
-        fileIndex << searchForm;
+        fileIndex << getHead();
 
         fileIndex << "<br>"; // TODO: block generation graph
                 // if (fChartsEnabled || BlockExplorer::fBlockExplorerEnabled) Charts::BlocksAdded().AddData(1);
@@ -190,8 +271,7 @@ bool  BlocksContainer::UpdateIndex(bool force)
             for (size_t u = 0; u < g_latestBlocksAdded.size(); u++)
             {
                 fileIndex << ((u % 2 == 0) ? "<tr class=\"even\">" : "<tr>")
-                          << "<td><a href=\"b_" << g_latestBlocksAdded[u].id << ".html\">"
-                            << g_latestBlocksAdded[u].id << "</a></td><td>"
+                          << "<td>" << fixupKnownObjects(g_latestBlocksAdded[u].id) << "</td><td>"
                           << (g_latestBlocksAdded[u].isPoS ? "&#10004;" : "") << "</td><td>"
                           << g_latestBlocksAdded[u].height << "</td><td>"
                           << unixTimeToString(g_latestBlocksAdded[u].unixTs) << "</td><td>"
@@ -203,11 +283,9 @@ bool  BlocksContainer::UpdateIndex(bool force)
 
         fileIndex << "</table>";
         fileIndex << "<br><p style=\"margin-left: auto; margin-right: auto; width: 780px\">"
-                 <<"Updated at " << unixTimeToString(nowTime) << " up to block " << upToBlock << "."
-                 <<"<br><br><i>Copyright &copy; 2017-2018 by Scash developers.</i></p>";
+                 <<"Updated at " << unixTimeToString(nowTime) << " up to block " << upToBlock << ".";
 
-        fileIndex << "</body></html>";
-
+        fileIndex << getTail();
         fileIndex.close();
     }
     catch (std::exception& ex)

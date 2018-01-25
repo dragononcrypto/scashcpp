@@ -159,6 +159,7 @@ enum FormattingType {
     FORMAT_TYPE_PLAIN,
     FORMAT_TYPE_CSS,
     FORMAT_TYPE_HTML,
+    FORMAT_TYPE_NICE_HTML,
 };
 
 /** Position on disk for a particular transaction. */
