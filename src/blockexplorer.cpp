@@ -27,7 +27,8 @@ enum ObjectTypes {
     TYPE_NONE,
     TYPE_TX,
     TYPE_BLOCK,
-    TYPE_WALLET,
+    TYPE_ADDRESS,
+    TYPE_ANY
 };
 
 std::map<std::string, ObjectTypes> g_ids;
@@ -45,7 +46,16 @@ static std::vector<BlockDataInfo> g_latestBlocksAdded;
 void reloadKnownObjects()
 {
     LOCK(g_cs_ids);
-    // TODO
+
+    boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
+    boost::filesystem::directory_iterator end;
+
+    for (boost::filesystem::directory_iterator i(pathBe); i != end; ++i)
+    {
+        const boost::filesystem::path cp = (*i);
+        printf("Enumerated file %s \n", cp.stem().string().c_str());
+        g_ids[cp.stem().string()] = TYPE_ANY;
+    }
 }
 
 bool BlocksContainer::BlockExplorerInit()
@@ -159,16 +169,106 @@ std::string getTail()
     return "<br><br><i>Copyright &copy; 2017-2018 by Scash developers.</i></p></body></html>";
 }
 
-bool BlocksContainer::WriteBlockInfo(
-        bool isPos,
-        int height, unsigned int unixTs,
-        const std::string& blockId,
-        const std::string& blockContent)
+enum FormattingType {
+    FORMAT_TYPE_PLAIN,
+    FORMAT_TYPE_CSS,
+    FORMAT_TYPE_HTML,
+    FORMAT_TYPE_NICE_HTML,
+};
+
+void makeObjectKnown(const std::string& id, ObjectTypes t)
 {
+    LOCK(g_cs_ids);
+    g_ids[id] = t;
+}
+
+void printBlockToStream(CBlock& b, std::ostringstream& stream, FormattingType formattingType)
+{
+    std::string skip = "\n  ";
+    std::string bigskip = "\n\n";
+
+    if (formattingType == FORMAT_TYPE_CSS)
     {
-        LOCK(g_cs_ids);
-        g_ids[blockId] = TYPE_BLOCK;
+            skip = ",";
+            bigskip = ",";
     }
+    else if (formattingType == FORMAT_TYPE_HTML)
+    {
+        skip = "\n<br>&nbsp;";
+        bigskip = "\n<p>";
+    }
+
+    if (formattingType == FORMAT_TYPE_NICE_HTML)
+    {
+        stream << "<h3 align=center><a href='index.html'>&lt;&lt;&lt</a>&nbsp;Details for block " << b.GetHash().ToString() << "</h3>";
+        stream << "<table><tr><th>Param</th><th>Value</th></tr>"
+               << "<tr class=\"even\"><td>Version</td><td>" << b.nVersion << "</td></tr>"
+               << "<tr><td>Prev block hash</td><td>" << b.hashPrevBlock.ToString() << "</td></tr>"
+               << "<tr class=\"even\"><td>Merkle root hash</td><td>" << b.hashMerkleRoot.ToString() << "</td></tr>"
+               << "<tr><td>nTime</td><td>" << b.nTime << "</td></tr>"
+               << "<tr class=\"even\"><td>nBits</td><td>" << b.nBits << "</td></tr>"
+               << "<tr><td>nNonce</td><td>" << b.nNonce << "</td></tr>"
+               << "<tr class=\"even\"><td>Transactions count</td><td>" << b.vtx.size() << "</td></tr>"
+               << "<tr><td>Block signature</td><td>" << HexStr(b.vchBlockSig.begin(), b.vchBlockSig.end()) << "</td></tr>"
+               << "</table>";
+
+        stream << "<p><h3 align=center>Transactions list:</h3>";
+        stream << "<table><tr><th>Transaction Id</th><th>Version</th><th>Time</th><th>Lock Time</th><th>Ins</th><th>Outs</th><th>CoinBase?</th><th>CoinStake?</th><th>Amount</th></tr>";
+        for (unsigned int i = 0; i < b.vtx.size(); i++)
+        {
+            stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
+                    << "<td>" << b.vtx[i].GetHash().ToString() << "</td>"
+                    << "<td>" << b.vtx[i].nVersion << "</td>"
+                    << "<td>" << b.vtx[i].nTime << "</td>"
+                    << "<td>" << b.vtx[i].nLockTime << "</td>"
+                    << "<td>" << b.vtx[i].vin.size() << "</td>"
+                    << "<td>" << b.vtx[i].vout.size() << "</td>"
+                    << "<td>" << (b.vtx[i].IsCoinBase() ? "&#10004;" : "") << "</td>"
+                    << "<td>" << (b.vtx[i].IsCoinStake() ? "&#10004;" : "") << "</td>"
+                    << "<td>" << ((double)b.vtx[i].GetValueOut() / (double)COIN) << " SCS</td>"
+                    << "</tr>";
+        }
+        stream << "</table>";
+
+        stream << "<p><h3 align=center>Merkle tree:</h3>";
+        stream << "<table><tr><th>#</th><th>Merkle Tree Hash</th></tr>";
+        for (unsigned int i = 0; i < b.vMerkleTree.size(); i++)
+        {
+            stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
+                    << "<td>" << i << "</td>"
+                    << "<td>" << b.vMerkleTree[(b.vMerkleTree.size()-1) - i].ToString() << "</td>"
+                    << "<tr>";
+        }
+        stream << "</table>";
+    }
+    else
+    {
+        stream << "Block hash: " + b.GetHash().ToString()
+               << skip << "version: " << b.nVersion
+               << skip << "hashPrevBlock: " << b.hashPrevBlock.ToString()
+               << skip << "hashMerkleRoot: " << b.hashMerkleRoot.ToString()
+               << skip << "nTime: " << b.nTime
+               << skip << "nBits: " << b.nBits
+               << skip << "nNonce: " << b.nNonce
+               << skip << "Transactions count: " << b.vtx.size()
+               << skip << "Block signature: " << HexStr(b.vchBlockSig.begin(), b.vchBlockSig.end());
+
+        stream << bigskip << "Transactions list:";
+        for (unsigned int i = 0; i < b.vtx.size(); i++)
+        {
+            stream << skip << b.vtx[i].GetHash().ToString();
+        }
+        stream  << bigskip << "Merkle Tree:";
+        for (unsigned int i = 0; i < b.vMerkleTree.size(); i++)
+            stream << skip << b.vMerkleTree[i].ToString();
+    }
+}
+
+bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
+{
+    std::string blockId = block.GetHash().ToString();
+
+    makeObjectKnown(blockId, TYPE_BLOCK);
 
     try
     {
@@ -181,7 +281,13 @@ bool BlocksContainer::WriteBlockInfo(
 
         std::fstream fileBlock(pathStyleFile.c_str(), std::ios::out);
         fileBlock << getHead("Block " + blockId);
+
+        std::ostringstream temp;
+        printBlockToStream(block, temp, FORMAT_TYPE_NICE_HTML);
+        std::string blockContent = temp.str();
+
         fileBlock << fixupKnownObjects(blockContent);
+
         fileBlock << getTail();
         fileBlock.close();
     }
@@ -209,8 +315,8 @@ bool BlocksContainer::WriteBlockInfo(
             BlockDataInfo bs;
             bs.id = blockId;
             bs.height = height;
-            bs.unixTs = unixTs;
-            bs.isPoS = isPos;
+            bs.unixTs = block.nTime;
+            bs.isPoS = block.IsProofOfStake();
             g_latestBlocksAdded.insert(g_latestBlocksAdded.begin(), bs);
 
             while (g_latestBlocksAdded.size() > MaxLatestBlocks)
@@ -226,19 +332,6 @@ bool BlocksContainer::WriteBlockInfo(
 
     return true;
 }
-
-bool BlocksContainer::WriteTransactionInfo(const std::string& blockId, const std::string& txId,
-                                 const std::string& txContent)
-{
-    return false;
-}
-
-bool BlocksContainer::UpdateWalletInfo(const std::string walletId, const std::string txId)
-{
-    return false;
-}
-
-
 
 bool  BlocksContainer::UpdateIndex(bool force)
 {

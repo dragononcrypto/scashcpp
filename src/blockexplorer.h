@@ -7,6 +7,7 @@
 
 #include <string>
 #include <vector>
+#include "main.h"
 
 namespace BlockExplorer
 {
@@ -18,18 +19,13 @@ namespace BlockExplorer
     public:
         static bool BlockExplorerInit();
 
-        static bool WriteBlockInfo(bool isPos,
-                int height, unsigned int unixTs,
-                const std::string& blockId,
-                const std::string& blockContent);
+        static bool WriteBlockInfo(int height, CBlock& block);
 
-        static bool WriteTransactionInfo(const std::string& blockId, const std::string& txId,
-                                         const std::string& txContent);
-        static bool UpdateWalletInfo(const std::string walletId, const std::string txId);
         static bool UpdateIndex(bool force = false);
 
     private:
-        static const int MaxLatestBlocks = 24;
+        static const int MaxLatestBlocks = 30;
+
         static const int AutoUpdateTimeMs = 10 * 1000;
     };
 }
