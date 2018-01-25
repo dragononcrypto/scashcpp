@@ -11,6 +11,7 @@
 #include "init.h" 
 #include "ui_interface.h"
 #include "kernel.h"
+#include "blockexplorer.h"
 
 #include <sys/time.h>
 
@@ -2393,7 +2394,7 @@ if (pblock->IsProofOfStake())
 
     printf("ProcessBlock: ACCEPTED\n");
 
-    if (fChartsEnabled) Charts::BlocksAdded().AddData(1);
+    if (fChartsEnabled || BlockExplorer::fBlockExplorerEnabled) Charts::BlocksAdded().AddData(1);
 
     // Scash: if responsible for sync-checkpoint send it
     if (pfrom && !CSyncCheckpoint::strMasterPrivKey.empty())
@@ -2583,6 +2584,87 @@ FILE* AppendBlockFile(unsigned int& nFileRet)
     }
 }
 
+void CBlock::printToStream(std::ostringstream& stream, FormattingType formattingType) const
+{
+    std::string skip = "\n  ";
+    std::string bigskip = "\n\n";
+
+    if (formattingType == FORMAT_TYPE_CSS)
+    {
+            skip = ",";
+            bigskip = ",";
+    }
+    else if (formattingType == FORMAT_TYPE_HTML)
+    {
+        skip = "\n<br>&nbsp;";
+        bigskip = "\n<p>";
+    }
+
+    if (formattingType == FORMAT_TYPE_NICE_HTML)
+    {
+        stream << "<h3 align=center><a href='index.html'>&lt;&lt;&lt</a>&nbsp;Details for block " << GetHash().ToString() << "</h3>";
+        stream << "<table><tr><th>Param</th><th>Value</th></tr>"
+               << "<tr class=\"even\"><td>Version</td><td>" << nVersion << "</td></tr>"
+               << "<tr><td>Prev block hash</td><td>" << hashPrevBlock.ToString() << "</td></tr>"
+               << "<tr class=\"even\"><td>Merkle root hash</td><td>" << hashMerkleRoot.ToString() << "</td></tr>"
+               << "<tr><td>nTime</td><td>" << nTime << "</td></tr>"
+               << "<tr class=\"even\"><td>nBits</td><td>" << nBits << "</td></tr>"
+               << "<tr><td>nNonce</td><td>" << nNonce << "</td></tr>"
+               << "<tr class=\"even\"><td>Transactions count</td><td>" << vtx.size() << "</td></tr>"
+               << "<tr><td>Block signature</td><td>" << HexStr(vchBlockSig.begin(), vchBlockSig.end()) << "</td></tr>"
+               << "</table>";
+
+        stream << "<p><h3 align=center>Transactions list:</h3>";
+        stream << "<table><tr><th>Transaction Id</th><th>Version</th><th>Time</th><th>Lock Time</th><th>Ins</th><th>Outs</th><th>CoinBase?</th><th>CoinStake?</th><th>Amount</th></tr>";
+        for (unsigned int i = 0; i < vtx.size(); i++)
+        {
+            stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
+                    << "<td>" << vtx[i].GetHash().ToString() << "</td>"
+                    << "<td>" << vtx[i].nVersion << "</td>"
+                    << "<td>" << vtx[i].nTime << "</td>"
+                    << "<td>" << vtx[i].nLockTime << "</td>"
+                    << "<td>" << vtx[i].vin.size() << "</td>"
+                    << "<td>" << vtx[i].vout.size() << "</td>"
+                    << "<td>" << (vtx[i].IsCoinBase() ? "&#10004;" : "") << "</td>"
+                    << "<td>" << (vtx[i].IsCoinStake() ? "&#10004;" : "") << "</td>"
+                    << "<td>" << ((double)vtx[i].GetValueOut() / (double)COIN) << " SCS</td>"
+                    << "</tr>";
+        }
+        stream << "</table>";
+
+        stream << "<p><h3 align=center>Merkle tree:</h3>";
+        stream << "<table><tr><th>#</th><th>Merkle Tree Hash</th></tr>";
+        for (unsigned int i = 0; i < vMerkleTree.size(); i++)
+        {
+            stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
+                    << "<td>" << i << "</td>"
+                    << "<td>" << vMerkleTree[(vMerkleTree.size()-1) - i].ToString() << "</td>"
+                    << "<tr>";
+        }
+        stream << "</table>";
+    }
+    else
+    {
+        stream << "Block hash: " + GetHash().ToString()
+               << skip << "version: " << nVersion
+               << skip << "hashPrevBlock: " << hashPrevBlock.ToString()
+               << skip << "hashMerkleRoot: " << hashMerkleRoot.ToString()
+               << skip << "nTime: " << nTime
+               << skip << "nBits: " << nBits
+               << skip << "nNonce: " << nNonce
+               << skip << "Transactions count: " << vtx.size()
+               << skip << "Block signature: " << HexStr(vchBlockSig.begin(), vchBlockSig.end());
+
+        stream << bigskip << "Transactions list:";
+        for (unsigned int i = 0; i < vtx.size(); i++)
+        {
+            stream << skip << vtx[i].GetHash().ToString();
+        }
+        stream  << bigskip << "Merkle Tree:";
+        for (unsigned int i = 0; i < vMerkleTree.size(); i++)
+            stream << skip << vMerkleTree[i].ToString();
+    }
+}
 
 LoadBlockIndexResult LoadBlockIndex(bool fAllowNew)
 {
@@ -3475,14 +3557,45 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         CBlock block;
         vRecv >> block;
 
-        printf("received block %s\n", block.GetHash().ToString().substr(0,20).c_str());
-        // block.print();
+        std::string blockHash = block.GetHash().ToString();
+
+        printf("Received block %s\n", blockHash.c_str());
+
+        if (fDebug && fDumpAll)
+        {
+            block.print();
+        }
 
         CInv inv(MSG_BLOCK, block.GetHash());
         pfrom->AddInventoryKnown(inv);
 
         if (ProcessBlock(pfrom, &block))
+        {
             mapAlreadyAskedFor.erase(inv);
+
+            try
+            {
+                if (BlockExplorer::fBlockExplorerEnabled)
+                {
+                    std::ostringstream temp;
+                    block.printToStream(temp, FORMAT_TYPE_NICE_HTML);
+                    std::string content = temp.str();
+
+                    int height = pindexBest->nHeight;
+
+                    BlockExplorer::BlocksContainer::WriteBlockInfo(
+                                block.IsProofOfStake(),
+                                height,
+                                block.nTime,
+                                blockHash, content);
+                    BlockExplorer::BlocksContainer::UpdateIndex();
+                }
+            }
+            catch (std::exception& ex)
+            {
+                printf("Exception %s while add block to block explorer\n", ex.what());
+            }
+        }
         if (block.nDoS) pfrom->Misbehaving(block.nDoS);
     }
 
@@ -4385,7 +4498,9 @@ bool CheckWork(CBlock* pblock, CWallet& wallet, CReserveKey& reservekey)
 
         // Process this block the same as if we had received it from another node
         if (!ProcessBlock(NULL, pblock))
+        {
             return error("BitcoinMiner : ProcessBlock, block not accepted");
+        }
     }
 
     return true;
