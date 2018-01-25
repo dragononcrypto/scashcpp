@@ -9,7 +9,9 @@
 
 namespace BlockExplorer
 {
-
+class Style
+{
+public:
     // get <style>xxx</style> to inline into HTML
     static std::string getStyleInline();
 
@@ -21,6 +23,10 @@ namespace BlockExplorer
 
     // get <link>xxx</link> to inline into HTML to get style
     static std::string getStyleCssLink();
+
+private:
+    static std::string getStyleData();
+};
 }
 
 #endif // BLOCKEXPLORER_STYLE_H

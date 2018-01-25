@@ -9,8 +9,7 @@
 
 namespace BlockExplorer
 {
-
-
+    extern bool fBlockExplorerServerEnabled;
 }
 
 #endif // BLOCKEXPLORER_SERVER_H

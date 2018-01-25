@@ -8,4 +8,7 @@
 
 namespace BlockExplorer
 {
+
+bool fBlockExplorerServerEnabled =false;
+
 }

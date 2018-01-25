@@ -3,6 +3,7 @@
 // Copyright (c) 2017-2018 Scash developers
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
+
 #include "db.h"
 #include "walletdb.h"
 #include "bitcoinrpc.h"
@@ -12,6 +13,9 @@
 #include "ui_interface.h"
 #include "checkpoints.h"
 #include "chartdata.h"
+#include "blockexplorer.h"
+#include "blockexplorerserver.h"
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -501,6 +505,20 @@ bool AppInit2()
         fprintf(stdout, "Scash server starting\n");
 
     int64 nStart;
+
+    // ********************************************************* Step 4.5: block explorer stuff
+
+    BlockExplorer::fBlockExplorerEnabled = GetBoolArg("-blockexplorer");
+    BlockExplorer::fBlockExplorerServerEnabled = GetBoolArg("-blockexplorerserver");
+
+    if (BlockExplorer::fBlockExplorerEnabled)
+    {
+        if (!BlockExplorer::BlocksContainer::BlockExplorerInit())
+        {
+            BlockExplorer::fBlockExplorerEnabled = false;
+            BlockExplorer::fBlockExplorerServerEnabled = false;
+        }
+    }
 
     // ********************************************************* Step 5: verify database integrity
 

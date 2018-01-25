@@ -155,6 +155,12 @@ int CalculateRequiredConfirmations(int64 amount);
 
 bool GetWalletFile(CWallet* pwallet, std::string &strWalletFileOut);
 
+enum FormattingType {
+    FORMAT_TYPE_PLAIN,
+    FORMAT_TYPE_CSS,
+    FORMAT_TYPE_HTML,
+};
+
 /** Position on disk for a particular transaction. */
 class CDiskTxPos
 {
@@ -1095,6 +1101,8 @@ public:
 
     void print() const
     {
+        // TODO: use printToStream instead
+
         printf("CBlock(hash=%s, ver=%d, hashPrevBlock=%s, hashMerkleRoot=%s, nTime=%u, nBits=%08x, nNonce=%u, vtx=%" PRIszu ", vchBlockSig=%s)\n",
             GetHash().ToString().c_str(),
             nVersion,
@@ -1114,6 +1122,7 @@ public:
         printf("\n");
     }
 
+    void printToStream(std::ostringstream& stream, FormattingType formattingType) const;
 
     bool DisconnectBlock(CTxDB& txdb, CBlockIndex* pindex);
     bool ConnectBlock(CTxDB& txdb, CBlockIndex* pindex, bool fJustCheck=false);
