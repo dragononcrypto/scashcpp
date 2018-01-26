@@ -227,6 +227,8 @@ void TransactionRecord::updateStatus(const CWalletTx &wtx)
             status.maturity = TransactionStatus::Mature;
         }
     }
+
+    hasMessage = wtx.HasMessage();
 }
 
 bool TransactionRecord::statusUpdateNeeded()

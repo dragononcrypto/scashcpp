@@ -388,6 +388,21 @@ QString TransactionTableModel::formatTxType(const TransactionRecord *wtx) const
 
 QVariant TransactionTableModel::txAddressDecoration(const TransactionRecord *wtx) const
 {
+    if (wtx->hasMessage)
+    {
+        switch(wtx->type)
+        {
+        case TransactionRecord::RecvWithAddress:
+        case TransactionRecord::RecvFromOther:
+            return QIcon(":/icons/message64in");
+        case TransactionRecord::SendToAddress:
+        case TransactionRecord::SendToOther:
+            return QIcon(":/icons/message64out");
+        default:
+            return QIcon(":/icons/message64");
+        }
+    }
+
     switch(wtx->type)
     {
     case TransactionRecord::Generated:
@@ -647,6 +662,20 @@ QModelIndex TransactionTableModel::index(int row, int column, const QModelIndex 
     else
     {
         return QModelIndex();
+    }
+}
+
+bool TransactionTableModel::hasMessage(int row, int column, const QModelIndex &parent) const
+{
+    Q_UNUSED(parent);
+    TransactionRecord *data = priv->index(row);
+    if(data)
+    {
+        return data->hasMessage;
+    }
+    else
+    {
+        return false;
     }
 }
 

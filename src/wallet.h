@@ -175,7 +175,10 @@ public:
     int64 GetImmatureBalance() const;
     int64 GetStake() const;
     int64 GetNewMint() const;
-    bool CreateTransaction(const std::vector<std::pair<CScript, int64> >& vecSend, CWalletTx& wtxNew, CReserveKey& reservekey, int64& nFeeRet, const CCoinControl *coinControl=NULL);
+    bool CreateTransaction(const std::vector<std::pair<CScript, int64> >& vecSend,
+                           CWalletTx& wtxNew, CReserveKey& reservekey, int64& nFeeRet,
+                           const CCoinControl *coinControl=NULL,
+                           int messageBytes = 0);
     bool CreateTransaction(CScript scriptPubKey, int64 nValue, CWalletTx& wtxNew, CReserveKey& reservekey, int64& nFeeRet, const CCoinControl *coinControl=NULL);
     bool CommitTransaction(CWalletTx& wtxNew, CReserveKey& reservekey);
     bool GetStakeWeight(const CKeyStore& keystore, uint64& nMinWeight, uint64& nMaxWeight, uint64& nWeight);

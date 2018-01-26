@@ -90,7 +90,7 @@ public:
                 Type type, const std::string &address,
                 int64 debit, int64 credit):
             hash(hash), time(time), type(type), address(address), debit(debit), credit(credit),
-            idx(0)
+            hasMessage(false), idx(0)
     {
     }
 
@@ -107,6 +107,7 @@ public:
     std::string address;
     int64 debit;
     int64 credit;
+    bool hasMessage;
     /**@}*/
 
     /** Subtransaction index, for sort key */

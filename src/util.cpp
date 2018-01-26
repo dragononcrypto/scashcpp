@@ -28,6 +28,7 @@ namespace boost {
 #include <boost/filesystem/fstream.hpp>
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <openssl/crypto.h>
 #include <openssl/rand.h>
 #include <stdarg.h>
@@ -1351,3 +1352,18 @@ bool NewThread(void(*pfn)(void*), void* parg)
     }
     return true;
 }
+
+
+std::string simpleHTMLSafeDisplayFilter(const std::string& source)
+{
+    std::string result = source;
+    if (!source.empty())
+    {
+        boost::replace_all(result, "&", "&amp;");
+        boost::replace_all(result, "<", "&lt;");
+        boost::replace_all(result, ">", "&gt;");
+        boost::replace_all(result, "\n", "<br>");
+    }
+    return result;
+}
+

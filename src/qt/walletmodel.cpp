@@ -178,7 +178,15 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(
     wallet->AvailableCoins(vCoins, true, coinControl);
 
     BOOST_FOREACH(const COutput& out, vCoins)
+    {
         nBalance += out.tx->vout[out.i].nValue;
+    }
+
+    if(messageText.length() > SendMessageMaxChars)
+    {
+        return MessageTooLong;
+    }
+
     if(total > nBalance)
     {
         return AmountExceedsBalance;
@@ -188,6 +196,7 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(
     {
         return SendCoinsReturn(AmountWithFeeExceedsBalance, nTransactionFee);
     }
+
 
     {
         LOCK2(cs_main, wallet->cs_wallet);
@@ -204,7 +213,13 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(
         CWalletTx wtx;
         CReserveKey keyChange(wallet);
         int64 nFeeRequired = 0;
-        bool fCreated = wallet->CreateTransaction(vecSend, wtx, keyChange, nFeeRequired, coinControl);
+        bool fCreated = wallet->CreateTransaction(vecSend, wtx, keyChange,
+                                                  nFeeRequired, coinControl, messageText.length());
+
+        if (messageText.length() > 0)
+        {
+            wtx.SetMessage(messageText);
+        }
 
         if(!fCreated)
         {
@@ -222,6 +237,7 @@ WalletModel::SendCoinsReturn WalletModel::sendCoins(
         {
             return TransactionCommitFailed;
         }
+
         hex = QString::fromStdString(wtx.GetHash().GetHex());
     }
 

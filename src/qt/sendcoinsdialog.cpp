@@ -249,6 +249,11 @@ void SendCoinsDialog::on_sendButton_clicked()
             tr("The amount exceeds your balance."),
             QMessageBox::Ok, QMessageBox::Ok);
         break;
+    case WalletModel::MessageTooLong:
+        QMessageBox::warning(this, tr("Send Coins"),
+            tr("The attached message is too long."),
+            QMessageBox::Ok, QMessageBox::Ok);
+        break;
     case WalletModel::AmountWithFeeExceedsBalance:
         QMessageBox::warning(this, tr("Send Coins"),
             tr("The total exceeds your balance when the %1 transaction fee is included.").

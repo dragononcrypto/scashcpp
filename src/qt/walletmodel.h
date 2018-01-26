@@ -50,7 +50,8 @@ public:
         TransactionCreationFailed, // Error returned when wallet is still locked
         TransactionCommitFailed,
         Aborted,
-	WalletLocked
+        WalletLocked,
+        MessageTooLong
     };
 
     enum EncryptionStatus
