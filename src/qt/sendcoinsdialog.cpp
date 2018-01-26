@@ -296,6 +296,9 @@ void SendCoinsDialog::clear()
     {
         delete ui->entries->takeAt(0)->widget();
     }
+
+    messageEntry = NULL;
+
     addEntry();
 
     updateRemoveEnabled();
@@ -305,7 +308,7 @@ void SendCoinsDialog::clear()
 
 void SendCoinsDialog::reject()
 {
-    clear();
+    // clear();
 }
 
 void SendCoinsDialog::accept()
