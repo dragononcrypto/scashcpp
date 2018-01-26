@@ -7,6 +7,8 @@
 #include "sync.h"
 #include "blockexplorerstyle.h"
 #include "main.h"
+#include "base58.h"
+#include "db.h"
 
 #include <map>
 #include <boost/filesystem.hpp>
@@ -110,7 +112,8 @@ std::string fixupKnownObjects(const std::string& src)
         for (size_t u = 0; u < tokenized.size(); u++)
         {
             if ((tokenized[u].length() == 64 || tokenized[u].length() == 34)
-                    && g_ids.find(tokenized[u]) != g_ids.end())
+                    && g_ids.find(tokenized[u]) != g_ids.end()
+                    && ((u+1 >= tokenized.size()) || tokenized[u+1] != "."))
             {
                 result += "<a href=\"" + tokenized[u] + ".html\">"
                         + tokenized[u] + "</a>";
@@ -182,7 +185,96 @@ void makeObjectKnown(const std::string& id, ObjectTypes t)
     g_ids[id] = t;
 }
 
-void printBlockToStream(CBlock& b, std::ostringstream& stream, FormattingType formattingType)
+void printTxToStream(CTransaction& t, std::ostringstream& stream,
+                     int height,
+                     const std::string& blockId,
+                     FormattingType formattingType)
+{
+    stream << "<h3 align=center><a href='" + blockId + ".html'>&lt;&lt;&lt</a>&nbsp;Details for transaction " << t.GetHash().ToString() << "</h3>";
+    stream << "<table><tr><th>Param</th><th>Value</th></tr>"
+           << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:"+blockId+"-->" << "</td></tr>"
+           << "<tr class=\"even\"><td>Included in block</td><td>" << blockId << "</td></tr>"
+           << "<tr><td>Included in block at height</td><td>" << height << "</td></tr>"
+           << "<tr class=\"even\"><td>Version</td><td>" << t.nVersion << "</td></tr>"
+           << "<tr><td>Time</td><td>" << unixTimeToString(t.nTime) << "</td></tr>"
+           << "<tr class=\"even\"><td>LockTime</td><td>" << t.nLockTime << "</td></tr>"
+           << "<tr><td>DoS flag</td><td>" << t.nDoS << "</td></tr>"
+           << "<tr class=\"even\"><td>Inputs</td><td>" << t.vin.size() << "</td></tr>"
+           << "<tr><td>Outputs</td><td>" << t.vout.size() << "</td></tr>"
+
+           << "<tr class=\"even\"><td>Value</td><td>" << (t.GetValueOut() / (double)COIN) << " SCS</td></tr>"
+           << "<tr><td>CoinBase</td><td>" << (t.IsCoinBase() ? "&#10004;" : "") << "</td></tr>"
+
+           << "<tr class=\"even\"><td>CoinStake</td><td>" << (t.IsCoinStake() ? "&#10004;" : "") << "</td></tr>"
+           << "<tr><td>IsStandard</td><td>" << (t.IsStandard() ? "&#10004;" : "") << "</td></tr>"
+
+           << "<tr class=\"even\"><td>LegacySigOpCount</td><td>" << t.GetLegacySigOpCount() << "</td></tr>"
+
+           << "</table>";
+
+    if (t.HasMessage())
+    {
+        stream << "<br><p style=\"margin-left: auto; margin-right: auto; width: 780px\">";
+        stream << "<h3 align=center>Message:</h3><table><tr><td><font color=darkblue>";
+        try
+        {
+            stream << simpleHTMLSafeDisplayFilter(t.message);
+        }
+        catch (std::exception &ex)
+        {
+            printf("error while processing message: %s", ex.what());
+        }
+
+        stream << "</font></td></tr></table></p><br>";
+    }
+
+    CTxDB txdb("r");
+
+    stream << "<p><h3 align=center>Inputs:</h3>";
+    stream << "<table><tr><th>Amount</th><th>prevOut</th><th>scriptSig</th><th>nSequence</th><th>Source address</th></tr>";
+    for (unsigned int i = 0; i < t.vin.size(); i++)
+    {
+        CTxDestination address;
+        int64 amount = 0;
+        bool ok = false;
+
+        CTransaction prev;
+        if (txdb.ReadDiskTx(t.vin[i].prevout.hash, prev))
+        {
+            if (t.vin[i].prevout.n < prev.vout.size())
+            {
+                const CTxOut &vout = prev.vout[t.vin[i].prevout.n];
+                ok = ExtractDestination(vout.scriptPubKey, address);
+                amount = vout.nValue;
+            }
+        }
+
+        stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
+                << "<td>" << (amount ? (std::to_string(t.vout[i].nValue / (double)COIN) + " SCS") : "") << " </td>"
+                << "<td>" << t.vin[i].prevout.ToString() << "</td>"
+                << "<td>" << t.vin[i].scriptSig.ToString(true) << "</td>"
+                << "<td>" << t.vin[i].nSequence << "</td>"
+                << "<td>" << (ok ? CBitcoinAddress(address).ToString() : "-") << "</td>"
+                << "<tr>";
+    }
+    stream << "</table>";
+
+    stream << "<p><h3 align=center>Outputs:</h3>";
+    stream << "<table><tr><th>Amount</th><th>scriptPubKey</th><th>Destination address</th></tr>";
+    for (unsigned int i = 0; i < t.vout.size(); i++)
+    {
+        CTxDestination address;
+        bool ok = ExtractDestination(t.vout[i].scriptPubKey, address);
+        stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
+                << "<td>" << (t.vout[i].nValue / (double)COIN) << " SCS</td>"
+                << "<td>" << t.vout[i].scriptPubKey.ToString(true) << "</td>"
+                << "<td>" << (ok ? CBitcoinAddress(address).ToString() : "-") << "</td>"
+                << "<tr>";
+    }
+    stream << "</table>";
+}
+
+void printBlockToStream(CBlock& b, std::ostringstream& stream, int height, FormattingType formattingType)
 {
     std::string skip = "\n  ";
     std::string bigskip = "\n\n";
@@ -202,12 +294,14 @@ void printBlockToStream(CBlock& b, std::ostringstream& stream, FormattingType fo
     {
         stream << "<h3 align=center><a href='index.html'>&lt;&lt;&lt</a>&nbsp;Details for block " << b.GetHash().ToString() << "</h3>";
         stream << "<table><tr><th>Param</th><th>Value</th></tr>"
+              << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:"+b.GetHash().ToString()+"-->" << "</td></tr>"
+               << "<tr><td>Height</td><td>" << height << "</td></tr>"
                << "<tr class=\"even\"><td>Version</td><td>" << b.nVersion << "</td></tr>"
                << "<tr><td>Prev block hash</td><td>" << b.hashPrevBlock.ToString() << "</td></tr>"
                << "<tr class=\"even\"><td>Merkle root hash</td><td>" << b.hashMerkleRoot.ToString() << "</td></tr>"
-               << "<tr><td>nTime</td><td>" << b.nTime << "</td></tr>"
+               << "<tr><td>Time</td><td>" << unixTimeToString(b.nTime) << "</td></tr>"
                << "<tr class=\"even\"><td>nBits</td><td>" << b.nBits << "</td></tr>"
-               << "<tr><td>nNonce</td><td>" << b.nNonce << "</td></tr>"
+               << "<tr><td>Nonce</td><td>" << b.nNonce << "</td></tr>"
                << "<tr class=\"even\"><td>Transactions count</td><td>" << b.vtx.size() << "</td></tr>"
                << "<tr><td>Block signature</td><td>" << HexStr(b.vchBlockSig.begin(), b.vchBlockSig.end()) << "</td></tr>"
                << "</table>";
@@ -244,6 +338,7 @@ void printBlockToStream(CBlock& b, std::ostringstream& stream, FormattingType fo
     else
     {
         stream << "Block hash: " + b.GetHash().ToString()
+               << skip << "height: " << height
                << skip << "version: " << b.nVersion
                << skip << "hashPrevBlock: " << b.hashPrevBlock.ToString()
                << skip << "hashMerkleRoot: " << b.hashMerkleRoot.ToString()
@@ -264,27 +359,70 @@ void printBlockToStream(CBlock& b, std::ostringstream& stream, FormattingType fo
     }
 }
 
+bool writeBlockTransactions(int height, CBlock& block)
+{
+    bool result = true;
+
+    for (unsigned int i = 0; i < block.vtx.size(); i++)
+    {
+        std::string txId = block.vtx[i].GetHash().ToString();
+
+        try
+        {
+            std::ostringstream temp;
+            printTxToStream(block.vtx[i], temp, height, block.GetHash().ToString(), FORMAT_TYPE_NICE_HTML);
+            std::string txContent = temp.str();
+
+            boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
+            std::string txFileName = txId + ".html";
+            boost::filesystem::path pathStyleFile = pathBe / txFileName;
+
+            std::fstream fileBlock(pathStyleFile.c_str(), std::ios::out);
+            fileBlock << getHead("Transaction " + txId);
+
+            fileBlock << fixupKnownObjects(txContent);
+
+            fileBlock << getTail();
+            fileBlock.close();
+        }
+        catch (std::exception& ex)
+        {
+            printf("Write tx info failed: %s\n", ex.what());
+            result = false;
+        }
+    }
+
+    return result;
+}
+
 bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
 {
     std::string blockId = block.GetHash().ToString();
 
     makeObjectKnown(blockId, TYPE_BLOCK);
 
+    for (unsigned int i = 0; i < block.vtx.size(); i++)
+    {
+        makeObjectKnown(block.vtx[i].GetHash().ToString(), TYPE_TX);
+    }
+
     try
     {
         boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
         boost::filesystem::create_directory(pathBe);
 
+        writeBlockTransactions(height, block);
+
         std::string blockFileName = blockId + ".html";
+
+        std::ostringstream temp;
+        printBlockToStream(block, temp, height, FORMAT_TYPE_NICE_HTML);
+        std::string blockContent = temp.str();
 
         boost::filesystem::path pathStyleFile = pathBe / blockFileName;
 
         std::fstream fileBlock(pathStyleFile.c_str(), std::ios::out);
         fileBlock << getHead("Block " + blockId);
-
-        std::ostringstream temp;
-        printBlockToStream(block, temp, FORMAT_TYPE_NICE_HTML);
-        std::string blockContent = temp.str();
 
         fileBlock << fixupKnownObjects(blockContent);
 
@@ -297,6 +435,7 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
         return false;
     }
 
+    // Update data for index.html
     {
         LOCK(g_cs_blocks);
 

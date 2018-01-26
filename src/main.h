@@ -447,13 +447,16 @@ typedef std::map<uint256, std::pair<CTxIndex, CTransaction> > MapPrevTx;
 class CTransaction
 {
 public:
-    static const int CURRENT_VERSION=1;
+    static const int SIMPLE_VERSION = 1;
+    static const int EXTENDED_VERSION = 2;
 
     int nVersion;
+    int nVersionCompat;
     unsigned int nTime;
     std::vector<CTxIn> vin;
     std::vector<CTxOut> vout;
     unsigned int nLockTime;
+    std::string message;
 
     // Denial-of-service detection:
     mutable int nDoS;
@@ -466,27 +469,59 @@ public:
 
     IMPLEMENT_SERIALIZE
     (
-        READWRITE(this->nVersion);
-        nVersion = this->nVersion;
+        if (!(nType & SER_GETHASH))
+        {
+            READWRITE(this->nVersion);
+            nVersion = this->nVersion;
+        }
+        else
+        {
+            READWRITE(this->nVersionCompat);
+        }
         READWRITE(nTime);
         READWRITE(vin);
         READWRITE(vout);
         READWRITE(nLockTime);
-	)
+
+        if (nVersion >= 2)
+        {
+            if (!(nType & SER_GETHASH))
+            {
+                READWRITE(message);
+            }
+        }
+        else if (fRead)
+        {
+            const_cast<CTransaction*>(this)->message.clear();
+        }
+    )
 
     void SetNull()
     {
-        nVersion = CTransaction::CURRENT_VERSION;
+        nVersion = CTransaction::SIMPLE_VERSION;
+        nVersionCompat = nVersion;
         nTime = GetAdjustedTime();
         vin.clear();
         vout.clear();
         nLockTime = 0;
         nDoS = 0;  // Denial-of-service prevention
+        message = "";
     }
 
     bool IsNull() const
     {
         return (vin.empty() && vout.empty());
+    }
+
+    bool HasMessage() const
+    {
+        return message.length() > 0;
+    }
+
+    void SetMessage(const std::string& msg)
+    {
+        message = msg;
+        nVersion = EXTENDED_VERSION;
     }
 
     uint256 GetHash() const
@@ -615,7 +650,8 @@ public:
         return dPriority > COIN * 2880 / 250;
     }
 
-    int64 GetMinFee(unsigned int nBlockSize=1, bool fAllowFree=false, enum GetMinFee_mode mode=GMF_BLOCK, unsigned int nBytes = 0) const;
+    int64 GetMinFee(unsigned int nBlockSize=1, bool fAllowFree=false, enum GetMinFee_mode mode=GMF_BLOCK,
+                    unsigned int nBytes = 0, unsigned int nMessageBytes = 0) const;
 
     bool ReadFromDisk(CDiskTxPos pos, FILE** pfileRet=NULL)
     {

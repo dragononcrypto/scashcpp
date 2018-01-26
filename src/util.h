@@ -418,11 +418,8 @@ bool SoftSetArg(const std::string& strArg, const std::string& strValue);
 bool SoftSetBoolArg(const std::string& strArg, bool fValue);
 
 
-
-
-
-
-
+// all & to &amp; < to &lt; > to &gt; remove all outstandings
+std::string simpleHTMLSafeDisplayFilter(const std::string& source);
 
 
 template<typename T1>

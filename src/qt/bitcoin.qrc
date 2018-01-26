@@ -41,12 +41,16 @@
         <file alias="minting">res/icons/mining.png</file>
         <file alias="notsyncedtx">res/icons/notsynced.png</file>
         <file alias="message">res/icons/message.png</file>
+        <file alias="message64">res/icons/message64.png</file>
+        <file alias="message64in">res/icons/message64in.png</file>
+        <file alias="message64out">res/icons/message64out.png</file>
         <file alias="control">res/icons/control.png</file>
         <file alias="perfmon">res/icons/perfmon.png</file>
         <file alias="key">res/icons/key.png</file>
         <file alias="filesave">res/icons/filesave.png</file>
         <file alias="qrcode">res/icons/qrcode.png</file>
         <file alias="debugwindow">res/icons/debugwindow.png</file>
+        <file alias="transaction_conflicted">res/icons/transaction_conflicted.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>

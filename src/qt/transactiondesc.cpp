@@ -208,25 +208,39 @@ QString TransactionDesc::toHTML(CWallet *wallet, CWalletTx &wtx)
         //
         // Message
         //
+        // wtx.mapValue["message"] is not a message transmitted over blockchain, it is local note while tx creation
         if (!wtx.mapValue["message"].empty())
-             strHTML += "<br><b>" + tr("Message") + ":</b><br>" + GUIUtil::HtmlEscape(wtx.mapValue["message"], true) + "<br>";
+             strHTML += "<br><b>" + tr("Note") + ":</b><br>" + GUIUtil::HtmlEscape(wtx.mapValue["message"], true) + "<br>";
 
-		if (!wtx.mapValue["comment"].empty())
+        if (!wtx.mapValue["comment"].empty())
             strHTML += "<br><b>" + tr("Comment") + ":</b><br>" + GUIUtil::HtmlEscape(wtx.mapValue["comment"], true) + "<br>";
 
-        strHTML += "<b>" + tr("Transaction ID") + ":</b> " + wtx.GetHash().ToString().c_str() + "<br>";
-
-		
+        strHTML += "<b>" + tr("Transaction ID") + ":</b> " + wtx.GetHash().ToString().c_str();
 
         if (wtx.IsCoinBase() || wtx.IsCoinStake())
-            strHTML += "<br>" + tr("Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to \"not accepted\" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.").arg(nCoinbaseMaturity+COINBASE_MATURITY_SAFE_GAP) + "<br>";
+        {
+            strHTML += "<br>" + tr("Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to \"not accepted\" and it won't be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.").arg(nCoinbaseMaturity+COINBASE_MATURITY_SAFE_GAP);
+        }
+
+        if (wtx.HasMessage())
+        {
+            try
+            {
+                strHTML += "<h4>" + tr("Message") + "</h4>";
+                strHTML += "<font color=darkblue>" + GUIUtil::HtmlEscape(wtx.message, true) + "</font>";
+            }
+            catch (std::exception& ex)
+            {
+                printf("Error while decoding message: %s\n", ex.what());
+            }
+        }
 
         //
         // Detailed view
         //
         if (true)
         {
-            strHTML += "<hr><br>" + tr("Detailed view") + "<br><br>";
+            strHTML += "<hr><h4>" + tr("Detailed view") + "</h4>";
             BOOST_FOREACH(const CTxIn& txin, wtx.vin)
                 if(wallet->IsMine(txin))
                     strHTML += "<b>" + tr("Debit") + ":</b> " + BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, -wallet->GetDebit(txin)) + "<br>";

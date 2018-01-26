@@ -1573,32 +1573,58 @@ bool VerifyScript(const CScript& scriptSig, const CScript& scriptPubKey, const C
 {
     vector<vector<unsigned char> > stack, stackCopy;
     if (!EvalScript(stack, scriptSig, txTo, nIn, nHashType))
+    {
+        if (fDebug && fDumpAll) printf("ERROR: !EvalScript(stack, scriptSig, txTo, nIn, nHashType)\n");
         return false;
+    }
     if (fValidatePayToScriptHash)
         stackCopy = stack;
     if (!EvalScript(stack, scriptPubKey, txTo, nIn, nHashType))
+    {
+        if (fDebug && fDumpAll) printf("ERROR: !EvalScript(stack, scriptPubKey, txTo, nIn, nHashType)\n");
         return false;
+    }
     if (stack.empty())
+    {
+        if (fDebug && fDumpAll) printf("ERROR: stack.empty()\n");
         return false;
+    }
 
     if (CastToBool(stack.back()) == false)
+    {
+        if (fDebug && fDumpAll) printf("ERROR: CastToBool(stack.back()) == false\n");
         return false;
+    }
 
     // Additional validation for spend-to-script-hash transactions:
     if (fValidatePayToScriptHash && scriptPubKey.IsPayToScriptHash())
     {
         if (!scriptSig.IsPushOnly()) // scriptSig must be literals-only
+        {
+            if (fDebug && fDumpAll) printf("ERROR: !scriptSig.IsPushOnly()\n");
             return false;            // or validation fails
+        }
 
         const valtype& pubKeySerialized = stackCopy.back();
         CScript pubKey2(pubKeySerialized.begin(), pubKeySerialized.end());
         popstack(stackCopy);
 
         if (!EvalScript(stackCopy, pubKey2, txTo, nIn, nHashType))
+        {
+            if (fDebug && fDumpAll) printf("ERROR: !EvalScript(stackCopy, pubKey2, txTo, nIn, nHashType)\n");
             return false;
+        }
         if (stackCopy.empty())
+        {
+            if (fDebug && fDumpAll) printf("ERROR: stackCopy.empty()\n");
             return false;
-        return CastToBool(stackCopy.back());
+        }
+
+        if (CastToBool(stackCopy.back()) == false)
+        {
+            if (fDebug && fDumpAll) printf("ERROR: fValidatePayToScriptHash: CastToBool(stack.back()) == false\n");
+            return false;
+        }
     }
 
     return true;
@@ -1656,11 +1682,23 @@ bool VerifySignature(const CTransaction& txFrom, const CTransaction& txTo, unsig
     assert(nIn < txTo.vin.size());
     const CTxIn& txin = txTo.vin[nIn];
     if (txin.prevout.n >= txFrom.vout.size())
+    {
+        if (fDebug && fDumpAll)
+        {
+            printf("ERROR: txin.prevout.n >= txFrom.vout.size()\n");
+        }
         return false;
+    }
     const CTxOut& txout = txFrom.vout[txin.prevout.n];
 
     if (txin.prevout.hash != txFrom.GetHash())
+    {
+        if (fDebug && fDumpAll)
+        {
+            printf("txin.prevout.hash != txFrom.GetHash()\n");
+        }
         return false;
+    }
 
     return VerifyScript(txin.scriptSig, txout.scriptPubKey, txTo, nIn, fValidatePayToScriptHash, nHashType);
 }

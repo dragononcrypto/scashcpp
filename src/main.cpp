@@ -303,7 +303,7 @@ bool CTransaction::ReadFromDisk(COutPoint prevout)
 
 bool CTransaction::IsStandard() const
 {
-    if (nVersion > CTransaction::CURRENT_VERSION)
+    if (nVersion > CTransaction::EXTENDED_VERSION)
         return false;
 
     BOOST_FOREACH(const CTxIn& txin, vin)
@@ -525,7 +525,8 @@ int CalculateRequiredConfirmations(int64 amount)
 
 
 int64 CTransaction::GetMinFee(unsigned int nBlockSize, bool fAllowFree,
-                              enum GetMinFee_mode mode, unsigned int nBytes) const
+                              enum GetMinFee_mode mode, unsigned int nBytes,
+                              unsigned int messageBytes) const
 {
     // Base fee is either MIN_TX_FEE or MIN_RELAY_TX_FEE
     int64 nBaseFee = (mode == GMF_RELAY) ? MIN_RELAY_TX_FEE : MIN_TX_FEE;
@@ -541,6 +542,13 @@ int64 CTransaction::GetMinFee(unsigned int nBlockSize, bool fAllowFree,
                 nMinFee = nBaseFee;
     }
 
+    /* Message bytes calculated differently, and there is not mistake that
+     * nMinFee already included these bytes as technical ones */
+    if (messageBytes > 0)
+    {
+        nMinFee += messageBytes * SendMessageCostPerChar;
+    }
+
     // Raise the price as the block approaches full
     if (nBlockSize != 1 && nNewBlockSize >= MAX_BLOCK_SIZE_GEN/2)
     {
@@ -551,6 +559,7 @@ int64 CTransaction::GetMinFee(unsigned int nBlockSize, bool fAllowFree,
 
     if (!MoneyRange(nMinFee))
         nMinFee = MAX_MONEY;
+
     return nMinFee;
 }
 
@@ -2723,7 +2732,6 @@ void InitializeConstants()
     std::generate(x13CutoffReward.begin(), x13CutoffReward.end(), ExpDivGenerator(32 * COIN, 4));
     std::generate(mSHACutoffHeight.begin(), mSHACutoffHeight.end(), ExpMulGenerator(12000, 4));
     std::generate(mSHACutoffReward.begin(), mSHACutoffReward.end(), IncGenerator(0, COIN));
-
 }
 
 
