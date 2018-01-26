@@ -148,16 +148,6 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_connections">
-      <attribute name="title">
-       <string>Network &amp;connections</string>
-      </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
-       <property name="spacing">
-        <number>3</number>
-       </property>
-      </layout>
-     </widget>
      <widget class="QWidget" name="tab_local">
       <attribute name="title">
        <string>&amp;Local performance</string>
