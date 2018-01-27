@@ -10,6 +10,7 @@
 namespace BlockExplorer
 {
     extern bool fBlockExplorerServerEnabled;
+    extern int fBlockExplorerServerPort;
 }
 
 #endif // BLOCKEXPLORER_SERVER_H

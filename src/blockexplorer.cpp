@@ -185,18 +185,112 @@ void makeObjectKnown(const std::string& id, ObjectTypes t)
     g_ids[id] = t;
 }
 
+static const std::string Address_NoAddress = "no address";
+
+bool addAddressTx(const std::string& fileAddress,
+                  const std::string& sourceAddress, const std::string& destAddress,
+                  int64 amount,
+                  const std::string& txId, const std::string& blockId,
+                  const std::string& txDate,
+                  std::string message = "")
+{
+    if (Address_NoAddress != sourceAddress) makeObjectKnown(sourceAddress, TYPE_ADDRESS);
+    if (Address_NoAddress != destAddress) makeObjectKnown(destAddress, TYPE_ADDRESS);
+
+    makeObjectKnown(txId, TYPE_TX);
+
+    if (Address_NoAddress == fileAddress) return true;
+
+    try
+    {
+        if (message.length() > 140)
+        {
+            message = message.substr(0,137) + "...[TRIMMED]";
+        }
+        if (message.length() > 0)
+        {
+            message = "<font color=darkblue>" + message + "<font>";
+        }
+
+        boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
+        boost::filesystem::create_directory(pathBe);
+
+        std::string addressFileName = fileAddress + ".html";
+        boost::filesystem::path pathAddressFile = pathBe / addressFileName;
+
+        bool fileIsAlreadyCreated = boost::filesystem::exists(pathAddressFile);
+
+        std::ostringstream temp;
+
+        if (!fileIsAlreadyCreated)
+        {
+            temp << "<h3 align=center><a href='" + txId + ".html'>&lt;&lt;&lt</a>&nbsp;Details for address " << fileAddress << "</h3>";
+            temp << "<table><tr><th>Param</th><th>Value</th></tr>"
+                   << "<tr><td>Balance</td><td>" << "<!--dynamic:balance:"+fileAddress+"-->" << "</td></tr>"
+                   << "<tr class=\"even\"><td>Balance confirmed</td><td>" << "<!--dynamic:blockstate:"+blockId+"-->" << "</td></tr>"
+                   << "</table>";
+
+            temp << "<p><h3 align=center>Transactions:</h3>";
+            temp << "<table><tr><th>TX id</th><th>Date</th><th>From</th><th>To</th><th>Amount</th><th>State</th><th>Message</th></tr>";
+        }
+
+        std::string amountStr = std::to_string((double)amount / (double)COIN) + " SCS";
+        if (amount < 0) amountStr = "<font color=darkred>" + amountStr + "</font>";
+        if (amount > 0) amountStr = "<font color=darkgreen>" + amountStr + "</font>";
+
+        temp << "<tr>"
+                << "<td>" << txId << " </td>"
+                << "<td>" << txDate << " </td>"
+                << "<td>" << sourceAddress << "</td>"
+                << "<td>" << destAddress << "</td>"
+                << "<td>" << (amount ? amountStr : "-")  << "</td>"
+                << "<td>" << "<!--dynamic:blockstate:"+blockId+"-->" << "</td>"
+                << "<td>" << message << "</td>"
+                << "<tr>\n";
+
+        std::string addressContent = temp.str();
+
+        if (!fileIsAlreadyCreated)
+        {
+            std::fstream fileOut(pathAddressFile.c_str(), std::ios::out);
+            fileOut << getHead("Address " + fileAddress);
+
+            fileOut << fixupKnownObjects(addressContent);
+
+            fileOut.close();
+        }
+        else
+        {
+            std::fstream fileOut(pathAddressFile.c_str(), std::ofstream::out | std::ofstream::app);
+
+            fileOut << fixupKnownObjects(addressContent);
+
+            fileOut.close();
+        }
+    }
+    catch (std::exception& ex)
+    {
+        printf("Write address info failed: %s\n", ex.what());
+        return false;
+    }
+
+    return true;
+}
+
 void printTxToStream(CTransaction& t, std::ostringstream& stream,
                      int height,
                      const std::string& blockId,
                      FormattingType formattingType)
 {
+    std::string txDate = unixTimeToString(t.nTime);
+
     stream << "<h3 align=center><a href='" + blockId + ".html'>&lt;&lt;&lt</a>&nbsp;Details for transaction " << t.GetHash().ToString() << "</h3>";
     stream << "<table><tr><th>Param</th><th>Value</th></tr>"
            << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:"+blockId+"-->" << "</td></tr>"
            << "<tr class=\"even\"><td>Included in block</td><td>" << blockId << "</td></tr>"
            << "<tr><td>Included in block at height</td><td>" << height << "</td></tr>"
            << "<tr class=\"even\"><td>Version</td><td>" << t.nVersion << "</td></tr>"
-           << "<tr><td>Time</td><td>" << unixTimeToString(t.nTime) << "</td></tr>"
+           << "<tr><td>Time</td><td>" << txDate << "</td></tr>"
            << "<tr class=\"even\"><td>LockTime</td><td>" << t.nLockTime << "</td></tr>"
            << "<tr><td>DoS flag</td><td>" << t.nDoS << "</td></tr>"
            << "<tr class=\"even\"><td>Inputs</td><td>" << t.vin.size() << "</td></tr>"
@@ -212,13 +306,20 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
 
            << "</table>";
 
+    std::string nonZeroInputAddr = "";
+    std::vector<std::string> nonZeroOutputAddrs;
+    std::vector<int64> nonZeroAmountOuts;
+    bool hasPoSOutputs = false;
+    std::string messageSafe = "";
+
     if (t.HasMessage())
     {
         stream << "<br><p style=\"margin-left: auto; margin-right: auto; width: 780px\">";
         stream << "<h3 align=center>Message:</h3><table><tr><td><font color=darkblue>";
         try
         {
-            stream << simpleHTMLSafeDisplayFilter(t.message);
+            messageSafe = simpleHTMLSafeDisplayFilter(t.message);
+            stream << messageSafe;
         }
         catch (std::exception &ex)
         {
@@ -229,6 +330,7 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
     }
 
     CTxDB txdb("r");
+
 
     stream << "<p><h3 align=center>Inputs:</h3>";
     stream << "<table><tr><th>Amount</th><th>prevOut</th><th>scriptSig</th><th>nSequence</th><th>Source address</th></tr>";
@@ -249,8 +351,13 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
             }
         }
 
+        if (ok && (amount > 0))
+        {
+            nonZeroInputAddr = CBitcoinAddress(address).ToString();
+        }
+
         stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
-                << "<td>" << (amount ? (std::to_string(t.vout[i].nValue / (double)COIN) + " SCS") : "") << " </td>"
+                << "<td>" << (amount ? (std::to_string((double)t.vout[i].nValue / (double)COIN) + " SCS") : "") << " </td>"
                 << "<td>" << t.vin[i].prevout.ToString() << "</td>"
                 << "<td>" << t.vin[i].scriptSig.ToString(true) << "</td>"
                 << "<td>" << t.vin[i].nSequence << "</td>"
@@ -265,6 +372,18 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
     {
         CTxDestination address;
         bool ok = ExtractDestination(t.vout[i].scriptPubKey, address);
+
+        if (t.vout[i].nValue && ok)
+        {
+            nonZeroAmountOuts.push_back(t.vout[i].nValue);
+            nonZeroOutputAddrs.push_back(CBitcoinAddress(address).ToString());
+        }
+
+        if (t.vout[i].nValue == 0)
+        {
+            hasPoSOutputs = true;
+        }
+
         stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
                 << "<td>" << (t.vout[i].nValue / (double)COIN) << " SCS</td>"
                 << "<td>" << t.vout[i].scriptPubKey.ToString(true) << "</td>"
@@ -272,6 +391,27 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
                 << "<tr>";
     }
     stream << "</table>";
+
+    if (nonZeroInputAddr.empty()) nonZeroInputAddr = Address_NoAddress;
+
+    if (hasPoSOutputs)
+    {
+        // This is PoS Transaction
+        // TODO: decide to show or not
+    }
+    else
+    {
+        for (size_t u = 0; u < nonZeroAmountOuts.size() && u < nonZeroOutputAddrs.size(); u++)
+        {
+            addAddressTx(nonZeroOutputAddrs[u],
+                         nonZeroInputAddr, nonZeroOutputAddrs[u], nonZeroAmountOuts[u],
+                         t.GetHash().ToString(), blockId, txDate, messageSafe);
+
+            addAddressTx(nonZeroInputAddr,
+                         nonZeroInputAddr, nonZeroOutputAddrs[u], -nonZeroAmountOuts[u],
+                         t.GetHash().ToString(), blockId, txDate, messageSafe);
+        }
+    }
 }
 
 void printBlockToStream(CBlock& b, std::ostringstream& stream, int height, FormattingType formattingType)
@@ -375,9 +515,9 @@ bool writeBlockTransactions(int height, CBlock& block)
 
             boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
             std::string txFileName = txId + ".html";
-            boost::filesystem::path pathStyleFile = pathBe / txFileName;
+            boost::filesystem::path pathTxFile = pathBe / txFileName;
 
-            std::fstream fileBlock(pathStyleFile.c_str(), std::ios::out);
+            std::fstream fileBlock(pathTxFile.c_str(), std::ios::out);
             fileBlock << getHead("Transaction " + txId);
 
             fileBlock << fixupKnownObjects(txContent);
@@ -419,9 +559,9 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
         printBlockToStream(block, temp, height, FORMAT_TYPE_NICE_HTML);
         std::string blockContent = temp.str();
 
-        boost::filesystem::path pathStyleFile = pathBe / blockFileName;
+        boost::filesystem::path pathBlockFile = pathBe / blockFileName;
 
-        std::fstream fileBlock(pathStyleFile.c_str(), std::ios::out);
+        std::fstream fileBlock(pathBlockFile.c_str(), std::ios::out);
         fileBlock << getHead("Block " + blockId);
 
         fileBlock << fixupKnownObjects(blockContent);
@@ -486,9 +626,9 @@ bool  BlocksContainer::UpdateIndex(bool force)
 
         std::string blockFileName = "index.html";
 
-        boost::filesystem::path pathStyleFile = pathBe / blockFileName;
+        boost::filesystem::path pathIndexFile = pathBe / blockFileName;
 
-        std::fstream fileIndex(pathStyleFile.c_str(), std::ios::out);
+        std::fstream fileIndex(pathIndexFile.c_str(), std::ios::out);
         fileIndex << getHead();
 
         fileIndex << "<br>"; // TODO: block generation graph

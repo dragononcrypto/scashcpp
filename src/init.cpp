@@ -510,6 +510,7 @@ bool AppInit2()
 
     BlockExplorer::fBlockExplorerEnabled = GetBoolArg("-blockexplorer");
     BlockExplorer::fBlockExplorerServerEnabled = GetBoolArg("-blockexplorerserver");
+    BlockExplorer::fBlockExplorerServerPort = GetBoolArg("-blockexplorerserverport");
 
     if (BlockExplorer::fBlockExplorerEnabled)
     {
