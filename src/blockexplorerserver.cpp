@@ -10,5 +10,6 @@ namespace BlockExplorer
 {
 
 bool fBlockExplorerServerEnabled =false;
+int fBlockExplorerServerPort = 5081;
 
 }
