@@ -13,7 +13,7 @@ to trace transactions between Scash wallets.
 -----------------------------
 Specifications:
 
-Total coins: 476,918 SCS
+Total coins: 476,918 SCS (PoW) + annual 8% PoS intereset
 
 Algorithm: x13 + mSHA3
 
