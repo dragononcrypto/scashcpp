@@ -113,7 +113,8 @@ std::string fixupKnownObjects(const std::string& src)
         {
             if ((tokenized[u].length() == 64 || tokenized[u].length() == 34)
                     && g_ids.find(tokenized[u]) != g_ids.end()
-                    && ((u+1 >= tokenized.size()) || tokenized[u+1] != "."))
+                    && ((u+1 >= tokenized.size()) ||
+                            (tokenized[u+1] != ".")))
             {
                 result += "<a href=\"" + tokenized[u] + ".html\">"
                         + tokenized[u] + "</a>";
@@ -135,9 +136,9 @@ std::string unixTimeToString(unsigned int ts)
 {
     struct tm epoch_time;
     long int tsLI = ts;
-    memcpy(&epoch_time, localtime(&tsLI), sizeof (struct tm));
+    memcpy(&epoch_time, gmtime(&tsLI), sizeof (struct tm));
     char res[64];
-    strftime(res, sizeof(res), "%Y-%m-%d %H:%M:%S", &epoch_time);
+    strftime(res, sizeof(res), "%Y-%m-%d %H:%M:%S UTC", &epoch_time);
     return res;
 }
 
@@ -149,6 +150,7 @@ std::string unixTimeToAgeFromNow(unsigned int ts, unsigned int from)
     if (diff < 60*60) return std::to_string(diff/60) + "m";
     return std::to_string(diff/60/60) + "h";
 }
+
 
 static const std::string searchScript = + "<script>function nav() { window.location.href=\"search?q=\" + window.document.getElementById(\"search\").value; return false; }</script>";
 static const std::string searchForm = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
@@ -224,10 +226,10 @@ bool addAddressTx(const std::string& fileAddress,
 
         if (!fileIsAlreadyCreated)
         {
-            temp << "<h3 align=center><a href='" + txId + ".html'>&lt;&lt;&lt</a>&nbsp;Details for address " << fileAddress << "</h3>";
+            temp << "<h3 align=center><a href='" + txId + ".html'>&lt;&lt;&lt;</a>&nbsp;Details for address " << fileAddress << "</h3>";
             temp << "<table><tr><th>Param</th><th>Value</th></tr>"
-                   << "<tr><td>Balance</td><td>" << "<!--dynamic:balance:"+fileAddress+"-->" << "</td></tr>"
-                   << "<tr class=\"even\"><td>Balance confirmed</td><td>" << "<!--dynamic:blockstate:"+blockId+"-->" << "</td></tr>"
+                   << "<tr><td>Balance</td><td>" << "<!--dynamic:balance:0x"+fileAddress+"-->" << "</td></tr>"
+                   << "<tr class=\"even\"><td>Balance confirmed</td><td>" << "<!--dynamic:blockstate:0x"+blockId+"-->" << "</td></tr>"
                    << "</table>";
 
             temp << "<p><h3 align=center>Transactions:</h3>";
@@ -238,13 +240,17 @@ bool addAddressTx(const std::string& fileAddress,
         if (amount < 0) amountStr = "<font color=darkred>" + amountStr + "</font>";
         if (amount > 0) amountStr = "<font color=darkgreen>" + amountStr + "</font>";
 
+        std::string amountTechnical = "";
+        if (amount < 0) amountTechnical = "<!--amount:minus:" + std::to_string(amount) + "-->";
+        if (amount > 0) amountTechnical = "<!--amount:plus:" + std::to_string(amount) + "-->";
+
         temp << "<tr>"
                 << "<td>" << txId << " </td>"
                 << "<td>" << txDate << " </td>"
                 << "<td>" << sourceAddress << "</td>"
                 << "<td>" << destAddress << "</td>"
-                << "<td>" << (amount ? amountStr : "-")  << "</td>"
-                << "<td>" << "<!--dynamic:blockstate:"+blockId+"-->" << "</td>"
+                << "<td>" << (amount ? amountStr : "-") << " " << amountTechnical << "</td>"
+                << "<td>" << "<!--dynamic:blockstate:0x"+blockId+"-->" << "</td>"
                 << "<td>" << message << "</td>"
                 << "<tr>\n";
 
@@ -284,9 +290,9 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
 {
     std::string txDate = unixTimeToString(t.nTime);
 
-    stream << "<h3 align=center><a href='" + blockId + ".html'>&lt;&lt;&lt</a>&nbsp;Details for transaction " << t.GetHash().ToString() << "</h3>";
+    stream << "<h3 align=center><a href='" + blockId + ".html'>&lt;&lt;&lt;</a>&nbsp;Details for transaction " << t.GetHash().ToString() << "</h3>";
     stream << "<table><tr><th>Param</th><th>Value</th></tr>"
-           << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:"+blockId+"-->" << "</td></tr>"
+           << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:0x"+blockId+"-->" << "</td></tr>"
            << "<tr class=\"even\"><td>Included in block</td><td>" << blockId << "</td></tr>"
            << "<tr><td>Included in block at height</td><td>" << height << "</td></tr>"
            << "<tr class=\"even\"><td>Version</td><td>" << t.nVersion << "</td></tr>"
@@ -432,9 +438,9 @@ void printBlockToStream(CBlock& b, std::ostringstream& stream, int height, Forma
 
     if (formattingType == FORMAT_TYPE_NICE_HTML)
     {
-        stream << "<h3 align=center><a href='index.html'>&lt;&lt;&lt</a>&nbsp;Details for block " << b.GetHash().ToString() << "</h3>";
+        stream << "<h3 align=center><a href='index.html'>&lt;&lt;&lt;</a>&nbsp;Details for block " << b.GetHash().ToString() << "</h3>";
         stream << "<table><tr><th>Param</th><th>Value</th></tr>"
-              << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:"+b.GetHash().ToString()+"-->" << "</td></tr>"
+              << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:0x"+b.GetHash().ToString()+"-->" << "</td></tr>"
                << "<tr><td>Height</td><td>" << height << "</td></tr>"
                << "<tr class=\"even\"><td>Version</td><td>" << b.nVersion << "</td></tr>"
                << "<tr><td>Prev block hash</td><td>" << b.hashPrevBlock.ToString() << "</td></tr>"
