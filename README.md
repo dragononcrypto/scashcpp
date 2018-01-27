@@ -13,22 +13,24 @@ to trace transactions between Scash wallets.
 -----------------------------
 Specifications:
 
-Total coins: 476 918 SCS
+Total coins: 476,918 SCS
 
-PoW timespan: 300 000 blocks
-
-Algorithm: x13
-
-Premine 5%, for rewards
+Algorithm: x13 + mSHA3
 
 Initial PoW block reward: 8 SCS
 
-PoS annual rate 8%
+PoS annual rate: 8%
 
-PoS minimum stake age: 1 hours, 4 hours
+PoS minimum stake age: 1 to 4 hours
 
-Block time: 40 seconds
+Block time: 40 to 90 seconds
 
-Port 35334
+Block size: up to 2Mb
 
-RPCport 35333
+Required TX confirmations: 3 to 7 depending on TX amount
+
+Mined blocks confirmations: 60
+
+Default connection port: 35334
+
+Default RPC port: 35333
