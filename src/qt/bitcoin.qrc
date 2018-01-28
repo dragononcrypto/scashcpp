@@ -51,6 +51,7 @@
         <file alias="qrcode">res/icons/qrcode.png</file>
         <file alias="debugwindow">res/icons/debugwindow.png</file>
         <file alias="transaction_conflicted">res/icons/transaction_conflicted.png</file>
+        <file alias="Scash64png">res/icons/Scash-64.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>
