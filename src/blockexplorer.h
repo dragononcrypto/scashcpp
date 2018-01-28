@@ -23,10 +23,12 @@ namespace BlockExplorer
 
         static bool UpdateIndex(bool force = false);
 
+        static std::string GetFileDataByURL(const std::string& url);
+
     private:
         static const int MaxLatestBlocks = 30;
 
-        static const int AutoUpdateTimeMs = 10 * 1000;
+        static const int AutoUpdateTimeMs = 3 * 1000;
     };
 }
 

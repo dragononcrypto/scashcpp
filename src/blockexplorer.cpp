@@ -24,6 +24,7 @@ static CCriticalSection g_cs_blocks;
 static unsigned int g_lastUpdateTime = 0;
 
 static CCriticalSection g_cs_ids;
+static CCriticalSection g_cs_be_fatlock;
 
 enum ObjectTypes {
     TYPE_NONE,
@@ -45,6 +46,35 @@ struct BlockDataInfo
 
 static std::vector<BlockDataInfo> g_latestBlocksAdded;
 
+std::string safeEncodeFileNameWithoutExtension(const std::string& name)
+{
+    std::string result = "";
+
+    for (size_t u = 0; u < name.length(); u++)
+    {
+        if (isalnum(name[u]))
+            result += name[u];
+        else
+            result += "_";
+    }
+
+    return result;
+}
+
+
+std::string filterURLRequest(const std::string& name)
+{
+    std::string result = "";
+
+    for (size_t u = 0; u < name.length(); u++)
+    {
+        if (isalnum(name[u]) || name[u] == '?' || name[u] == '.' || name[u] == '/')
+            result += name[u];
+    }
+
+    return result;
+}
+
 void reloadKnownObjects()
 {
     LOCK(g_cs_ids);
@@ -55,7 +85,10 @@ void reloadKnownObjects()
     for (boost::filesystem::directory_iterator i(pathBe); i != end; ++i)
     {
         const boost::filesystem::path cp = (*i);
-        printf("Enumerated file %s \n", cp.stem().string().c_str());
+        if (fDebug && fDumpAll)
+        {
+            printf("Enumerated file %s \n", cp.stem().string().c_str());
+        }
         g_ids[cp.stem().string()] = TYPE_ANY;
     }
 }
@@ -157,13 +190,14 @@ static const std::string searchForm = "<form id='searchForm' onSubmit='return na
      " <input type='text' id='search' placeholder='Search address, block, transaction, tag...' value='' width=\"588px\" required> "
      " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
 
-std::string getHead(std::string titleAdd = "")
+std::string getHead(std::string titleAdd = "", bool addRefreshTag = false)
 {
     std::string result =  "<html><head><title>Scash Block Explorer";
     if (titleAdd != "") result += " - " + titleAdd;
     result += "</title>"
          + Style::getStyleCssLink()
          + searchScript
+         + (addRefreshTag ? "<meta http-equiv=\"refresh\" content=\"10\" />" : "")
          + "</head><body>"
          + searchForm;
     return result;
@@ -217,7 +251,7 @@ bool addAddressTx(const std::string& fileAddress,
         boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
         boost::filesystem::create_directory(pathBe);
 
-        std::string addressFileName = fileAddress + ".html";
+        std::string addressFileName = safeEncodeFileNameWithoutExtension(fileAddress) + ".html";
         boost::filesystem::path pathAddressFile = pathBe / addressFileName;
 
         bool fileIsAlreadyCreated = boost::filesystem::exists(pathAddressFile);
@@ -229,7 +263,7 @@ bool addAddressTx(const std::string& fileAddress,
             temp << "<h3 align=center><a href='" + txId + ".html'>&lt;&lt;&lt;</a>&nbsp;Details for address " << fileAddress << "</h3>";
             temp << "<table><tr><th>Param</th><th>Value</th></tr>"
                    << "<tr><td>Balance</td><td>" << "<!--dynamic:balance:0x"+fileAddress+"-->" << "</td></tr>"
-                   << "<tr class=\"even\"><td>Balance confirmed</td><td>" << "<!--dynamic:blockstate:0x"+blockId+"-->" << "</td></tr>"
+                   << "<tr class=\"even\"><td>Balance confirmed</td><td>" << "<!--dynamic:balanceconfirmed:0x"+fileAddress+"-->" << "</td></tr>"
                    << "</table>";
 
             temp << "<p><h3 align=center>Transactions:</h3>";
@@ -520,7 +554,7 @@ bool writeBlockTransactions(int height, CBlock& block)
             std::string txContent = temp.str();
 
             boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
-            std::string txFileName = txId + ".html";
+            std::string txFileName = safeEncodeFileNameWithoutExtension(txId) + ".html";
             boost::filesystem::path pathTxFile = pathBe / txFileName;
 
             std::fstream fileBlock(pathTxFile.c_str(), std::ios::out);
@@ -543,6 +577,8 @@ bool writeBlockTransactions(int height, CBlock& block)
 
 bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
 {
+    LOCK(g_cs_be_fatlock);
+
     std::string blockId = block.GetHash().ToString();
 
     makeObjectKnown(blockId, TYPE_BLOCK);
@@ -559,7 +595,7 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
 
         writeBlockTransactions(height, block);
 
-        std::string blockFileName = blockId + ".html";
+        std::string blockFileName = safeEncodeFileNameWithoutExtension(blockId) + ".html";
 
         std::ostringstream temp;
         printBlockToStream(block, temp, height, FORMAT_TYPE_NICE_HTML);
@@ -625,6 +661,8 @@ bool  BlocksContainer::UpdateIndex(bool force)
 
     try
     {
+        LOCK(g_cs_be_fatlock);
+
         unsigned long nowTime = getNowTime();
 
         boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
@@ -635,7 +673,7 @@ bool  BlocksContainer::UpdateIndex(bool force)
         boost::filesystem::path pathIndexFile = pathBe / blockFileName;
 
         std::fstream fileIndex(pathIndexFile.c_str(), std::ios::out);
-        fileIndex << getHead();
+        fileIndex << getHead("", true);
 
         fileIndex << "<br>"; // TODO: block generation graph
                 // if (fChartsEnabled || BlockExplorer::fBlockExplorerEnabled) Charts::BlocksAdded().AddData(1);
@@ -676,4 +714,109 @@ bool  BlocksContainer::UpdateIndex(bool force)
     return true;
 }
 
+std::string fixupDynamicStatuses(const std::string& data)
+{
+    // TODO
+    return data;
 }
+
+std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
+{
+    try
+    {
+        LOCK(g_cs_be_fatlock);
+
+        std::string reqSafe = urlUnsafe;
+        std::string reqPrint;
+
+        // eat all data before /
+        size_t pos = reqSafe.find('/');
+        if (pos != std::string::npos) reqSafe = reqSafe.substr(pos+1);
+
+        bool searchRequest = false;
+        const std::string searchPrefix = "search?q=";
+        if (reqSafe.length() > searchPrefix.length()
+                && reqSafe.substr(0, searchPrefix.length()) == searchPrefix)
+        {
+            // this is search request
+            reqSafe = reqSafe.substr(searchPrefix.length());
+            searchRequest = true;
+            reqPrint = reqSafe;
+        }
+
+        reqSafe = filterURLRequest(reqSafe);
+
+        bool bullshit = false;
+
+        if (reqSafe == "mystyle.css")
+        {
+            return Style::getStyleCssFileContent();
+        }
+
+        if (!searchRequest)
+        {
+            pos = reqSafe.find('.');
+            if (pos > 0 && pos != std::string::npos)
+            {
+                reqSafe = reqSafe.substr(0, pos);
+                reqPrint = reqSafe;
+            }
+            else
+            {
+                bullshit = true;
+                printf("Some bullshit like request: %s\n", urlUnsafe.c_str());
+            }
+        }
+
+        if (reqSafe.length() == 0)
+        {
+            bullshit = false;
+            reqSafe = "index";
+        }
+
+        if (!bullshit)
+        {
+            // try to load and parse file with base name of reqSafe
+            reqSafe = safeEncodeFileNameWithoutExtension(reqSafe);
+            reqSafe += ".html";
+
+            try
+            {
+                boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
+                boost::filesystem::create_directory(pathBe);
+
+                boost::filesystem::path pathTarget = pathBe / reqSafe;
+
+                std::ifstream fileStream(pathTarget.string());
+                std::string strData;
+
+                fileStream.seekg(0, std::ios::end);
+                strData.reserve(fileStream.tellg());
+                fileStream.seekg(0, std::ios::beg);
+
+                strData.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+
+                return fixupDynamicStatuses(strData);
+            }
+            catch (std::exception& ex)
+            {
+                printf("Requested file [%s] not found or some error appears: %s\n", reqSafe.c_str(), ex.what());
+            }
+        }
+
+        // return generic not found page
+        std::string result = getHead("Not found: " + reqSafe)
+                + "<br><h3>Sorry, the requested information is not found: " + reqPrint + "</h3><br>"
+                + "Return to the <a href='index.html'>index</a><br>"
+                + getTail();
+        return result;
+    }
+    catch (std::exception& ex)
+    {
+        printf("Request processing error: %s\n", ex.what());
+        return "500 ERROR";
+    }
+}
+
+}
+

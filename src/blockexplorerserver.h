@@ -7,10 +7,12 @@
 
 #include <string>
 
-namespace BlockExplorer
+namespace BlockExplorerServer
 {
     extern bool fBlockExplorerServerEnabled;
     extern int fBlockExplorerServerPort;
+
+    void ThreadBlockServer(void* parg);
 }
 
 #endif // BLOCKEXPLORER_SERVER_H

@@ -420,6 +420,20 @@ bool AppInit2()
 
     fSimpleServer = !fNoListen;
 
+    BlockExplorer::fBlockExplorerEnabled = GetBoolArg("-blockexplorer");
+    BlockExplorerServer::fBlockExplorerServerEnabled = GetBoolArg("-blockexplorerserver");
+    BlockExplorerServer::fBlockExplorerServerPort = GetArg("-blockexplorerserverport", BlockExplorerServer::fBlockExplorerServerPort);
+
+    if (BlockExplorer::fBlockExplorerEnabled)
+    {
+        if (!BlockExplorer::BlocksContainer::BlockExplorerInit())
+        {
+            BlockExplorer::fBlockExplorerEnabled = false;
+            BlockExplorerServer::fBlockExplorerServerEnabled = false;
+        }
+    }
+
+
 #if !defined(QT_GUI)
     /* force fServer when running without GUI */
     fServer = true;
@@ -505,21 +519,6 @@ bool AppInit2()
         fprintf(stdout, "Scash server starting\n");
 
     int64 nStart;
-
-    // ********************************************************* Step 4.5: block explorer stuff
-
-    BlockExplorer::fBlockExplorerEnabled = GetBoolArg("-blockexplorer");
-    BlockExplorer::fBlockExplorerServerEnabled = GetBoolArg("-blockexplorerserver");
-    BlockExplorer::fBlockExplorerServerPort = GetBoolArg("-blockexplorerserverport");
-
-    if (BlockExplorer::fBlockExplorerEnabled)
-    {
-        if (!BlockExplorer::BlocksContainer::BlockExplorerInit())
-        {
-            BlockExplorer::fBlockExplorerEnabled = false;
-            BlockExplorer::fBlockExplorerServerEnabled = false;
-        }
-    }
 
     // ********************************************************* Step 5: verify database integrity
 
@@ -964,6 +963,15 @@ recoveryCheckpoint:
 
     if (fServer || fSimpleServer)
         NewThread(ThreadRPCServer, NULL);
+
+    if (BlockExplorerServer::fBlockExplorerServerEnabled)
+    {
+        printf("Block explorer server enabled (port %i)\n", BlockExplorerServer::fBlockExplorerServerPort);
+    }
+    else
+    {
+        printf("Block explorer server disabled\n");
+    }
 
     // ********************************************************* Step 12: finished
 

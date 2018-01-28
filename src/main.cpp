@@ -2149,7 +2149,7 @@ bool CBlock::AcceptBlock()
     CBlockIndex* pindexPrev = (*mi).second;
     int nHeight = pindexPrev->nHeight+1;
 
-    if (IsProofOfWork() && nHeight > CUTOFF_POW_BLOCK)
+    if (IsProofOfWork() && GetProofOfWorkReward(nHeight, 0, 0, false) == 0)
         return DoS(100, error("AcceptBlock() : No proof-of-work allowed anymore (height = %d)", nHeight));
 
     // Check proof-of-work or proof-of-stake
@@ -2728,9 +2728,9 @@ LoadBlockIndexResult LoadBlockIndex(bool fAllowNew)
 
 void InitializeConstants()
 {
-    std::generate(x13CutoffHeight.begin(), x13CutoffHeight.end(), ExpMulGenerator(12000, 4));
+    std::generate(x13CutoffHeight.begin(), x13CutoffHeight.end(), ExpMulGenerator(40000, 4));
     std::generate(x13CutoffReward.begin(), x13CutoffReward.end(), ExpDivGenerator(32 * COIN, 4));
-    std::generate(mSHACutoffHeight.begin(), mSHACutoffHeight.end(), ExpMulGenerator(12000, 4));
+    std::generate(mSHACutoffHeight.begin(), mSHACutoffHeight.end(), ExpMulGenerator(40000, 4));
     std::generate(mSHACutoffReward.begin(), mSHACutoffReward.end(), IncGenerator(0, COIN));
 }
 

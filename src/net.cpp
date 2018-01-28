@@ -11,6 +11,7 @@
 #include "addrman.h"
 #include "ui_interface.h"
 #include "chartdata.h"
+#include "blockexplorerserver.h"
 
 #ifdef WIN32
 #include <string.h>
@@ -1168,9 +1169,9 @@ void MapPort()
 // The first name is used as information source for addrman.
 // The second name should resolve to a list of seed addresses.
 static const char *strDNSSeed[][2] = {
-//    {"node001.scash.ml", "node001.scash.ml"},
-//    {"node002.scash.ml", "node002.scash.ml"},
-//    {"node003.scash.ml", "node003.scash.ml"},
+    {"node001.scash.ml", "node001.scash.ml"},
+    {"node002.scash.ml", "node002.scash.ml"},
+    {"node003.scash.ml", "node003.scash.ml"},
 };
 
 void ThreadDNSAddressSeed(void* parg)
@@ -1895,6 +1896,14 @@ void StartNode(void* parg)
     // Dump network addresses
     if (!NewThread(ThreadDumpAddress, NULL))
         printf("Error; NewThread(ThreadDumpAddress) failed\n");
+
+    // Block explorer server
+    if (BlockExplorerServer::fBlockExplorerServerEnabled
+            && BlockExplorerServer::fBlockExplorerServerPort)
+    {
+        printf("Starting block explorer server thread");
+        NewThread(BlockExplorerServer::ThreadBlockServer, NULL);
+    }
 
     if(fStaking)
     {
