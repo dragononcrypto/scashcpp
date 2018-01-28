@@ -58,6 +58,8 @@ inline bool MoneyRange(int64 nValue) { return (nValue >= 0 && nValue <= MAX_MONE
 // Threshold for nLockTime: below this value it is interpreted as block number, otherwise as UNIX timestamp.
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
 
+static const int COMMIT_EVERY_N_BLOCKS = 500; // flush db file on every Nth block
+
 #ifdef USE_UPNP
 static const int fHaveUPnP = true;
 #else
@@ -483,7 +485,7 @@ public:
         READWRITE(vout);
         READWRITE(nLockTime);
 
-        if (nVersion >= 2)
+        if (nVersion >= EXTENDED_VERSION)
         {
             if (!(nType & SER_GETHASH))
             {
@@ -897,7 +899,8 @@ class CBlock
 {
 public:
     // header
-    static const int CURRENT_VERSION=4;
+    static const int SIMPLE_VERSION = 4;
+    static const int EXTENDED_VERSION = 5;
     int nVersion;
     uint256 hashPrevBlock;
     uint256 hashMerkleRoot;
@@ -917,6 +920,11 @@ public:
     // Denial-of-service detection:
     mutable int nDoS;
     bool DoS(int nDoSIn, bool fIn) const { nDoS += nDoSIn; return fIn; }
+
+    // Extended version
+    std::string msha3;
+    std::string message;
+    unsigned int nBitsMSHA;
 
     CBlock()
     {
@@ -944,11 +952,30 @@ public:
             const_cast<CBlock*>(this)->vtx.clear();
             const_cast<CBlock*>(this)->vchBlockSig.clear();
         }
+
+        if (nVersion >= EXTENDED_VERSION)
+        {
+            if (!(nType & (SER_GETHASH|SER_BLOCKHEADERONLY)))
+            {
+                READWRITE(nBitsMSHA);
+                READWRITE(msha3);
+                READWRITE(message);
+            }
+        }
+        else if (fRead)
+        {
+        }
     )
+
+    void SetMessage(const std::string& msg)
+    {
+        message = msg;
+        nVersion = EXTENDED_VERSION;
+    }
 
     void SetNull()
     {
-        nVersion = CBlock::CURRENT_VERSION;
+        nVersion = CBlock::SIMPLE_VERSION;
         hashPrevBlock = 0;
         hashMerkleRoot = 0;
         nTime = 0;
@@ -958,6 +985,9 @@ public:
         vchBlockSig.clear();
         vMerkleTree.clear();
         nDoS = 0;
+        nBitsMSHA = 0;
+        msha3 = "";
+        message = "";
     }
 
     bool IsNull() const
@@ -1086,7 +1116,7 @@ public:
 
         // Flush stdio buffers and commit to disk before returning
         fflush(fileout);
-        if (!IsInitialBlockDownload() || (nBestHeight+1) % 500 == 0)
+        if (!IsInitialBlockDownload() || (nBestHeight+1) % COMMIT_EVERY_N_BLOCKS == 0)
             FileCommit(fileout);
 
         if (fChartsEnabled) Charts::DatabaseAvgTime().AddData(getTicksCountToMeasure() - startTime);
