@@ -720,6 +720,12 @@ std::string fixupDynamicStatuses(const std::string& data)
     return data;
 }
 
+// we don't wanna this thing will be DoSed right after start, so here's small hack to cutoff suspicious stuff
+const int largeRequestCutoff = 100; // ms
+
+// should be operated under g_cs_be_fatlock
+std::map<std::string, int> largeRequests;
+
 std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
 {
     try
@@ -746,7 +752,7 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
 
         reqSafe = filterURLRequest(reqSafe);
 
-        bool bullshit = false;
+        bool malformedRequest = false;
 
         if (reqSafe == "mystyle.css")
         {
@@ -763,18 +769,21 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
             }
             else
             {
-                bullshit = true;
-                printf("Some bullshit like request: %s\n", urlUnsafe.c_str());
+                malformedRequest = true;
+                if (fDebug)
+                {
+                    printf("Some malformed request got: %s\n", urlUnsafe.c_str());
+                }
             }
         }
 
         if (reqSafe.length() == 0)
         {
-            bullshit = false;
+            malformedRequest = false;
             reqSafe = "index";
         }
 
-        if (!bullshit)
+        if (!malformedRequest)
         {
             // try to load and parse file with base name of reqSafe
             reqSafe = safeEncodeFileNameWithoutExtension(reqSafe);
@@ -782,6 +791,8 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
 
             try
             {
+                unsigned int startTime = getTicksCountToMeasure();
+
                 boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
                 boost::filesystem::create_directory(pathBe);
 
@@ -796,7 +807,25 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
 
                 strData.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
 
-                return fixupDynamicStatuses(strData);
+                std::string resultData;
+
+                bool foundInLargeRequests = largeRequests.find(reqSafe) != largeRequests.end();
+                if (foundInLargeRequests && largeRequest[reqSafe] > largeRequestCutoff)
+                {
+                     resultData = strData;
+                }
+                else
+                {
+                     resultData = fixupDynamicStatuses(strData);
+                }
+
+                unsigned int elapsedTime = getTicksCountToMeasure();
+                if (elapsedTime > largeRequestCutoff || foundInLargeRequests)
+                {
+                    largeRequests[reqSafe] = elapsedTime;
+                }
+
+                return resultData;
             }
             catch (std::exception& ex)
             {
