@@ -86,6 +86,7 @@ CMedianFilter<int64> vTimeOffsets(200,0);
 bool fReopenDebugLog = false;
 bool fWalletLoadWarn = false;
 bool fWalletLoadErr = false;
+int64 fInOutBytes = 0;
 
 // Init OpenSSL library multithreading support
 static CCriticalSection** ppmutexOpenSSL;

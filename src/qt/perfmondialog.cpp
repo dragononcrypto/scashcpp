@@ -32,6 +32,8 @@ PerfMonDialog::PerfMonDialog(QWidget *parent) :
 
     timer = new QTimer(this);
 
+    setFixedSize(width(), height());
+
     // setup signal and slot
     connect(timer, SIGNAL(timeout()), this, SLOT(updateOnTimer()));
 
@@ -210,6 +212,9 @@ void PerfMonDialog::updateNow()
     prepareAndDrawChartData(imgOutgoingTraffic, *(ui->labelOutgoingTraffic),
                             Charts::NetworkOutBytes(), 1024, "Kb/s");
 
+    prepareAndDrawChartData(imgTotalTraffic, *(ui->labelTotalTraffic),
+                            Charts::NetworkTotalTraffic(), 1024, "Mb"); // already in kilobytes, so divide only by 1024
+
     prepareAndDrawChartData(imgInConnections, *(ui->labelIncomingConnections),
                             Charts::NetworkInConnections(), 1, "nodes");
     prepareAndDrawChartData(imgOutConnections, *(ui->labelOutgoingConnections),
@@ -240,6 +245,12 @@ void PerfMonDialog::updateNow()
     Charts::DatabaseQueries().AddData(0);
     Charts::BlocksAdded().AddData(0);
     Charts::BlocksRejected().AddData(0);
+
+    /* fix issue with not moving DatabaseAvgTime graph
+     * just duplicate last value every second: */
+    Charts::DatabaseAvgTime().AddData(Charts::DatabaseAvgTime().GetData(0));
+
+    Charts::NetworkTotalTraffic().AddData(fInOutBytes / 1024); // add in kilobytes
 }
 
 

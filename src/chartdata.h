@@ -50,6 +50,9 @@ class Charts
 public:
     static ChartData& NetworkInBytes();
     static ChartData& NetworkOutBytes();
+
+    static ChartData& NetworkTotalTraffic();
+
     static ChartData& NetworkInConnections();
     static ChartData& NetworkOutConnections();
     static ChartData& NetworkBannedConnections();

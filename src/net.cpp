@@ -169,7 +169,11 @@ bool RecvLine(SOCKET hSocket, string& strLine)
         int nBytes = recv(hSocket, &c, 1, 0);
         if (nBytes > 0)
         {
-            if (fChartsEnabled) Charts::NetworkInBytes().AddData(nBytes);
+            if (fChartsEnabled)
+            {
+                Charts::NetworkInBytes().AddData(nBytes);
+                fInOutBytes += nBytes;
+            }
 
             if (c == '\n')
                 continue;
@@ -941,7 +945,12 @@ void ThreadSocketHandler2(void* parg)
                                 pnode->CloseSocketDisconnect();
                             }
                         }
-                        if (fChartsEnabled) Charts::NetworkInBytes().AddData(nBytes);
+
+                        if (fChartsEnabled)
+                        {
+                            Charts::NetworkInBytes().AddData(nBytes);
+                            fInOutBytes += nBytes;
+                        }
                     }
                 }
             }
@@ -975,7 +984,12 @@ void ThreadSocketHandler2(void* parg)
                                 pnode->CloseSocketDisconnect();
                             }
                         }
-                        if (fChartsEnabled) Charts::NetworkOutBytes().AddData(nBytes);
+
+                        if (fChartsEnabled)
+                        {
+                            Charts::NetworkOutBytes().AddData(nBytes);
+                            fInOutBytes += nBytes;
+                        }
                     }
                 }
             }

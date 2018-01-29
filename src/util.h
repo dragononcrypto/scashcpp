@@ -161,6 +161,7 @@ extern bool fNoListen;
 extern bool fReopenDebugLog;
 extern bool fWalletLoadWarn;
 extern bool fWalletLoadErr;
+extern int64 fInOutBytes;
 
 void RandAddSeed();
 void RandAddSeedPerfmon();

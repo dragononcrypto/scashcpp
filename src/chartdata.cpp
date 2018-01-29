@@ -21,6 +21,8 @@ static ChartData cDatabageAvgTime(CHART_HOUR_POINTS, ChartData::ChartAddMode_Ave
 static ChartData cBlocksAdded(CHART_HOUR_POINTS, ChartData::ChartAddMode_SumLocal);
 static ChartData cBlocksRejected(CHART_HOUR_POINTS, ChartData::ChartAddMode_SumLocal);
 
+static ChartData cTotalTraffic(CHART_HOUR_POINTS, ChartData::ChartAddMode_Maximum);
+
 bool fChartsEnabled = true;
 
 ChartData& Charts::NetworkInBytes()
@@ -71,6 +73,11 @@ ChartData& Charts::BlocksAdded()
 ChartData& Charts::BlocksRejected()
 {
     return cBlocksRejected;
+}
+
+ChartData& Charts::NetworkTotalTraffic()
+{
+    return cTotalTraffic;
 }
 
 static int UnixTimeNowToPoint()

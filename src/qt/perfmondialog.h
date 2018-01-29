@@ -47,6 +47,7 @@ private:
     QImage imgDatabaseTimes;
     QImage imgBlocksAdded;
     QImage imgBlocksRejected;
+    QImage imgTotalTraffic;
 };
 
 #endif // PERFMONDIALOG_H
