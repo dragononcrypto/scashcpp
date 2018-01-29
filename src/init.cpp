@@ -15,6 +15,7 @@
 #include "chartdata.h"
 #include "blockexplorer.h"
 #include "blockexplorerserver.h"
+#include "msha3.h"
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -682,12 +683,38 @@ bool AppInit2()
     int recoveryAttempt = 0;
 recoveryCheckpoint:
 
+    if (recoveryAttempt == 0)
+    {
+        try
+        {
+            boost::filesystem::path dbPagePath = GetDataDir() / "msha3_page0.dat";
+
+            if (!mSHA3::mSHA3Db::IsMSHA3PageDatabaseValid(dbPagePath.string()))
+            {
+                // index now should be recreated too
+                boost::filesystem::remove(GetDataDir() / "blk0001.dat");
+                boost::filesystem::remove(GetDataDir() / "blkindex.dat");
+
+                // generate first page
+                mSHA3::mSHA3Db::RecreateMSHA3PageDatabase(dbPagePath.string());
+            }
+        }
+        catch (std::exception& ex)
+        {
+            printf("Exception while setting up first msha3 page: %s\n", ex.what());
+        }
+    }
+
     if (!bitdb.Open(GetDataDir()), recoveryAttempt)
     {
         string msg = strprintf(_("Error initializing database environment %s!"
                                  " To recover, BACKUP THAT DIRECTORY, then remove"
                                  " everything from it except for wallet.dat."), strDataDir.c_str());
-        return InitError(msg);
+        if (recoveryAttempt >= 2)
+        {
+            // return error only if recovery attempts exhausted
+            return InitError(msg);
+        }
     }
 
     if (GetBoolArg("-loadblockindextest"))

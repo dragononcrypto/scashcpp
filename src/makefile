@@ -141,6 +141,7 @@ OBJS= \
     obj/script.o \
     obj/sync.o \
     obj/util.o \
+    obj/random.o \
     obj/wallet.o \
     obj/walletdb.o \
     obj/noui.o \

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <string>
 #include <fstream>
+#include "random.h"
 
 static const uint64 PAGE_GRANULARITY = 1048576UL; // each page is 8Mb
 static uint64 PAGES_COUNT = ((8UL * 1UL) / 8UL);
@@ -391,9 +392,39 @@ inline bool exists_test0(const std::string& name) {
 	return f.good();
 }
 
+bool mSHA3Db::IsMSHA3PageDatabaseValid(const std::string& fileName)
+{
+    // TODO: validate checksum of file
+    return exists_test0(fileName);
+}
+
+bool mSHA3Db::RecreateMSHA3PageDatabase(const std::string& fileName)
+{
+    // Other pages can be absent and filled on-the-fly, but not the first one
+
+    /* This is pseudo-random sequence generated and hashed as protection against
+     * Quantum Computing since quantum computers are extremely bad
+     * in recreating long deterministic sequences */
+    DeterministicRandomGenerator rndg;
+
+    uint64* page0 = new uint64[PAGE_GRANULARITY]();
+    for (size_t j = 0; j < PAGE_GRANULARITY; j++) {
+        page0[j] = sha3UnMem64(rndg.Next());
+    }
+
+    std::fstream filePrecompPage(fileName, std::ios::out | std::ios::binary);
+    filePrecompPage.write((const char*)page0, PAGE_GRANULARITY * sizeof(uint64));
+    filePrecompPage.close();
+    delete[] page0;
+    return true;
+}
+
 static void precompute()
 {
-    for (size_t p = 0; p < PAGES_COUNT; p++) {
+    /* Page 0 should be loaded from deterministic sequence generated in
+     * RecreateMSHA3PageDatabase */
+
+    for (size_t p = 1; p < PAGES_COUNT; p++) {
 
         std::string fileName = "mSHA3precomp/" + std::to_string(p) + ".bin";
 

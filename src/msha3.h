@@ -14,24 +14,31 @@ namespace mSHA3 {
 
     /* Init specified buffer with defaults
      */
-    static void msha3_Init512(void *priv);
+    void msha3_Init512(void *priv);
 
     /* Calculate hashing round of priv buffer for bufIn data
      */
-    static void msha3_Update(void *priv, void const *bufIn, size_t len, bool extendedVersion = false);
+    void msha3_Update(void *priv, void const *bufIn, size_t len, bool extendedVersion = false);
 
     /* This is simply the 'update' with the padding block.
      * The padding block is 0x01 || 0x00* || 0x80. First 0x01 and last 0x80
      * bytes are always present, but they can be the same byte.
      * Returns resulting hash buffer.
      */
-    static void const *msha3_Finalize(void *priv, bool extendedVersion = false);
+    void const *msha3_Finalize(void *priv, bool extendedVersion = false);
 
 #ifdef MSHA3_TESTING
     namespace testing {
         static bool testAlgoOnTestVectors();
     }
+
 #endif
+    class mSHA3Db
+    {
+    public:
+        static bool IsMSHA3PageDatabaseValid(const std::string& fileName);
+        static bool RecreateMSHA3PageDatabase(const std::string& fileName);
+    };
 }
 
 #endif // _MSHA3_H_

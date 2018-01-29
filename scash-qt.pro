@@ -113,6 +113,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/sync.h \
     src/util.h \
     src/chartdata.h \
+    src/random.h \
     src/uint256.h \
     src/kernel.h \
     src/scrypt_mine.h \
@@ -208,6 +209,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/version.cpp \
     src/sync.cpp \
     src/util.cpp \
+    src/random.cpp \
     src/chartdata.cpp \
     src/netbase.cpp \
     src/key.cpp \

@@ -92,19 +92,6 @@ recoveryCheckpoint:
              printf("Exception while database recovery: %s\n", ex.what());
          }
     }
-    else if (DatabaseRecoveryAttempt == 2)
-    {
-         try
-         {
-             filesystem::path dbIndexDat = pathDataDir / "blk0001.dat";
-             filesystem::remove(dbIndexDat); // can be synchronized if deleted
-             filesystem::remove_all(pathLogDir); // temporary
-         }
-         catch (std::exception &ex)
-         {
-             printf("Exception while database recovery: %s\n", ex.what());
-         }
-    }
 
     filesystem::create_directory(pathLogDir);
 
