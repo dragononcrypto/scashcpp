@@ -13,7 +13,7 @@
 #include <string>
 #include <vector>
 
-#include <jsoncpp/json/json.h>
+#include "json.h"
 
 	/* === General types === */
 	struct getinfo_t{

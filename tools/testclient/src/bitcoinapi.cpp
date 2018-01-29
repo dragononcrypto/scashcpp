@@ -14,8 +14,7 @@
 #include <stdexcept>
 #include <cmath>
 
-#include <jsonrpccpp/client.h>
-#include <jsonrpccpp/client/connectors/httpclient.h>
+#include "client/connectors/httpclient.h"
 
 using jsonrpc::Client;
 using jsonrpc::JSONRPC_CLIENT_V1;

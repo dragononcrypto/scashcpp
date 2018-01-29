@@ -14,10 +14,10 @@
 #include <sstream>
 #include <iostream>
 
-#include <jsoncpp/json/json.h>
-#include <jsoncpp/json/reader.h>
-#include <jsoncpp/json/value.h>
-#include <jsonrpccpp/client.h>
+#include "json.h"
+#include "reader.h"
+#include "value.h"
+#include "client/client.h"
 
 using Json::Value;
 using Json::Reader;
