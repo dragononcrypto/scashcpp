@@ -14,6 +14,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 namespace BlockExplorer
 {
@@ -275,8 +276,8 @@ bool addAddressTx(const std::string& fileAddress,
         if (amount > 0) amountStr = "<font color=darkgreen>" + amountStr + "</font>";
 
         std::string amountTechnical = "";
-        if (amount < 0) amountTechnical = "<!--amount:minus:" + std::to_string(amount) + "-->";
-        if (amount > 0) amountTechnical = "<!--amount:plus:" + std::to_string(amount) + "-->";
+        if (amount < 0) amountTechnical = "<!--dynamic:amountminus:" + std::to_string(-amount) + "-->";
+        if (amount > 0) amountTechnical = "<!--dynamic:amountplus:" + std::to_string(amount) + "-->";
 
         temp << "<tr>"
                 << "<td>" << txId << " </td>"
@@ -284,7 +285,7 @@ bool addAddressTx(const std::string& fileAddress,
                 << "<td>" << sourceAddress << "</td>"
                 << "<td>" << destAddress << "</td>"
                 << "<td>" << (amount ? amountStr : "-") << " " << amountTechnical << "</td>"
-                << "<td>" << "<!--dynamic:blockstate:0x"+blockId+"-->" << "</td>"
+                << "<td>" << "<!--dynamic:txstate:0x"+txId+"-->" << "</td>"
                 << "<td>" << message << "</td>"
                 << "<tr>\n";
 
@@ -323,10 +324,11 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
                      FormattingType formattingType)
 {
     std::string txDate = unixTimeToString(t.nTime);
+    std::string hash = t.GetHash().ToString();
 
-    stream << "<h3 align=center><a href='" + blockId + ".html'>&lt;&lt;&lt;</a>&nbsp;Details for transaction " << t.GetHash().ToString() << "</h3>";
+    stream << "<h3 align=center><a href='" + blockId + ".html'>&lt;&lt;&lt;</a>&nbsp;Details for transaction " << hash << "</h3>";
     stream << "<table><tr><th>Param</th><th>Value</th></tr>"
-           << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:0x"+blockId+"-->" << "</td></tr>"
+           << "<tr><td>Status</td><td>" << "<!--dynamic:txstate:0x"+hash+"-->" << "</td></tr>"
            << "<tr class=\"even\"><td>Included in block</td><td>" << blockId << "</td></tr>"
            << "<tr><td>Included in block at height</td><td>" << height << "</td></tr>"
            << "<tr class=\"even\"><td>Version</td><td>" << t.nVersion << "</td></tr>"
@@ -370,7 +372,6 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
     }
 
     CTxDB txdb("r");
-
 
     stream << "<p><h3 align=center>Inputs:</h3>";
     stream << "<table><tr><th>Amount</th><th>prevOut</th><th>scriptSig</th><th>nSequence</th><th>Source address</th></tr>";
@@ -472,9 +473,16 @@ void printBlockToStream(CBlock& b, std::ostringstream& stream, int height, Forma
 
     if (formattingType == FORMAT_TYPE_NICE_HTML)
     {
+        std::string txHash = b.GetHash().ToString();
+        for (unsigned int i = 0; i < b.vtx.size(); i++)
+        {
+            txHash = b.vtx[i].GetHash().ToString();
+            break;
+        }
+
         stream << "<h3 align=center><a href='index.html'>&lt;&lt;&lt;</a>&nbsp;Details for block " << b.GetHash().ToString() << "</h3>";
         stream << "<table><tr><th>Param</th><th>Value</th></tr>"
-              << "<tr><td>Status</td><td>" << "<!--dynamic:blockstate:0x"+b.GetHash().ToString()+"-->" << "</td></tr>"
+              << "<tr><td>Status</td><td>" << "<!--dynamic:txstate:0x" + txHash + "-->" << "</td></tr>"
                << "<tr><td>Height</td><td>" << height << "</td></tr>"
                << "<tr class=\"even\"><td>Version</td><td>" << b.nVersion << "</td></tr>"
                << "<tr><td>Prev block hash</td><td>" << b.hashPrevBlock.ToString() << "</td></tr>"
@@ -716,8 +724,152 @@ bool  BlocksContainer::UpdateIndex(bool force)
 
 std::string fixupDynamicStatuses(const std::string& data)
 {
-    // TODO
-    return data;
+    try
+    {
+        std::string result = "";
+
+        int64 balanceAmount = 0;
+        int64 balanceAmountConfirmed = 0;
+        int tempBalanceToConfirm = 0;
+
+        size_t startPos = 0;
+        const std::string dynamicStartMarker = "<!--dynamic:";
+        const std::string dynamicEndMarket = "-->";
+
+        const std::string txStatePrefix = "txstate:0x";
+        const std::string txAmountPlus = "amountplus:";
+        const std::string txAmountMinus = "amountminus:";
+        const std::string txBalance = "balance:0x";
+        const std::string txBalanceConfrimed = "balanceconfirmed:0x";
+
+        const std::string BALANCE_PLACEHOLDER = "<!--%%BALANCE%-->";
+        const std::string BALANCE_CONFIRMED_PLACEHOLDER = "<!--%%BALANCEC%-->";
+        bool needUpdateBalance = false;
+
+        const int SGOOD = 1;
+        const int SBAD = 2;
+        const int SUNKNOWN = 0;
+        const int STECHNICAL = 3;
+
+        while (startPos < data.length())
+        {
+            size_t nextDynamicPos = data.find(dynamicStartMarker, startPos);
+            if (nextDynamicPos == std::string::npos)
+            {
+                // no more dynamics.
+                result += data.substr(startPos);
+                break;
+            }
+            else
+            {
+                size_t nextDynamicPosBeforeMarker = nextDynamicPos;
+                nextDynamicPos += dynamicStartMarker.length();
+                size_t nextDynamicEndPos = data.find(dynamicEndMarket, nextDynamicPos);
+                if (nextDynamicPos != std::string::npos)
+                {
+                    std::string temp = data.substr(nextDynamicPos, nextDynamicEndPos - nextDynamicPos);
+                    result += data.substr(startPos, nextDynamicPosBeforeMarker - startPos);
+
+                    int state = SUNKNOWN;
+                    if (temp.find(txAmountPlus) == 0)
+                    {
+                        temp = temp.substr(txAmountPlus.length());
+                        int r = std::stoi(temp);
+                        balanceAmount += r;
+                        tempBalanceToConfirm = r;
+                        state = STECHNICAL;
+                        temp = "";
+                    }
+                    else if (temp.find(txAmountMinus) == 0)
+                    {
+                        temp = temp.substr(txAmountMinus.length());
+                        int r = std::stoi(temp);
+                        balanceAmount -= r;
+                        tempBalanceToConfirm = -r;
+                        state = STECHNICAL;
+                        temp = "";
+                    }
+                    else if (temp.find(txBalance) == 0)
+                    {
+                        temp = BALANCE_PLACEHOLDER;
+                        needUpdateBalance = true;
+                        state = STECHNICAL;
+                    }
+                    else if (temp.find(txBalanceConfrimed) == 0)
+                    {
+                        temp = BALANCE_CONFIRMED_PLACEHOLDER;
+                        needUpdateBalance = true;
+                        state = STECHNICAL;
+                    }
+                    else if (temp.find(txStatePrefix) == 0)
+                    {
+                        temp = temp.substr(txStatePrefix.length());
+                        uint256 hash(temp);
+                        CTxDB txdb("r");
+                        CTransaction tx;
+                        CTxIndex txIdx;
+                        if (txdb.ReadDiskTx(hash, tx, txIdx))
+                        {
+                            int confirms = txIdx.GetDepthInMainChain();
+                            temp = std::to_string(confirms) + " confirmations";
+                            if (confirms < 6)
+                            {
+                                state = SUNKNOWN;
+                            }
+                            else
+                            {
+                                balanceAmountConfirmed += tempBalanceToConfirm;
+                                tempBalanceToConfirm = 0;
+                                state = SGOOD;
+                            }
+                        }
+                        else
+                        {
+                            temp = "not found or not yet confirmed";
+                            state = SBAD;
+                        }
+                    }
+
+                    switch (state)
+                    {
+                    case SGOOD:
+                        result += "<font color=green>" + temp + "</font>";
+                        break;
+                    case SBAD:
+                        result += "<font color=red>" + temp + "</font>";
+                        break;
+                    case SUNKNOWN:
+                        result += "<font color=gray>" + temp + "</font>";
+                        break;
+                    default:
+                        result += temp;
+                    }
+
+                    startPos = nextDynamicEndPos + dynamicEndMarket.length();
+                }
+                else
+                {
+                    // this one is not closed
+                    break;
+                }
+            }
+        }
+
+        if (needUpdateBalance)
+        {
+            std::string balanceUnconf = std::to_string((double)balanceAmount / (double)COIN) + " SCS";
+            std::string balanceConf = std::to_string((double)balanceAmountConfirmed / (double)COIN) + " SCS";
+            boost::replace_all(result, BALANCE_CONFIRMED_PLACEHOLDER, balanceConf);
+            boost::replace_all(result, BALANCE_PLACEHOLDER, balanceUnconf);
+        }
+
+        return result;
+    }
+    catch (std::exception& ex)
+    {
+        printf("fixupDynamicStatuses failed: %s\n", ex.what());
+        return data;
+    }
 }
 
 // we don't wanna this thing will be DoSed right after start, so here's small hack to cutoff suspicious stuff
@@ -798,6 +950,8 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
 
                 boost::filesystem::path pathTarget = pathBe / reqSafe;
 
+                /* Do not try to optimize this part, file access are real fast
+                 * and moreover, probably cached */
                 std::ifstream fileStream(pathTarget.string());
                 std::string strData;
 
@@ -810,18 +964,23 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
                 std::string resultData;
 
                 bool foundInLargeRequests = largeRequests.find(reqSafe) != largeRequests.end();
-                if (foundInLargeRequests && largeRequest[reqSafe] > largeRequestCutoff)
+                if (foundInLargeRequests && largeRequests[reqSafe] > largeRequestCutoff)
                 {
-                     resultData = strData;
+                    // TODO: NOTFIY user about rate limit
+                    resultData = strData;
                 }
                 else
                 {
-                     resultData = fixupDynamicStatuses(strData);
+                    resultData = fixupDynamicStatuses(strData);
                 }
 
-                unsigned int elapsedTime = getTicksCountToMeasure();
+                unsigned int elapsedTime = getTicksCountToMeasure() - startTime;
                 if (elapsedTime > largeRequestCutoff || foundInLargeRequests)
                 {
+                    if (elapsedTime > largeRequestCutoff)
+                    {
+                        printf("Performance: generation of %s request reply took %u ms", reqSafe.c_str(), elapsedTime);
+                    }
                     largeRequests[reqSafe] = elapsedTime;
                 }
 
