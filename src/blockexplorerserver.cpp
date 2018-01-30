@@ -236,7 +236,7 @@ bool ClientAllowed(const boost::asio::ip::address& address)
     }
 
     const string strAddress = address.to_string();
-    const vector<string>& vAllow = mapMultiArgs["-BESallowip"];
+    const vector<string>& vAllow = mapMultiArgs["-besallowip"];
     BOOST_FOREACH(string strAllow, vAllow)
         if (WildcardMatch(strAddress, strAllow))
             return true;
@@ -442,7 +442,7 @@ void ThreadBESServer2(void* parg)
 {
     printf("ThreadBESServer started\n");
 
-    const bool fUseSSL = GetBoolArg("-BESssl");
+    const bool fUseSSL = GetBoolArg("-besssl");
 
     asio::io_service io_service;
 
@@ -451,24 +451,24 @@ void ThreadBESServer2(void* parg)
     {
         context.set_options(ssl::context::no_sslv2);
 
-        filesystem::path pathCertFile(GetArg("-BESsslcertificatechainfile", "server.cert"));
+        filesystem::path pathCertFile(GetArg("-bessslcertificatechainfile", "server.cert"));
         if (!pathCertFile.is_complete()) pathCertFile = filesystem::path(GetDataDir()) / pathCertFile;
         if (filesystem::exists(pathCertFile)) context.use_certificate_chain_file(pathCertFile.string());
         else printf("ThreadBESServer ERROR: missing server certificate file %s\n", pathCertFile.string().c_str());
 
-        filesystem::path pathPKFile(GetArg("-BESsslprivatekeyfile", "server.pem"));
+        filesystem::path pathPKFile(GetArg("-bessslprivatekeyfile", "server.pem"));
         if (!pathPKFile.is_complete()) pathPKFile = filesystem::path(GetDataDir()) / pathPKFile;
         if (filesystem::exists(pathPKFile)) context.use_private_key_file(pathPKFile.string(), ssl::context::pem);
         else printf("ThreadBESServer ERROR: missing server private key file %s\n", pathPKFile.string().c_str());
 
-        string strCiphers = GetArg("-BESsslciphers", "TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH");
+        string strCiphers = GetArg("-bessslciphers", "TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH");
         SSL_CTX_set_cipher_list(context.impl(), strCiphers.c_str());
     }
 
     // Try a dual IPv6/IPv4 socket, falling back to separate IPv4 and IPv6 sockets
-    const bool loopback = !mapArgs.count("-BESallowip");
+    const bool loopback = !mapArgs.count("-besallowip");
     asio::ip::address bindAddress = loopback ? asio::ip::address_v6::loopback() : asio::ip::address_v6::any();
-    ip::tcp::endpoint endpoint(bindAddress, GetArg("-BESport", GetDefaultBESPort()));
+    ip::tcp::endpoint endpoint(bindAddress, GetArg("-besport", GetDefaultBESPort()));
     boost::system::error_code v6_only_error;
     boost::shared_ptr<ip::tcp::acceptor> acceptor(new ip::tcp::acceptor(io_service));
 
