@@ -9,6 +9,7 @@
 #include <string>
 #include <fstream>
 #include "random.h"
+#include "main.h"
 
 static const uint64 PAGE_GRANULARITY = 1048576UL; // each page is 8Mb
 static uint64 PAGES_COUNT = ((8UL * 1UL) / 8UL);
@@ -407,9 +408,12 @@ bool mSHA3Db::RecreateMSHA3PageDatabase(const std::string& fileName)
      * in recreating long deterministic sequences */
     DeterministicRandomGenerator rndg;
 
+    uint64 seed = 0;
     uint64* page0 = new uint64[PAGE_GRANULARITY]();
-    for (size_t j = 0; j < PAGE_GRANULARITY; j++) {
-        page0[j] = sha3UnMem64(rndg.Next());
+    for (size_t j = 0; j < PAGE_GRANULARITY; j++)
+    {
+        page0[j] = sha3UnMem64(seed + rndg.Next());
+        seed = page0[j];
     }
 
     std::fstream filePrecompPage(fileName, std::ios::out | std::ios::binary);
@@ -450,13 +454,16 @@ static void precompute()
 }
 
 
+static unsigned int g_ticks = 0;
 void MeasureStart() {
-    //
+    g_ticks = getTicksCountToMeasure();
 }
 
-void MeasureEnd(uint64 calls) {
-    //
+void MeasureEnd(uint64_t calls) {
+    unsigned int elapsed = getTicksCountToMeasure() - g_ticks;
+    printf("Elapsed time: %u ms, per call: %f ms\n", elapsed, (double)elapsed / (double)calls);
 }
+
 
 void InitPrecomputedTable(uint64 pagesCount)
 {
