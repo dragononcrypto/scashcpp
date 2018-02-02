@@ -10,6 +10,7 @@
 namespace BlockExplorerServer
 {
     extern bool fBlockExplorerServerEnabled;
+    extern bool fBalanceCheckerServerEnabled;
     extern int fBlockExplorerServerPort;
 
     void ThreadBlockServer(void* parg);

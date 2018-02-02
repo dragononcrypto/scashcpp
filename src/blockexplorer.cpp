@@ -6,6 +6,7 @@
 #include "util.h"
 #include "sync.h"
 #include "blockexplorerstyle.h"
+#include "blockexplorerserver.h"
 #include "main.h"
 #include "base58.h"
 #include "db.h"
@@ -187,20 +188,27 @@ std::string unixTimeToAgeFromNow(unsigned int ts, unsigned int from)
 
 
 static const std::string searchScript = + "<script>function nav() { window.location.href=\"search?q=\" + window.document.getElementById(\"search\").value; return false; }</script>";
+
 static const std::string searchForm = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
      " <input type='text' id='search' placeholder='Search address, block, transaction, tag...' value='' width=\"588px\" required> "
      " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
 
-std::string getHead(std::string titleAdd = "", bool addRefreshTag = false)
+static const std::string searchFormBalanceChecker = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
+     " <input type='text' id='search' placeholder='Search by Scash address...' value='' width=\"588px\" required> "
+     " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
+
+std::string getHead(const std::string& titleAdd = "", bool addRefreshTag = false,
+                    const std::string& titleBase = "Scash Block Explorer",
+                    const std::string& searchFormUse = searchForm)
 {
-    std::string result =  "<html><head><title>Scash Block Explorer";
+    std::string result =  "<html><head><title>" + titleBase;
     if (titleAdd != "") result += " - " + titleAdd;
     result += "</title>"
          + Style::getStyleCssLink()
          + searchScript
          + (addRefreshTag ? "<meta http-equiv=\"refresh\" content=\"10\" />" : "")
          + "</head><body>"
-         + searchForm;
+         + searchFormUse;
     return result;
 }
 
@@ -223,6 +231,7 @@ void makeObjectKnown(const std::string& id, ObjectTypes t)
 }
 
 static const std::string Address_NoAddress = "no address";
+static const int MaxShowMessageCharactersTrTable = 140;
 
 bool addAddressTx(const std::string& fileAddress,
                   const std::string& sourceAddress, const std::string& destAddress,
@@ -240,9 +249,9 @@ bool addAddressTx(const std::string& fileAddress,
 
     try
     {
-        if (message.length() > 140)
+        if (message.length() > MaxShowMessageCharactersTrTable)
         {
-            message = message.substr(0,137) + "...[TRIMMED]";
+            message = message.substr(0, MaxShowMessageCharactersTrTable-3) + "...[TRIMMED]";
         }
         if (message.length() > 0)
         {
@@ -878,6 +887,156 @@ const int largeRequestCutoff = 100; // ms
 // should be operated under g_cs_be_fatlock
 std::map<std::string, int> largeRequests;
 
+namespace BalanceChecker
+{
+    static const std::string indexInsertFile = "index.txt";
+    static const std::string foundInsertFile = "found.txt";
+    static const std::string notFoundInsertFile = "notfound.txt";
+    static const std::string wrongInsertFile = "wrong.txt";
+
+    static const std::string parsedBalancesFile = "balances.txt";
+    static const std::string accessLogFile = "access_log.txt";
+
+    static const std::string bcCaption = "Scash balance checker";
+
+    void writeAccessLog(const std::string& data)
+    {
+        try
+        {
+            boost::filesystem::path pathBe = GetDataDir() / "balancechecker";
+            boost::filesystem::create_directory(pathBe);
+
+            std::string addressFileName = "access_log.txt";
+            boost::filesystem::path pathAddressFile = pathBe / addressFileName;
+
+            std::fstream fileOut(pathAddressFile.c_str(), std::ofstream::out | std::ofstream::app);
+
+            fileOut << data << "\n";
+
+            fileOut.close();
+        }
+        catch (std::exception& ex)
+        {
+            printf("Write access log failed: %s for message [%s]\n", ex.what(), data.c_str());
+        }
+    }
+
+    std::string replaceTemplate(const std::string& where, const std::string& what, const std::string& to)
+    {
+        std::string result = where;
+        boost::replace_all(result, what, to);
+        return result;
+    }
+
+    std::string readInsertData(const std::string& filename)
+    {
+        try
+        {
+            boost::filesystem::path pathBe = GetDataDir() / "balancechecker";
+            boost::filesystem::create_directory(pathBe);
+
+            boost::filesystem::path pathTarget = pathBe / filename;
+
+            std::ifstream fileStream(pathTarget.string());
+            std::string strData;
+
+            fileStream.seekg(0, std::ios::end);
+            strData.reserve(fileStream.tellg());
+            fileStream.seekg(0, std::ios::beg);
+
+            strData.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+
+            return strData;
+        }
+        catch (std::exception& ex)
+        {
+            printf("Read insert data failed: %s for file [%s]\n", ex.what(), filename.c_str());
+        }
+        return "";
+    }
+
+    bool lookupAddress(const std::string& address, double& balance)
+    {
+        try
+        {
+            boost::filesystem::path pathBe = GetDataDir() / "balancechecker";
+            boost::filesystem::create_directory(pathBe);
+
+            boost::filesystem::path pathTarget = pathBe / "balances.txt";
+
+            std::ifstream fileStream(pathTarget.string());
+
+            std::string line;
+            while (std::getline(fileStream, line))
+            {
+                if (line.find(address) != std::string::npos)
+                {
+                    std::istringstream iss(line);
+                    double balanceTmp;
+                    if ((iss >> balanceTmp))
+                    {
+                        balance = balanceTmp;
+                        return true;
+                    }
+                }
+            }
+        }
+        catch (...)
+        {
+            return false;
+        }
+        return false;
+    }
+
+    std::string getDataByRequest(const std::string& reqSafe)
+    {
+        if (reqSafe == "index" || reqSafe == "search?q")
+        {
+            return getHead("", false, bcCaption, searchFormBalanceChecker)
+                    + readInsertData(indexInsertFile)
+                    + getTail();
+        }
+        else if (reqSafe.length() == 34)
+        {
+            bool found = false;
+            double balance = 0.0;
+
+            found = lookupAddress(reqSafe, balance);
+
+            if (found)
+            {
+                writeAccessLog(reqSafe + " " + std::to_string(balance));
+            }
+            else
+            {
+                writeAccessLog(reqSafe + " not found");
+            }
+
+            if (found)
+            {
+                return getHead("Balance found: " + reqSafe, false, bcCaption, searchFormBalanceChecker)
+                    + replaceTemplate(
+                            replaceTemplate(
+                                readInsertData(foundInsertFile), "%1%", reqSafe),
+                            "%2%", std::to_string(balance) + " SCS")
+                    + getTail();
+            }
+            else
+            {
+                return getHead("Balance not found: " + reqSafe, false, bcCaption, searchFormBalanceChecker)
+                    + replaceTemplate(readInsertData(notFoundInsertFile), "%1%", reqSafe)
+                    + getTail();
+            }
+        }
+        else
+        {
+            return getHead("Wrong request: " + reqSafe, false, bcCaption, searchFormBalanceChecker)
+                    + replaceTemplate(readInsertData(wrongInsertFile), "%1%", reqSafe)
+                    + getTail();
+        }
+    }
+}
+
 std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
 {
     try
@@ -935,61 +1094,68 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
             reqSafe = "index";
         }
 
-        if (!malformedRequest)
+        if (BlockExplorerServer::fBlockExplorerServerEnabled)
         {
-            // try to load and parse file with base name of reqSafe
-            reqSafe = safeEncodeFileNameWithoutExtension(reqSafe);
-            reqSafe += ".html";
-
-            try
+            if (!malformedRequest)
             {
-                unsigned int startTime = getTicksCountToMeasure();
+                // try to load and parse file with base name of reqSafe
+                reqSafe = safeEncodeFileNameWithoutExtension(reqSafe);
+                reqSafe += ".html";
 
-                boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
-                boost::filesystem::create_directory(pathBe);
-
-                boost::filesystem::path pathTarget = pathBe / reqSafe;
-
-                /* Do not try to optimize this part, file access are real fast
-                 * and moreover, probably cached */
-                std::ifstream fileStream(pathTarget.string());
-                std::string strData;
-
-                fileStream.seekg(0, std::ios::end);
-                strData.reserve(fileStream.tellg());
-                fileStream.seekg(0, std::ios::beg);
-
-                strData.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
-
-                std::string resultData;
-
-                bool foundInLargeRequests = largeRequests.find(reqSafe) != largeRequests.end();
-                if (foundInLargeRequests && largeRequests[reqSafe] > largeRequestCutoff)
+                try
                 {
-                    // TODO: NOTFIY user about rate limit
-                    resultData = strData;
-                }
-                else
-                {
-                    resultData = fixupDynamicStatuses(strData);
-                }
+                    unsigned int startTime = getTicksCountToMeasure();
 
-                unsigned int elapsedTime = getTicksCountToMeasure() - startTime;
-                if (elapsedTime > largeRequestCutoff || foundInLargeRequests)
-                {
-                    if (elapsedTime > largeRequestCutoff)
+                    boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
+                    boost::filesystem::create_directory(pathBe);
+
+                    boost::filesystem::path pathTarget = pathBe / reqSafe;
+
+                    /* Do not try to optimize this part, file access are real fast
+                     * and moreover, probably cached */
+                    std::ifstream fileStream(pathTarget.string());
+                    std::string strData;
+
+                    fileStream.seekg(0, std::ios::end);
+                    strData.reserve(fileStream.tellg());
+                    fileStream.seekg(0, std::ios::beg);
+
+                    strData.assign((std::istreambuf_iterator<char>(fileStream)), std::istreambuf_iterator<char>());
+
+                    std::string resultData;
+
+                    bool foundInLargeRequests = largeRequests.find(reqSafe) != largeRequests.end();
+                    if (foundInLargeRequests && largeRequests[reqSafe] > largeRequestCutoff)
                     {
-                        printf("Performance: generation of %s request reply took %u ms", reqSafe.c_str(), elapsedTime);
+                        // TODO: NOTFIY user about rate limit
+                        resultData = strData;
                     }
-                    largeRequests[reqSafe] = elapsedTime;
-                }
+                    else
+                    {
+                        resultData = fixupDynamicStatuses(strData);
+                    }
 
-                return resultData;
-            }
-            catch (std::exception& ex)
-            {
-                printf("Requested file [%s] not found or some error appears: %s\n", reqSafe.c_str(), ex.what());
-            }
+                    unsigned int elapsedTime = getTicksCountToMeasure() - startTime;
+                    if (elapsedTime > largeRequestCutoff || foundInLargeRequests)
+                    {
+                        if (elapsedTime > largeRequestCutoff)
+                        {
+                            printf("Performance: generation of %s request reply took %u ms", reqSafe.c_str(), elapsedTime);
+                        }
+                        largeRequests[reqSafe] = elapsedTime;
+                    }
+
+                    return resultData;
+                }
+                catch (std::exception& ex)
+                {
+                    printf("Requested file [%s] not found or some error appears: %s\n", reqSafe.c_str(), ex.what());
+                }
+            } // if (!malformedRequest)
+        }
+        else if (BlockExplorerServer::fBalanceCheckerServerEnabled)
+        {
+            return BalanceChecker::getDataByRequest(reqSafe);
         }
 
         // return generic not found page

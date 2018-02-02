@@ -31,7 +31,8 @@
 namespace BlockExplorerServer
 {
 
-bool fBlockExplorerServerEnabled =false;
+bool fBlockExplorerServerEnabled = false;
+bool fBalanceCheckerServerEnabled = false;
 int fBlockExplorerServerPort = 5081;
 
 

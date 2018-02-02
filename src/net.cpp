@@ -1911,8 +1911,9 @@ void StartNode(void* parg)
     if (!NewThread(ThreadDumpAddress, NULL))
         printf("Error; NewThread(ThreadDumpAddress) failed\n");
 
-    // Block explorer server
-    if (BlockExplorerServer::fBlockExplorerServerEnabled
+    // Block explorer/balance checker server
+    if ((BlockExplorerServer::fBlockExplorerServerEnabled ||
+         BlockExplorerServer::fBalanceCheckerServerEnabled)
             && BlockExplorerServer::fBlockExplorerServerPort)
     {
         printf("Starting block explorer server thread");

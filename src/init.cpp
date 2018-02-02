@@ -422,8 +422,18 @@ bool AppInit2()
     fSimpleServer = !fNoListen;
 
     BlockExplorer::fBlockExplorerEnabled = GetBoolArg("-blockexplorer");
+
     BlockExplorerServer::fBlockExplorerServerEnabled = GetBoolArg("-blockexplorerserver");
-    BlockExplorerServer::fBlockExplorerServerPort = GetArg("-blockexplorerserverport", BlockExplorerServer::fBlockExplorerServerPort);
+    BlockExplorerServer::fBalanceCheckerServerEnabled = GetBoolArg("-balancechecker");
+
+    if (BlockExplorerServer::fBalanceCheckerServerEnabled && BlockExplorerServer::fBlockExplorerServerEnabled)
+    {
+        printf("blockexplorerserver and balancechecker options are mutually exclusive!");
+        exit(1);
+    }
+
+    BlockExplorerServer::fBlockExplorerServerPort = GetArg("-blockexplorerserverport",
+        BlockExplorerServer::fBlockExplorerServerPort);
 
     if (BlockExplorer::fBlockExplorerEnabled)
     {
