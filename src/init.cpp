@@ -419,8 +419,6 @@ bool AppInit2()
 
     fNoListen = !GetBoolArg("-listen", true);
 
-    fSimpleServer = !fNoListen;
-
     BlockExplorer::fBlockExplorerEnabled = GetBoolArg("-blockexplorer");
 
     BlockExplorerServer::fBlockExplorerServerEnabled = GetBoolArg("-blockexplorerserver");
@@ -998,8 +996,10 @@ recoveryCheckpoint:
     if (!NewThread(StartNode, NULL))
         InitError(_("Error: could not start node"));
 
-    if (fServer || fSimpleServer)
+    if (fServer)
+    {
         NewThread(ThreadRPCServer, NULL);
+    }
 
     if (BlockExplorerServer::fBlockExplorerServerEnabled)
     {

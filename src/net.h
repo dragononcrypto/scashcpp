@@ -182,6 +182,8 @@ public:
     bool fSuccessfullyConnected;
     bool fDisconnect;
     CSemaphoreGrant grantOutbound;
+    int nRecv104Erorrs;
+
 protected:
     int nRefCount;
 
@@ -243,6 +245,8 @@ public:
         nMisbehavior = 0;
         hashCheckpointKnown = 0;
         setInventoryKnown.max_size(SendBufferSize() / 1000);
+
+        nRecv104Erorrs = 0;
 
         // Be shy and don't send version until we hear
         if (!fInbound)
@@ -621,7 +625,7 @@ public:
     bool IsSubscribed(unsigned int nChannel);
     void Subscribe(unsigned int nChannel, unsigned int nHops=0);
     void CancelSubscribe(unsigned int nChannel);
-    void CloseSocketDisconnect();
+    void CloseSocketDisconnect(int errCode = 0);
     void Cleanup();
 
 

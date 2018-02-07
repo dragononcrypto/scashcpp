@@ -1168,11 +1168,11 @@ void static InvalidChainFound(CBlockIndex* pindexNew)
     }
 
     printf("InvalidChainFound: invalid block=%s  height=%d  trust=%s  date=%s\n",
-      pindexNew->GetBlockHash().ToString().substr(0,20).c_str(), pindexNew->nHeight,
+      pindexNew->GetBlockHash().ToString().c_str(), pindexNew->nHeight,
       pindexNew->bnChainTrust.ToString().c_str(), DateTimeStrFormat("%x %H:%M:%S",
       pindexNew->GetBlockTime()).c_str());
     printf("InvalidChainFound:  current best=%s  height=%d  trust=%s  date=%s\n",
-      hashBestChain.ToString().substr(0,20).c_str(), nBestHeight, bnBestChainTrust.ToString().c_str(),
+      hashBestChain.ToString().c_str(), nBestHeight, bnBestChainTrust.ToString().c_str(),
       DateTimeStrFormat("%x %H:%M:%S", pindexBest->GetBlockTime()).c_str());
 }
 
@@ -1693,8 +1693,12 @@ bool static Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
         vConnect.push_back(pindex);
     reverse(vConnect.begin(), vConnect.end());
 
-    printf("REORGANIZE: Disconnect %" PRIszu " blocks; %s..%s\n", vDisconnect.size(), pfork->GetBlockHash().ToString().substr(0,20).c_str(), pindexBest->GetBlockHash().ToString().substr(0,20).c_str());
-    printf("REORGANIZE: Connect %" PRIszu " blocks; %s..%s\n", vConnect.size(), pfork->GetBlockHash().ToString().substr(0,20).c_str(), pindexNew->GetBlockHash().ToString().substr(0,20).c_str());
+    printf("REORGANIZE: Disconnect %" PRIszu " blocks; %s..%s\n",
+           vDisconnect.size(), pfork->GetBlockHash().ToString().c_str(),
+           pindexBest->GetBlockHash().ToString().c_str());
+    printf("REORGANIZE: Connect %" PRIszu " blocks; %s..%s\n",
+           vConnect.size(), pfork->GetBlockHash().ToString().c_str(),
+           pindexNew->GetBlockHash().ToString().c_str());
 
     // Disconnect shorter branch
     vector<CTransaction> vResurrect;
@@ -1704,7 +1708,8 @@ bool static Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
         if (!block.ReadFromDisk(pindex))
             return error("Reorganize() : ReadFromDisk for disconnect failed");
         if (!block.DisconnectBlock(txdb, pindex))
-            return error("Reorganize() : DisconnectBlock %s failed", pindex->GetBlockHash().ToString().substr(0,20).c_str());
+            return error("Reorganize() : DisconnectBlock %s failed",
+                         pindex->GetBlockHash().ToString().c_str());
 
         // Queue memory transactions to resurrect
         BOOST_FOREACH(const CTransaction& tx, block.vtx)
@@ -1723,7 +1728,8 @@ bool static Reorganize(CTxDB& txdb, CBlockIndex* pindexNew)
         if (!block.ConnectBlock(txdb, pindex))
         {
             // Invalid block
-            return error("Reorganize() : ConnectBlock %s failed", pindex->GetBlockHash().ToString().substr(0,20).c_str());
+            return error("Reorganize() : ConnectBlock %s failed",
+                         pindex->GetBlockHash().ToString().c_str());
         }
 
         // Queue memory transactions to delete
@@ -1976,7 +1982,8 @@ bool CBlock::AddToBlockIndex(unsigned int nFile, unsigned int nBlockPos)
     // Check for duplicate
     uint256 hash = GetHash();
     if (mapBlockIndex.count(hash))
-        return error("AddToBlockIndex() : %s already exists", hash.ToString().substr(0,20).c_str());
+        return error("AddToBlockIndex() : %s already exists",
+                     hash.ToString().c_str());
 
     // Construct new block index object
     CBlockIndex* pindexNew = new CBlockIndex(nFile, nBlockPos, *this);
@@ -2266,9 +2273,11 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
     // Check for duplicate
     uint256 hash = pblock->GetHash();
     if (mapBlockIndex.count(hash))
-        return error("ProcessBlock() : already have block %d %s", mapBlockIndex[hash]->nHeight, hash.ToString().substr(0,20).c_str());
+        return error("ProcessBlock() : already have block %d %s",
+                     mapBlockIndex[hash]->nHeight, hash.ToString().c_str());
     if (mapOrphanBlocks.count(hash))
-        return error("ProcessBlock() : already have block (orphan) %s", hash.ToString().substr(0,20).c_str());
+        return error("ProcessBlock() : already have block (orphan) %s",
+                     hash.ToString().c_str());
 
     // Scash: check proof-of-stake
     // Limited duplicity on stake: prevents block flood attack
@@ -2343,7 +2352,10 @@ if (pblock->IsProofOfStake())
     // If don't already have its previous block, shunt it off to holding area until we get it
     if (!mapBlockIndex.count(pblock->hashPrevBlock))
     {
-        printf("ProcessBlock: ORPHAN BLOCK, prev=%s\n", pblock->hashPrevBlock.ToString().substr(0,20).c_str());
+        unsigned int orphanedCount = setStakeSeenOrphan.size();
+        printf("ProcessBlock: ORPHAN BLOCK, prev=%s (total orphaned: %u)\n",
+               pblock->hashPrevBlock.ToString().c_str(), orphanedCount);
+
         CBlock* pblock2 = new CBlock(*pblock);
         // Scash: check proof-of-stake
         if (pblock2->IsProofOfStake())
@@ -2402,6 +2414,7 @@ if (pblock->IsProofOfStake())
     }
 
     printf("ProcessBlock: ACCEPTED\n");
+    fLastHeightUpdateTime = getTicksCountToMeasure();
 
     if (fChartsEnabled || BlockExplorer::fBlockExplorerEnabled) Charts::BlocksAdded().AddData(1);
 
@@ -3335,7 +3348,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         // Send the rest of the chain
         if (pindex)
             pindex = pindex->pnext;
-        int nLimit = 500;
+        int nLimit = 300 + rand()%300;
         
         for (; pindex; pindex = pindex->pnext)
         {
@@ -3353,7 +3366,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             {
                 // When this block is requested, we'll send an inv that'll make them
                 // getblocks the next batch of inventory.
-                printf("  getblocks stopping at limit %d %s\n", pindex->nHeight, pindex->GetBlockHash().ToString().substr(0,20).c_str());
+                printf("  getblocks stopping at limit %d %s\n", pindex->nHeight,
+                       pindex->GetBlockHash().ToString().c_str());
                 pfrom->hashContinue = pindex->GetBlockHash();
                 break;
             }
@@ -3399,7 +3413,8 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 
         vector<CBlock> vHeaders;
         int nLimit = 2000;
-        printf("getheaders %d to %s\n", (pindex ? pindex->nHeight : -1), hashStop.ToString().substr(0,20).c_str());
+        printf("getheaders %d to %s\n", (pindex ? pindex->nHeight : -1),
+               hashStop.ToString().c_str());
         for (; pindex; pindex = pindex->pnext)
         {
             vHeaders.push_back(pindex->GetBlockHeader());
@@ -3496,25 +3511,32 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         CInv inv(MSG_BLOCK, block.GetHash());
         pfrom->AddInventoryKnown(inv);
 
-        if (ProcessBlock(pfrom, &block))
+        try
         {
-            mapAlreadyAskedFor.erase(inv);
-
-            if (BlockExplorer::fBlockExplorerEnabled)
+            if (ProcessBlock(pfrom, &block))
             {
-                try
+                mapAlreadyAskedFor.erase(inv);
+
+                if (BlockExplorer::fBlockExplorerEnabled)
                 {
-                    BlockExplorer::BlocksContainer::WriteBlockInfo(pindexBest->nHeight, block);
-                    BlockExplorer::BlocksContainer::UpdateIndex();
-                }
-                catch (std::exception& ex)
-                {
-                    printf("Exception %s while add block to block explorer\n", ex.what());
+                    try
+                    {
+                        BlockExplorer::BlocksContainer::WriteBlockInfo(pindexBest->nHeight, block);
+                        BlockExplorer::BlocksContainer::UpdateIndex();
+                    }
+                    catch (std::exception& ex)
+                    {
+                        printf("Exception %s while add block to block explorer\n", ex.what());
+                    }
                 }
             }
-        }
 
-        if (block.nDoS) pfrom->Misbehaving(block.nDoS);
+            if (block.nDoS) pfrom->Misbehaving(block.nDoS);
+        }
+        catch (std::exception& ex)
+        {
+            printf("Exception %s while ProcessBlock\n", ex.what());
+        }
     }
 
 

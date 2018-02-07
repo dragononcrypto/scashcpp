@@ -393,10 +393,26 @@ inline bool exists_test0(const std::string& name) {
 	return f.good();
 }
 
+uint64* page0_data = NULL;
+
 bool mSHA3Db::IsMSHA3PageDatabaseValid(const std::string& fileName)
 {
-    // TODO: validate checksum of file
-    return exists_test0(fileName);
+    if (!exists_test0(fileName))
+    {
+        return false;
+    }
+
+    page0_data = new uint64[PAGE_GRANULARITY]();
+    uint64 fileCrc = 0;
+    std::fstream filePrecompPage(fileName, std::ios::in | std::ios::binary);
+    filePrecompPage.read((char*)page0_data, PAGE_GRANULARITY * sizeof(uint64));
+    filePrecompPage.close();
+    for (size_t j = 0; j < PAGE_GRANULARITY; j++)
+    {
+        fileCrc ^= page0_data[j];
+    }
+
+    return (fileCrc == 17694909919366803121UL);
 }
 
 bool mSHA3Db::RecreateMSHA3PageDatabase(const std::string& fileName)
@@ -409,17 +425,20 @@ bool mSHA3Db::RecreateMSHA3PageDatabase(const std::string& fileName)
     DeterministicRandomGenerator rndg;
 
     uint64 seed = 0;
-    uint64* page0 = new uint64[PAGE_GRANULARITY]();
+    page0_data = new uint64[PAGE_GRANULARITY]();
+    uint64 seedBase = 0;
     for (size_t j = 0; j < PAGE_GRANULARITY; j++)
     {
-        page0[j] = sha3UnMem64(seed + rndg.Next());
-        seed = page0[j];
+        uint64 data = ((seed ^ rndg.Next()) << 16) + (seedBase >> (j % 16));
+        if (!(j % 8)) { data = sha3UnMem64(data); seedBase = data; }
+        page0_data[j] = data;
+        seed = page0_data[j];
     }
 
     std::fstream filePrecompPage(fileName, std::ios::out | std::ios::binary);
-    filePrecompPage.write((const char*)page0, PAGE_GRANULARITY * sizeof(uint64));
+    filePrecompPage.write((const char*)page0_data, PAGE_GRANULARITY * sizeof(uint64));
     filePrecompPage.close();
-    delete[] page0;
+
     return true;
 }
 

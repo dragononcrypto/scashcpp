@@ -30,6 +30,7 @@ using namespace std;
 using namespace boost;
 
 static const int MAX_OUTBOUND_CONNECTIONS = 12;
+static const int MAX_TOTAL_CONNECTIONS = 125;
 
 void ThreadMessageHandler2(void* parg);
 void ThreadSocketHandler2(void* parg);
@@ -185,7 +186,7 @@ bool RecvLine(SOCKET hSocket, string& strLine)
         }
         else if (nBytes <= 0)
         {
-            if (fShutdown)
+            if (fShutdown || fForceReconnect)
                 return false;
             if (nBytes < 0)
             {
@@ -495,6 +496,43 @@ CNode* FindNode(const CService& addr)
     return NULL;
 }
 
+bool IsManuallyTrusted(const CAddress& addr)
+{
+    if (mapArgs.count("-trustnode") > 0)
+    {
+        BOOST_FOREACH(string& strTrust, mapMultiArgs["-trustnode"])
+        {
+            if (addr.ToString().substr(0, strTrust.length()) == strTrust)
+            {
+                if (fDebug && fDumpAll)
+                {
+                    printf("TRUSTED NODE OPERATION %s\n",
+                        addr.ToString().c_str());
+                }
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+bool IsManuallyBanned(const CAddress& addrConnect)
+{
+    if (mapArgs.count("-bannode") > 0)
+    {
+        BOOST_FOREACH(string& strBan, mapMultiArgs["-bannode"])
+        {
+            if (addrConnect.ToString().substr(0, strBan.length()) == strBan)
+            {
+                printf("NODE IS BANNED %s\n",
+                    addrConnect.ToString().c_str());
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 CNode* ConnectNode(CAddress addrConnect, const char *pszDest, int64 nTimeout)
 {
     if (pszDest == NULL) {
@@ -513,6 +551,10 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, int64 nTimeout)
         }
     }
 
+    if (IsManuallyBanned(addrConnect))
+    {
+        return NULL;
+    }
 
     /// debug print
     printf("trying connection %s lastseen=%.1fhrs\n",
@@ -559,7 +601,7 @@ CNode* ConnectNode(CAddress addrConnect, const char *pszDest, int64 nTimeout)
     }
 }
 
-void CNode::CloseSocketDisconnect()
+void CNode::CloseSocketDisconnect(int errCode)
 {
     fDisconnect = true;
     if (hSocket != INVALID_SOCKET)
@@ -568,6 +610,10 @@ void CNode::CloseSocketDisconnect()
         closesocket(hSocket);
         hSocket = INVALID_SOCKET;
         vRecv.clear();
+        if (errCode == 104)
+        {
+            nRecv104Erorrs++;
+        }
     }
 }
 
@@ -670,11 +716,31 @@ void ThreadSocketHandler(void* parg)
     // Make this thread recognisable as the networking thread
     RenameThread("scash-net");
 
+    fLastHeightUpdateTime = getTicksCountToMeasure();
+
     try
     {
-        vnThreadsRunning[THREAD_SOCKETHANDLER]++;
-        ThreadSocketHandler2(parg);
-        vnThreadsRunning[THREAD_SOCKETHANDLER]--;
+        bool fForceReconnectProcessed = false;
+
+        while (true)
+        {
+            vnThreadsRunning[THREAD_SOCKETHANDLER]++;
+            ThreadSocketHandler2(parg);
+            vnThreadsRunning[THREAD_SOCKETHANDLER]--;
+
+            if (fShutdown) break;
+            else Sleep(2000);
+
+            if (fForceReconnect && fForceReconnectProcessed)
+            {
+                fForceReconnect = false;
+                fForceReconnectProcessed = false;
+            }
+            else if (fForceReconnect)
+            {
+                fForceReconnectProcessed = true;
+            }
+        }
     }
     catch (std::exception& e) {
         vnThreadsRunning[THREAD_SOCKETHANDLER]--;
@@ -703,7 +769,7 @@ void ThreadSocketHandler2(void* parg)
             vector<CNode*> vNodesCopy = vNodes;
             BOOST_FOREACH(CNode* pnode, vNodesCopy)
             {
-                if (pnode->fDisconnect ||
+                if (fForceReconnect || pnode->fDisconnect ||
                     (pnode->GetRefCount() <= 0 && pnode->vRecv.empty() && pnode->vSend.empty()))
                 {
                     // remove from vNodes
@@ -807,7 +873,7 @@ void ThreadSocketHandler2(void* parg)
         int nSelect = select(have_fds ? hSocketMax + 1 : 0,
                              &fdsetRecv, &fdsetSend, &fdsetError, &timeout);
         vnThreadsRunning[THREAD_SOCKETHANDLER]++;
-        if (fShutdown)
+        if (fShutdown || fForceReconnect)
             return;
         if (nSelect == SOCKET_ERROR)
         {
@@ -857,7 +923,7 @@ void ThreadSocketHandler2(void* parg)
                 if (nErr != WSAEWOULDBLOCK)
                     printf("socket error accept failed: %d\n", nErr);
             }
-            else if (nInbound >= GetArg("-maxconnections", 125) - MAX_OUTBOUND_CONNECTIONS)
+            else if (nInbound >= GetArg("-maxconnections", MAX_TOTAL_CONNECTIONS) - MAX_OUTBOUND_CONNECTIONS)
             {
                 {
                     LOCK(cs_setservAddNodeAddresses);
@@ -865,7 +931,7 @@ void ThreadSocketHandler2(void* parg)
                         closesocket(hSocket);
                 }
             }
-            else if (CNode::IsBanned(addr))
+            else if (CNode::IsBanned(addr) && !IsManuallyTrusted(addr))
             {
                 if (fChartsEnabled) Charts::NetworkBannedConnections().AddData(1);
                 printf("connection from %s dropped (banned)\n", addr.ToString().c_str());
@@ -942,7 +1008,7 @@ void ThreadSocketHandler2(void* parg)
                             {
                                 if (!pnode->fDisconnect)
                                     printf("socket recv error %d\n", nErr);
-                                pnode->CloseSocketDisconnect();
+                                pnode->CloseSocketDisconnect(nErr);
                             }
                         }
 
@@ -1187,6 +1253,7 @@ static const char *strDNSSeed[][2] = {
     {"node002.scash.ml", "node002.scash.ml"},
     {"node003.scash.ml", "node003.scash.ml"},
 };
+const int strDNSSeedLength = 3;
 
 void ThreadDNSAddressSeed(void* parg)
 {
@@ -1218,7 +1285,7 @@ void ThreadDNSAddressSeed2(void* parg)
     {
         printf("Loading addresses from DNS seeds (could take a while)\n");
 
-        for (unsigned int seed_idx = 0; seed_idx < ARRAYLEN(strDNSSeed); seed_idx++) {
+        for (unsigned int seed_idx = 0; seed_idx < strDNSSeedLength; seed_idx++) {
             if (HaveNameProxy()) {
                 AddOneShot(strDNSSeed[seed_idx][1]);
             } else {
@@ -1401,6 +1468,26 @@ void ThreadOpenConnections2(void* parg)
         if (fShutdown)
             return;
 
+        if (IsInitialBlockDownload() && !fForceReconnect)
+        {
+            if (fLastHeightUpdateTime > 0)
+            {
+                unsigned int difference = getTicksCountToMeasure() - fLastHeightUpdateTime;
+                unsigned int stuckTimeout = GetArg("-stucktimeout", 20000);
+                if (difference > stuckTimeout)
+                {
+                    printf("****************************************************\n");
+                    printf("* No blocks within %ums since last block download   \n", difference);
+                    printf("* Seems to be network is stuck, so try to reconnect \n");
+                    printf("****************************************************\n");
+
+                    fForceReconnect = true;
+                    fLastHeightUpdateTime = getTicksCountToMeasure();
+                    Sleep(stuckTimeout / 2);
+                }
+            }
+        }
+
         // Add seed nodes if external ip not got
         if (addrman.size()==0 && (GetTime() - nStart > 60) && !fTestNet)
         {
@@ -1442,40 +1529,58 @@ void ThreadOpenConnections2(void* parg)
 
         int64 nANow = GetAdjustedTime();
 
-        int nTries = 0;
-        loop
+        std::vector<std::string> usedAddresses;
+
+        static unsigned int maxConnectionsBurst = GetArg("-burstconnect", 2);
+        if (maxConnectionsBurst > MAX_OUTBOUND_CONNECTIONS)
+            maxConnectionsBurst = MAX_OUTBOUND_CONNECTIONS;
+
+        for (size_t connectionNumber = 0; connectionNumber < maxConnectionsBurst; connectionNumber++)
         {
-            // use an nUnkBias between 10 (no outgoing connections) and 90 (8 outgoing connections)
-            CAddress addr = addrman.Select(10 + min(nOutbound,8)*10);
+            int nTries = 0;
+            loop
+            {
+                // use an nUnkBias between 10 (no outgoing connections) and 90 (8 outgoing connections)
+                CAddress addr = addrman.Select(10 + min(nOutbound,8)*10);
 
-            // if we selected an invalid address, restart
-            if (!addr.IsValid() || setConnected.count(addr.GetGroup()) || IsLocal(addr))
+                // if we selected an invalid address, restart
+                if (!addr.IsValid() || setConnected.count(addr.GetGroup()) || IsLocal(addr))
+                    break;
+
+                // If we didn't find an appropriate destination after trying 100 addresses fetched from addrman,
+                // stop this loop, and let the outer loop run again (which sleeps, adds seed nodes, recalculates
+                // already-connected network ranges, ...) before trying new addrman addresses.
+                nTries++;
+                if (nTries > 100)
+                    break;
+
+                if (IsLimited(addr))
+                    continue;
+
+                // only consider very recently tried nodes after 30 failed attempts
+                if (nANow - addr.nLastTry < 600 && nTries < 30)
+                    continue;
+
+                // do not allow non-default ports, unless after 50 invalid addresses selected already
+                if (addr.GetPort() != GetDefaultPort() && nTries < 50)
+                    continue;
+
+                addrConnect = addr;
                 break;
+            }
 
-            // If we didn't find an appropriate destination after trying 100 addresses fetched from addrman,
-            // stop this loop, and let the outer loop run again (which sleeps, adds seed nodes, recalculates
-            // already-connected network ranges, ...) before trying new addrman addresses.
-            nTries++;
-            if (nTries > 100)
-                break;
-
-            if (IsLimited(addr))
+            if (std::find(usedAddresses.begin(), usedAddresses.end(), addrConnect.ToString())
+                    != usedAddresses.end())
+            {
                 continue;
+            }
 
-            // only consider very recently tried nodes after 30 failed attempts
-            if (nANow - addr.nLastTry < 600 && nTries < 30)
-                continue;
-
-            // do not allow non-default ports, unless after 50 invalid addresses selected already
-            if (addr.GetPort() != GetDefaultPort() && nTries < 50)
-                continue;
-
-            addrConnect = addr;
-            break;
+            if (addrConnect.IsValid())
+            {
+                OpenNetworkConnection(addrConnect, &grant);
+                usedAddresses.push_back(addrConnect.ToString());
+            }
         }
-
-        if (addrConnect.IsValid())
-            OpenNetworkConnection(addrConnect, &grant);
     }
 }
 
@@ -1868,7 +1973,7 @@ void StartNode(void* parg)
 
     if (semOutbound == NULL) {
         // initialize semaphore
-        int nMaxOutbound = min(MAX_OUTBOUND_CONNECTIONS, (int)GetArg("-maxconnections", 125));
+        int nMaxOutbound = min(MAX_OUTBOUND_CONNECTIONS, (int)GetArg("-maxconnections", MAX_TOTAL_CONNECTIONS));
         semOutbound = new CSemaphore(nMaxOutbound);
     }
 

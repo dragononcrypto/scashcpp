@@ -241,7 +241,7 @@ ReadKeyValue(CWallet* pwallet, CDataStream& ssKey, CDataStream& ssValue,
                 printf("LoadWallet  %s\n", wtx.GetHash().ToString().c_str());
                 printf(" %12" PRI64d "   %s  %s\n",
                     wtx.vout[0].nValue,
-                    wtx.hashBlock.ToString().substr(0,20).c_str(),
+                    wtx.hashBlock.ToString().c_str(),
                     wtx.mapValue["message"].c_str());
             }
         }
