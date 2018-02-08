@@ -23,6 +23,7 @@
 
 #include <qrcodegen.h>
 
+
 PerfMonDialog::PerfMonDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::PerfMonDialog),
@@ -59,7 +60,7 @@ void PerfMonDialog::setModel(OptionsModel *model)
     this->model = model;
 }
 
-static void drawCharOnImage(QImage &img, ChartData& data, int divisor, QString unit)
+static void drawCharOnImage(QImage &img, ChartData& data, int divisor, QString unit, bool skipZeroes = false)
 {
     int imgWidth = img.width();
     int imgHeight = img.height();
@@ -110,10 +111,20 @@ static void drawCharOnImage(QImage &img, ChartData& data, int divisor, QString u
             if (index > 0 && index < data.GetCount())
             {
                 int value = data.GetData(index);
-                int y = (int)((double)value * scaleY);
-                if (y < 0) y = 0;
-                if (y >= imgHeight-1) y = imgHeight - 2;
-                y = (imgHeight-1) - y;
+                int y = 0;
+
+                if (skipZeroes && value == 0 && prevY != -1)
+                {
+                    y = prevY;
+                }
+                else
+                {
+                    y = (int)((double)value * scaleY);
+                    if (y < 0) y = 0;
+                    if (y >= imgHeight-1) y = imgHeight - 2;
+                    y = (imgHeight-1) - y;
+                }
+
                 img.setPixel(x, y, 0xff00000);
                 if (prevY != -1)
                 {
@@ -151,7 +162,7 @@ static void drawCharOnImage(QImage &img, ChartData& data, int divisor, QString u
     }
 }
 
-static void prepareAndDrawChartData(QImage &img, QLabel &label, ChartData &data, int divisor, QString unit)
+static void prepareAndDrawChartData(QImage &img, QLabel &label, ChartData &data, int divisor, QString unit, bool skipZeroes = false)
 {
     int imgWidth = label.width();
     int imgHeight = label.height();
@@ -161,7 +172,7 @@ static void prepareAndDrawChartData(QImage &img, QLabel &label, ChartData &data,
         img = QImage(imgWidth, imgHeight, QImage::Format_RGB32);
     }
 
-    drawCharOnImage(img, data, divisor, unit);
+    drawCharOnImage(img, data, divisor, unit, skipZeroes);
     if (label.text().length() > 0) label.setText("");
     label.setPixmap(QPixmap::fromImage(img));
 }
@@ -207,36 +218,42 @@ void PerfMonDialog::updateNow()
     Charts::NetworkOutConnections().AddData(outbound);
     Charts::MemoryUtilization().AddData(getMemUsage());
 
-    prepareAndDrawChartData(imgIncomingTraffic, *(ui->labelIncomingTraffic),
-                            Charts::NetworkInBytes(), 1024, "Kb/s");
-    prepareAndDrawChartData(imgOutgoingTraffic, *(ui->labelOutgoingTraffic),
-                            Charts::NetworkOutBytes(), 1024, "Kb/s");
+    if (ui->labelOutgoingConnections->height() > 30)
+    {
+        prepareAndDrawChartData(imgIncomingTraffic, *(ui->labelIncomingTraffic),
+                                Charts::NetworkInBytes(), 1024, "Kb/s");
+        prepareAndDrawChartData(imgOutgoingTraffic, *(ui->labelOutgoingTraffic),
+                                Charts::NetworkOutBytes(), 1024, "Kb/s");
 
-    prepareAndDrawChartData(imgTotalTraffic, *(ui->labelTotalTraffic),
-                            Charts::NetworkTotalTraffic(), 1024, "Mb"); // already in kilobytes, so divide only by 1024
+        prepareAndDrawChartData(imgTotalTraffic, *(ui->labelTotalTraffic),
+                                Charts::NetworkTotalTraffic(), 1024, "Mb"); // already in kilobytes, so divide only by 1024
 
-    prepareAndDrawChartData(imgInConnections, *(ui->labelIncomingConnections),
-                            Charts::NetworkInConnections(), 1, "nodes");
-    prepareAndDrawChartData(imgOutConnections, *(ui->labelOutgoingConnections),
-                            Charts::NetworkOutConnections(), 1, "nodes");
+        prepareAndDrawChartData(imgInConnections, *(ui->labelIncomingConnections),
+                                Charts::NetworkInConnections(), 1, "nodes");
+        prepareAndDrawChartData(imgOutConnections, *(ui->labelOutgoingConnections),
+                                Charts::NetworkOutConnections(), 1, "nodes");
 
-    prepareAndDrawChartData(imgBanCount, *(ui->labelBannedCount),
-                            Charts::NetworkBannedConnections(), 1, "nodes/s");
+        prepareAndDrawChartData(imgBanCount, *(ui->labelBannedCount),
+                                Charts::NetworkBannedConnections(), 1, "nodes/s");
+    }
 
-    prepareAndDrawChartData(imgMemUtil, *(ui->labelMemoryUsage),
-                            Charts::MemoryUtilization(), 1024, "MB");
+    if (ui->labelMemoryUsage->height() > 30)
+    {
+        prepareAndDrawChartData(imgMemUtil, *(ui->labelMemoryUsage),
+                                Charts::MemoryUtilization(), 1024, "MB", true);
 
-    prepareAndDrawChartData(imgDatabaseQueries, *(ui->labelDatabaseQueries),
-                            Charts::DatabaseQueries(), 1, "q/s");
+        prepareAndDrawChartData(imgDatabaseQueries, *(ui->labelDatabaseQueries),
+                                Charts::DatabaseQueries(), 1, "q/s");
 
-    prepareAndDrawChartData(imgDatabaseTimes, *(ui->labelDatabaseAvgTime),
-                            Charts::DatabaseAvgTime(), 1, "ms");
+        prepareAndDrawChartData(imgDatabaseTimes, *(ui->labelDatabaseAvgTime),
+                                Charts::DatabaseAvgTime(), 1, "ms");
 
-    prepareAndDrawChartData(imgBlocksAdded, *(ui->labelBlocksAdded),
-                            Charts::BlocksAdded(), 1, "blocks/s");
+        prepareAndDrawChartData(imgBlocksAdded, *(ui->labelBlocksAdded),
+                                Charts::BlocksAdded(), 1, "blocks/s");
 
-    prepareAndDrawChartData(imgBlocksRejected, *(ui->labelBlocksRejected),
-                            Charts::BlocksRejected(), 1, "blocks/s");
+        prepareAndDrawChartData(imgBlocksRejected, *(ui->labelBlocksRejected),
+                                Charts::BlocksRejected(), 1, "blocks/s");
+    }
 
     // Trick to scroll graphic
     Charts::NetworkInBytes().AddData(0);

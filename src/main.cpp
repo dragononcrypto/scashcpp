@@ -2331,7 +2331,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         bnNewBlock.SetCompact(pblock->nBits);
         CBigNum bnRequired;
 
-if (pblock->IsProofOfStake())
+        if (pblock->IsProofOfStake())
             bnRequired.SetCompact(ComputeMinStake(GetLastBlockIndex(pcheckpoint, true)->nBits, deltaTime, pblock->nTime));
         else
             bnRequired.SetCompact(ComputeMinWork(GetLastBlockIndex(pcheckpoint, false)->nBits, deltaTime));
@@ -2339,7 +2339,9 @@ if (pblock->IsProofOfStake())
         if (bnNewBlock > bnRequired)
         {
             if (pfrom)
-                pfrom->Misbehaving(100);
+            {
+                pfrom->Misbehaving(10);
+            }
             if (fChartsEnabled) Charts::BlocksRejected().AddData(1);
             return error("ProcessBlock() : block with too little %s", pblock->IsProofOfStake()? "proof-of-stake" : "proof-of-work");
         }
@@ -3348,7 +3350,24 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         // Send the rest of the chain
         if (pindex)
             pindex = pindex->pnext;
-        int nLimit = 300 + rand()%300;
+
+        // TODO: should be depending on connection quality
+        int nLimit = GetArg("-getblocksstep", 100);
+        if (pfrom)
+        {
+            if (pfrom->nInvCountLoaedLast)
+            {
+                nLimit = nLimit + pfrom->nInvCountLoaedLast;
+            }
+
+            int maxBlocks = GetArg("-getblocksmax", 1000);
+            if (nLimit > maxBlocks)
+            {
+                nLimit = maxBlocks;
+            }
+
+            pfrom->nInvCountLoaedLast = nLimit;
+        }
         
         for (; pindex; pindex = pindex->pnext)
         {

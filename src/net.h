@@ -183,6 +183,7 @@ public:
     bool fDisconnect;
     CSemaphoreGrant grantOutbound;
     int nRecv104Erorrs;
+    int nInvCountLoaedLast;
 
 protected:
     int nRefCount;
@@ -247,6 +248,7 @@ public:
         setInventoryKnown.max_size(SendBufferSize() / 1000);
 
         nRecv104Erorrs = 0;
+        nInvCountLoaedLast = 0;
 
         // Be shy and don't send version until we hear
         if (!fInbound)
@@ -287,7 +289,7 @@ public:
         nRefCount--;
     }
 
-
+    void AskFor(const CInv& inv);
 
     void AddAddressKnown(const CAddress& addr)
     {
@@ -319,26 +321,6 @@ public:
             if (!setInventoryKnown.count(inv))
                 vInventoryToSend.push_back(inv);
         }
-    }
-
-    void AskFor(const CInv& inv)
-    {
-        // We're using mapAskFor as a priority queue,
-        // the key is the earliest time the request can be sent
-        int64& nRequestTime = mapAlreadyAskedFor[inv];
-        if (fDebugNet)
-            printf("askfor %s   %" PRI64d " (%s)\n", inv.ToString().c_str(), nRequestTime, DateTimeStrFormat("%H:%M:%S", nRequestTime/1000000).c_str());
-
-        // Make sure not to reuse time indexes to keep things in the same order
-        int64 nNow = (GetTime() - 1) * 1000000;
-        static int64 nLastTime;
-        ++nLastTime;
-        nNow = std::max(nNow, nLastTime);
-        nLastTime = nNow;
-
-        // Each retry is 2 minutes after the last
-        nRequestTime = std::max(nRequestTime + 2 * 60 * 1000000, nNow);
-        mapAskFor.insert(std::make_pair(nRequestTime, inv));
     }
 
 
