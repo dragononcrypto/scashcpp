@@ -407,7 +407,7 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
         }
 
         stream << ((i % 2 != 0) ? "<tr>" : "<tr class=\"even\">")
-                << "<td>" << (amount ? (std::to_string((double)t.vout[i].nValue / (double)COIN) + " SCS") : "") << " </td>"
+                << "<td>" << (amount ? (std::to_string((0.0 + amount) / (double)COIN) + " SCS") : "") << " </td>"
                 << "<td>" << t.vin[i].prevout.ToString() << "</td>"
                 << "<td>" << t.vin[i].scriptSig.ToString(true) << "</td>"
                 << "<td>" << t.vin[i].nSequence << "</td>"
