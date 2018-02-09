@@ -19,15 +19,15 @@ To build executables for Windows 64-bit:
 
     cd buildsystem
     
+This step can take up to 30-40 minutes:
+
+    make --file=Depends.mk HOST=x86_64-w64-mingw32 -j4
+    
 Then run the following command:
 
     ./autogen.sh
     
 Some warnings may be produced, but this is normal.
-
-Next step can take up to 30-40 minutes:
-
-    make HOST=x86_64-w64-mingw32 -j4
 
 This also can take long time:
 
