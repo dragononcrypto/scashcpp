@@ -17,11 +17,13 @@ Install curl that is required for depends scripts:
 
 To build executables for Windows 64-bit:
 
-    cd depends
+    cd buildsystem
     
 Then run the following command:
 
     ./autogen.sh
+    
+Some warnings may be produced, but this is normal.
 
 Next step can take up to 30-40 minutes:
 
@@ -29,7 +31,10 @@ Next step can take up to 30-40 minutes:
 
 This also can take long time:
 
-    ./configure --prefix=`pwd`/depends/x86_64-w64-mingw32
+    ./configure --prefix=`pwd`/x86_64-w64-mingw32
+    
+And finally run build process itself:
+
     make
 
 
