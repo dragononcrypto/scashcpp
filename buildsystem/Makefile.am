@@ -4,6 +4,7 @@ SUBDIRS = ../src
 
 GZIP_ENV="-9n"
 
+PKG_CHECK_MODULES=
 BITCOIND_BIN=$(top_builddir)/../src/scashd$(EXEEXT)
 BITCOIN_QT_BIN=$(top_builddir)/../src/qt/scash-qt$(EXEEXT)
 
