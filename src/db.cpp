@@ -892,7 +892,7 @@ bool CTxDB::LoadBlockIndexGuts()
 
     // Load mapBlockIndex
     unsigned int fFlags = DB_SET_RANGE;
-    loop
+    LOOP
     {
         // Read next record
         CDataStream ssKey(SER_DISK, CLIENT_VERSION);
@@ -953,7 +953,7 @@ bool CTxDB::LoadBlockIndexGuts()
         }
         }    // try
         catch (std::exception &e) {
-            return error("%s() : deserialize error", __PRETTY_FUNCTION__);
+            return error("%s() : deserialize error", __FUNCTION__);
         }
     }
     pcursor->close();

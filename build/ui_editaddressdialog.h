@@ -10,16 +10,16 @@
 #define UI_EDITADDRESSDIALOG_H
 
 #include <QtCore/QVariant>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QFormLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets//QAction>
+#include <QtWidgets//QApplication>
+#include <QtWidgets//QButtonGroup>
+#include <QtWidgets//QDialog>
+#include <QtWidgets//QDialogButtonBox>
+#include <QtWidgets//QFormLayout>
+#include <QtWidgets//QHeaderView>
+#include <QtWidgets//QLabel>
+#include <QtWidgets//QLineEdit>
+#include <QtWidgets//QVBoxLayout>
 
 QT_BEGIN_NAMESPACE
 
@@ -88,14 +88,14 @@ public:
 
     void retranslateUi(QDialog *EditAddressDialog)
     {
-        EditAddressDialog->setWindowTitle(QApplication::translate("EditAddressDialog", "Edit Address", 0, QApplication::UnicodeUTF8));
-        label->setText(QApplication::translate("EditAddressDialog", "&Label", 0, QApplication::UnicodeUTF8));
+        EditAddressDialog->setWindowTitle(QApplication::translate("EditAddressDialog", "Edit Address", 0));
+        label->setText(QApplication::translate("EditAddressDialog", "&Label", 0));
 #ifndef QT_NO_TOOLTIP
-        labelEdit->setToolTip(QApplication::translate("EditAddressDialog", "The label associated with this address book entry", 0, QApplication::UnicodeUTF8));
+        labelEdit->setToolTip(QApplication::translate("EditAddressDialog", "The label associated with this address book entry", 0));
 #endif // QT_NO_TOOLTIP
-        label_2->setText(QApplication::translate("EditAddressDialog", "&Address", 0, QApplication::UnicodeUTF8));
+        label_2->setText(QApplication::translate("EditAddressDialog", "&Address", 0));
 #ifndef QT_NO_TOOLTIP
-        addressEdit->setToolTip(QApplication::translate("EditAddressDialog", "The address associated with this address book entry. This can only be modified for sending addresses.", 0, QApplication::UnicodeUTF8));
+        addressEdit->setToolTip(QApplication::translate("EditAddressDialog", "The address associated with this address book entry. This can only be modified for sending addresses.", 0));
 #endif // QT_NO_TOOLTIP
     } // retranslateUi
 

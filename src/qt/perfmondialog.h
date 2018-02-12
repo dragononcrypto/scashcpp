@@ -5,7 +5,7 @@
 #ifndef PERFMONDIALOG_H
 #define PERFMONDIALOG_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 #include <QImage>
 #include <QTimer>
 

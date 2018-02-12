@@ -10,18 +10,18 @@
 #define UI_ADDRESSBOOKPAGE_H
 
 #include <QtCore/QVariant>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QTableView>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
+#include <QtWidgets//QAction>
+#include <QtWidgets//QApplication>
+#include <QtWidgets//QButtonGroup>
+#include <QtWidgets//QDialogButtonBox>
+#include <QtWidgets//QHBoxLayout>
+#include <QtWidgets//QHeaderView>
+#include <QtWidgets//QLabel>
+#include <QtWidgets//QPushButton>
+#include <QtWidgets//QSpacerItem>
+#include <QtWidgets//QTableView>
+#include <QtWidgets//QVBoxLayout>
+#include <QtWidgets//QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -143,32 +143,32 @@ public:
 
     void retranslateUi(QWidget *AddressBookPage)
     {
-        AddressBookPage->setWindowTitle(QApplication::translate("AddressBookPage", "Address Book", 0, QApplication::UnicodeUTF8));
-        labelExplanation->setText(QApplication::translate("AddressBookPage", "These are your Scash addresses for receiving payments. You may want to give a different one to each sender so you can keep track of who is paying you.", 0, QApplication::UnicodeUTF8));
+        AddressBookPage->setWindowTitle(QApplication::translate("AddressBookPage", "Address Book", 0));
+        labelExplanation->setText(QApplication::translate("AddressBookPage", "These are your Scash addresses for receiving payments. You may want to give a different one to each sender so you can keep track of who is paying you.", 0));
 #ifndef QT_NO_TOOLTIP
-        tableView->setToolTip(QApplication::translate("AddressBookPage", "Double-click to edit address or label", 0, QApplication::UnicodeUTF8));
+        tableView->setToolTip(QApplication::translate("AddressBookPage", "Double-click to edit address or label", 0));
 #endif // QT_NO_TOOLTIP
 #ifndef QT_NO_TOOLTIP
-        newAddressButton->setToolTip(QApplication::translate("AddressBookPage", "Create a new address", 0, QApplication::UnicodeUTF8));
+        newAddressButton->setToolTip(QApplication::translate("AddressBookPage", "Create a new address", 0));
 #endif // QT_NO_TOOLTIP
-        newAddressButton->setText(QApplication::translate("AddressBookPage", "&New Address", 0, QApplication::UnicodeUTF8));
+        newAddressButton->setText(QApplication::translate("AddressBookPage", "&New Address", 0));
 #ifndef QT_NO_TOOLTIP
-        copyToClipboard->setToolTip(QApplication::translate("AddressBookPage", "Copy the currently selected address to the system clipboard", 0, QApplication::UnicodeUTF8));
+        copyToClipboard->setToolTip(QApplication::translate("AddressBookPage", "Copy the currently selected address to the system clipboard", 0));
 #endif // QT_NO_TOOLTIP
-        copyToClipboard->setText(QApplication::translate("AddressBookPage", "&Copy Address", 0, QApplication::UnicodeUTF8));
-        showQRCode->setText(QApplication::translate("AddressBookPage", "Show &QR Code", 0, QApplication::UnicodeUTF8));
+        copyToClipboard->setText(QApplication::translate("AddressBookPage", "&Copy Address", 0));
+        showQRCode->setText(QApplication::translate("AddressBookPage", "Show &QR Code", 0));
 #ifndef QT_NO_TOOLTIP
-        signMessage->setToolTip(QApplication::translate("AddressBookPage", "Sign a message to prove you own a Scash address", 0, QApplication::UnicodeUTF8));
+        signMessage->setToolTip(QApplication::translate("AddressBookPage", "Sign a message to prove you own a Scash address", 0));
 #endif // QT_NO_TOOLTIP
-        signMessage->setText(QApplication::translate("AddressBookPage", "Sign &Message", 0, QApplication::UnicodeUTF8));
+        signMessage->setText(QApplication::translate("AddressBookPage", "Sign &Message", 0));
 #ifndef QT_NO_TOOLTIP
-        verifyMessage->setToolTip(QApplication::translate("AddressBookPage", "Verify a message to ensure it was signed with a specified Scash address", 0, QApplication::UnicodeUTF8));
+        verifyMessage->setToolTip(QApplication::translate("AddressBookPage", "Verify a message to ensure it was signed with a specified Scash address", 0));
 #endif // QT_NO_TOOLTIP
-        verifyMessage->setText(QApplication::translate("AddressBookPage", "&Verify Message", 0, QApplication::UnicodeUTF8));
+        verifyMessage->setText(QApplication::translate("AddressBookPage", "&Verify Message", 0));
 #ifndef QT_NO_TOOLTIP
-        deleteButton->setToolTip(QApplication::translate("AddressBookPage", "Delete the currently selected address from the list", 0, QApplication::UnicodeUTF8));
+        deleteButton->setToolTip(QApplication::translate("AddressBookPage", "Delete the currently selected address from the list", 0));
 #endif // QT_NO_TOOLTIP
-        deleteButton->setText(QApplication::translate("AddressBookPage", "&Delete", 0, QApplication::UnicodeUTF8));
+        deleteButton->setText(QApplication::translate("AddressBookPage", "&Delete", 0));
     } // retranslateUi
 
 };

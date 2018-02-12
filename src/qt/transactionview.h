@@ -1,7 +1,7 @@
 #ifndef TRANSACTIONVIEW_H
 #define TRANSACTIONVIEW_H
 
-#include <QWidget>
+#include <QtWidgets/QWidget>
 
 class WalletModel;
 class TransactionFilterProxy;

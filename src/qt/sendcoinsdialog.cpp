@@ -19,10 +19,10 @@
 #include "coincontroldialog.h"
 #include "bitcoingui.h"
 
-#include <QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QLocale>
 #include <QTextDocument>
-#include <QScrollBar>
+#include <QtWidgets/QScrollBar>
 #include <QClipboard>
 
 SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
@@ -153,7 +153,7 @@ void SendCoinsDialog::on_sendButton_clicked()
     {
         formatted.append(tr("<b>%1</b> to <i>%2</i><font color=\"DarkRed\">%3</font>")
                          .arg(BitcoinUnits::formatWithUnit(BitcoinUnits::BTC, rcp.amount),
-                              Qt::escape(rcp.label),
+                              rcp.label.toHtmlEscaped(),
                               (rcp.label.length() == 0) ? rcp.address : " (" + rcp.address + ")"));
     }
 
@@ -485,7 +485,7 @@ void SendCoinsDialog::coinControlClipboardChange()
 // Coin Control: settings menu - coin control enabled/disabled by user
 void SendCoinsDialog::coinControlFeatureChanged(bool checked)
 {
-    ui->toggleCoinControlButton->setShown(checked);
+    ui->toggleCoinControlButton->setVisible(checked);
     if (!checked && fCoinControlShow)
     {
         // hide already opened coin control

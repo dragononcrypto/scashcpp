@@ -33,34 +33,36 @@
 #include "wallet.h"
 #include "bitcoinrpc.h"
 
+#include <QMimeData>
+
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
 #endif
 
-#include <QApplication>
-#include <QMainWindow>
-#include <QMenuBar>
-#include <QMenu>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMenu>
 #include <QIcon>
-#include <QTabWidget>
-#include <QVBoxLayout>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QToolBar>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
 #include <QLocale>
-#include <QMessageBox>
-#include <QProgressBar>
-#include <QStackedWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QProgressBar>
+#include <QtWidgets/QStackedWidget>
 #include <QDateTime>
 #include <QMovie>
-#include <QFileDialog>
+#include <QtWidgets/QFileDialog>
 #include <QDesktopServices>
 #include <QTimer>
 #include <QDragEnterEvent>
 #include <QUrl>
-#include <QStyle>
+#include <QtWidgets/QStyle>
 
 #include <iostream>
 
@@ -900,7 +902,7 @@ void BitcoinGUI::encryptWallet(bool status)
 
 void BitcoinGUI::backupWallet()
 {
-    QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+    QString saveDir = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).at(0);
     QString filename = QFileDialog::getSaveFileName(this, tr("Backup Wallet"), saveDir, tr("Wallet Data (*.dat)"));
     if(!filename.isEmpty()) {
         if(!walletModel->backupWallet(filename)) {

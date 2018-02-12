@@ -10,16 +10,16 @@
 #define UI_ABOUTDIALOG_H
 
 #include <QtCore/QVariant>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QDialog>
-#include <QtGui/QDialogButtonBox>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QVBoxLayout>
+#include <QtWidgets//QAction>
+#include <QtWidgets//QApplication>
+#include <QtWidgets//QButtonGroup>
+#include <QtWidgets//QDialog>
+#include <QtWidgets//QDialogButtonBox>
+#include <QtWidgets//QHBoxLayout>
+#include <QtWidgets//QHeaderView>
+#include <QtWidgets//QLabel>
+#include <QtWidgets//QSpacerItem>
+#include <QtWidgets//QVBoxLayout>
 
 QT_BEGIN_NAMESPACE
 
@@ -126,15 +126,15 @@ public:
 
     void retranslateUi(QDialog *AboutDialog)
     {
-        AboutDialog->setWindowTitle(QApplication::translate("AboutDialog", "About Scash", 0, QApplication::UnicodeUTF8));
-        label->setText(QApplication::translate("AboutDialog", "<b>Scash</b> version", 0, QApplication::UnicodeUTF8));
+        AboutDialog->setWindowTitle(QApplication::translate("AboutDialog", "About Scash", 0));
+        label->setText(QApplication::translate("AboutDialog", "<b>Scash</b> version", 0));
         copyrightLabel->setText(QApplication::translate("AboutDialog", "\n"
 "Copyright \302\251 2017-2018 Scash Developers\n"
-"", 0, QApplication::UnicodeUTF8));
+"", 0));
         label_2->setText(QApplication::translate("AboutDialog", "\n"
 "Distributed under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php.\n"
 "\n"
-"This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/) and cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP software written by Thomas Bernard.", 0, QApplication::UnicodeUTF8));
+"This product includes software developed by the OpenSSL Project for use in the OpenSSL Toolkit (http://www.openssl.org/) and cryptographic software written by Eric Young (eay@cryptsoft.com) and UPnP software written by Thomas Bernard.", 0));
     } // retranslateUi
 
 };

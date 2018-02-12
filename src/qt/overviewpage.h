@@ -1,7 +1,7 @@
 #ifndef OVERVIEWPAGE_H
 #define OVERVIEWPAGE_H
 
-#include <QWidget>
+#include <QtWidgets/QWidget>
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;

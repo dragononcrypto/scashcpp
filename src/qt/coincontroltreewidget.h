@@ -2,7 +2,7 @@
 #define COINCONTROLTREEWIDGET_H
 
 #include <QKeyEvent>
-#include <QTreeWidget>
+#include <QtWidgets/QTreeWidget>
 
 class CoinControlTreeWidget : public QTreeWidget {
 Q_OBJECT

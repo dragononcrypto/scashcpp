@@ -10,20 +10,20 @@
 #define UI_OPTIONSDIALOG_H
 
 #include <QtCore/QVariant>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QCheckBox>
-#include <QtGui/QDialog>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QTabWidget>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
+#include <QtWidgets//QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QCheckBox>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpacerItem>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
 #include "bitcoinamountfield.h"
 #include "qvalidatedlineedit.h"
 #include "qvaluecombobox.h"
@@ -335,69 +335,69 @@ public:
 
     void retranslateUi(QDialog *OptionsDialog)
     {
-        OptionsDialog->setWindowTitle(QApplication::translate("OptionsDialog", "Options", 0, QApplication::UnicodeUTF8));
-        transactionFeeInfoLabel->setText(QApplication::translate("OptionsDialog", "Unlike Bitcoin network in Scash the transactions fees are fixed. You may add up some amount to process them even quicker but this is not recommended. Additional fee per kB:", 0, QApplication::UnicodeUTF8));
-        transactionFeeLabel->setText(QApplication::translate("OptionsDialog", "Pay transaction &fee", 0, QApplication::UnicodeUTF8));
+        OptionsDialog->setWindowTitle(QApplication::translate("OptionsDialog", "Options", 0));
+        transactionFeeInfoLabel->setText(QApplication::translate("OptionsDialog", "Unlike Bitcoin network in Scash the transactions fees are fixed. You may add up some amount to process them even quicker but this is not recommended. Additional fee per kB:", 0));
+        transactionFeeLabel->setText(QApplication::translate("OptionsDialog", "Pay transaction &fee", 0));
 #ifndef QT_NO_TOOLTIP
-        bitcoinAtStartup->setToolTip(QApplication::translate("OptionsDialog", "Automatically start Scash after logging in to the system.", 0, QApplication::UnicodeUTF8));
+        bitcoinAtStartup->setToolTip(QApplication::translate("OptionsDialog", "Automatically start Scash after logging in to the system.", 0));
 #endif // QT_NO_TOOLTIP
-        bitcoinAtStartup->setText(QApplication::translate("OptionsDialog", "&Start Scash on system login", 0, QApplication::UnicodeUTF8));
+        bitcoinAtStartup->setText(QApplication::translate("OptionsDialog", "&Start Scash on system login", 0));
 #ifndef QT_NO_TOOLTIP
-        detachDatabases->setToolTip(QApplication::translate("OptionsDialog", "Detach block and address databases at shutdown. This means they can be moved to another data directory, but it slows down shutdown. The wallet is always detached.", 0, QApplication::UnicodeUTF8));
+        detachDatabases->setToolTip(QApplication::translate("OptionsDialog", "Detach block and address databases at shutdown. This means they can be moved to another data directory, but it slows down shutdown. The wallet is always detached.", 0));
 #endif // QT_NO_TOOLTIP
-        detachDatabases->setText(QApplication::translate("OptionsDialog", "&Detach databases at shutdown", 0, QApplication::UnicodeUTF8));
-        tabWidget->setTabText(tabWidget->indexOf(tabMain), QApplication::translate("OptionsDialog", "&Main", 0, QApplication::UnicodeUTF8));
+        detachDatabases->setText(QApplication::translate("OptionsDialog", "&Detach databases at shutdown", 0));
+        tabWidget->setTabText(tabWidget->indexOf(tabMain), QApplication::translate("OptionsDialog", "&Main", 0));
 #ifndef QT_NO_TOOLTIP
-        mapPortUpnp->setToolTip(QApplication::translate("OptionsDialog", "Automatically open the Scash client port on the router. This only works when your router supports UPnP and it is enabled.", 0, QApplication::UnicodeUTF8));
+        mapPortUpnp->setToolTip(QApplication::translate("OptionsDialog", "Automatically open the Scash client port on the router. This only works when your router supports UPnP and it is enabled.", 0));
 #endif // QT_NO_TOOLTIP
-        mapPortUpnp->setText(QApplication::translate("OptionsDialog", "Map port using &UPnP", 0, QApplication::UnicodeUTF8));
+        mapPortUpnp->setText(QApplication::translate("OptionsDialog", "Map port using &UPnP", 0));
 #ifndef QT_NO_TOOLTIP
-        connectSocks->setToolTip(QApplication::translate("OptionsDialog", "Connect to the Scash network through a SOCKS proxy (e.g. when connecting through Tor).", 0, QApplication::UnicodeUTF8));
+        connectSocks->setToolTip(QApplication::translate("OptionsDialog", "Connect to the Scash network through a SOCKS proxy (e.g. when connecting through Tor).", 0));
 #endif // QT_NO_TOOLTIP
-        connectSocks->setText(QApplication::translate("OptionsDialog", "&Connect through SOCKS proxy:", 0, QApplication::UnicodeUTF8));
-        proxyIpLabel->setText(QApplication::translate("OptionsDialog", "Proxy &IP:", 0, QApplication::UnicodeUTF8));
+        connectSocks->setText(QApplication::translate("OptionsDialog", "&Connect through SOCKS proxy:", 0));
+        proxyIpLabel->setText(QApplication::translate("OptionsDialog", "Proxy &IP:", 0));
 #ifndef QT_NO_TOOLTIP
-        proxyIp->setToolTip(QApplication::translate("OptionsDialog", "IP address of the proxy (e.g. 127.0.0.1)", 0, QApplication::UnicodeUTF8));
+        proxyIp->setToolTip(QApplication::translate("OptionsDialog", "IP address of the proxy (e.g. 127.0.0.1)", 0));
 #endif // QT_NO_TOOLTIP
-        proxyPortLabel->setText(QApplication::translate("OptionsDialog", "&Port:", 0, QApplication::UnicodeUTF8));
+        proxyPortLabel->setText(QApplication::translate("OptionsDialog", "&Port:", 0));
 #ifndef QT_NO_TOOLTIP
-        proxyPort->setToolTip(QApplication::translate("OptionsDialog", "Port of the proxy (e.g. 9050)", 0, QApplication::UnicodeUTF8));
+        proxyPort->setToolTip(QApplication::translate("OptionsDialog", "Port of the proxy (e.g. 9050)", 0));
 #endif // QT_NO_TOOLTIP
-        socksVersionLabel->setText(QApplication::translate("OptionsDialog", "SOCKS &Version:", 0, QApplication::UnicodeUTF8));
+        socksVersionLabel->setText(QApplication::translate("OptionsDialog", "SOCKS &Version:", 0));
 #ifndef QT_NO_TOOLTIP
-        socksVersion->setToolTip(QApplication::translate("OptionsDialog", "SOCKS version of the proxy (e.g. 5)", 0, QApplication::UnicodeUTF8));
+        socksVersion->setToolTip(QApplication::translate("OptionsDialog", "SOCKS version of the proxy (e.g. 5)", 0));
 #endif // QT_NO_TOOLTIP
-        tabWidget->setTabText(tabWidget->indexOf(tabNetwork), QApplication::translate("OptionsDialog", "&Network", 0, QApplication::UnicodeUTF8));
+        tabWidget->setTabText(tabWidget->indexOf(tabNetwork), QApplication::translate("OptionsDialog", "&Network", 0));
 #ifndef QT_NO_TOOLTIP
-        minimizeToTray->setToolTip(QApplication::translate("OptionsDialog", "Show only a tray icon after minimizing the window.", 0, QApplication::UnicodeUTF8));
+        minimizeToTray->setToolTip(QApplication::translate("OptionsDialog", "Show only a tray icon after minimizing the window.", 0));
 #endif // QT_NO_TOOLTIP
-        minimizeToTray->setText(QApplication::translate("OptionsDialog", "&Minimize to the tray instead of the taskbar", 0, QApplication::UnicodeUTF8));
+        minimizeToTray->setText(QApplication::translate("OptionsDialog", "&Minimize to the tray instead of the taskbar", 0));
 #ifndef QT_NO_TOOLTIP
-        minimizeOnClose->setToolTip(QApplication::translate("OptionsDialog", "Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.", 0, QApplication::UnicodeUTF8));
+        minimizeOnClose->setToolTip(QApplication::translate("OptionsDialog", "Minimize instead of exit the application when the window is closed. When this option is enabled, the application will be closed only after selecting Quit in the menu.", 0));
 #endif // QT_NO_TOOLTIP
-        minimizeOnClose->setText(QApplication::translate("OptionsDialog", "M&inimize on close", 0, QApplication::UnicodeUTF8));
-        tabWidget->setTabText(tabWidget->indexOf(tabWindow), QApplication::translate("OptionsDialog", "&Window", 0, QApplication::UnicodeUTF8));
-        langLabel->setText(QApplication::translate("OptionsDialog", "User Interface &language:", 0, QApplication::UnicodeUTF8));
+        minimizeOnClose->setText(QApplication::translate("OptionsDialog", "M&inimize on close", 0));
+        tabWidget->setTabText(tabWidget->indexOf(tabWindow), QApplication::translate("OptionsDialog", "&Window", 0));
+        langLabel->setText(QApplication::translate("OptionsDialog", "User Interface &language:", 0));
 #ifndef QT_NO_TOOLTIP
-        lang->setToolTip(QApplication::translate("OptionsDialog", "The user interface language can be set here. This setting will take effect after restarting scash.", 0, QApplication::UnicodeUTF8));
+        lang->setToolTip(QApplication::translate("OptionsDialog", "The user interface language can be set here. This setting will take effect after restarting scash.", 0));
 #endif // QT_NO_TOOLTIP
-        unitLabel->setText(QApplication::translate("OptionsDialog", "&Unit to show amounts in:", 0, QApplication::UnicodeUTF8));
+        unitLabel->setText(QApplication::translate("OptionsDialog", "&Unit to show amounts in:", 0));
 #ifndef QT_NO_TOOLTIP
-        unit->setToolTip(QApplication::translate("OptionsDialog", "Choose the default subdivision unit to show in the interface and when sending coins.", 0, QApplication::UnicodeUTF8));
+        unit->setToolTip(QApplication::translate("OptionsDialog", "Choose the default subdivision unit to show in the interface and when sending coins.", 0));
 #endif // QT_NO_TOOLTIP
 #ifndef QT_NO_TOOLTIP
-        displayAddresses->setToolTip(QApplication::translate("OptionsDialog", "Whether to show Scash addresses in the transaction list or not.", 0, QApplication::UnicodeUTF8));
+        displayAddresses->setToolTip(QApplication::translate("OptionsDialog", "Whether to show Scash addresses in the transaction list or not.", 0));
 #endif // QT_NO_TOOLTIP
-        displayAddresses->setText(QApplication::translate("OptionsDialog", "&Display addresses in transaction list", 0, QApplication::UnicodeUTF8));
+        displayAddresses->setText(QApplication::translate("OptionsDialog", "&Display addresses in transaction list", 0));
 #ifndef QT_NO_TOOLTIP
-        coinControlFeatures->setToolTip(QApplication::translate("OptionsDialog", "Whether to show coin control features or not.", 0, QApplication::UnicodeUTF8));
+        coinControlFeatures->setToolTip(QApplication::translate("OptionsDialog", "Whether to show coin control features or not.", 0));
 #endif // QT_NO_TOOLTIP
-        coinControlFeatures->setText(QApplication::translate("OptionsDialog", "Display coin &control settings (experimental feature)", 0, QApplication::UnicodeUTF8));
-        tabWidget->setTabText(tabWidget->indexOf(tabDisplay), QApplication::translate("OptionsDialog", "&Display", 0, QApplication::UnicodeUTF8));
+        coinControlFeatures->setText(QApplication::translate("OptionsDialog", "Display coin &control settings (experimental feature)", 0));
+        tabWidget->setTabText(tabWidget->indexOf(tabDisplay), QApplication::translate("OptionsDialog", "&Display", 0));
         statusLabel->setText(QString());
-        okButton->setText(QApplication::translate("OptionsDialog", "&OK", 0, QApplication::UnicodeUTF8));
-        cancelButton->setText(QApplication::translate("OptionsDialog", "&Cancel", 0, QApplication::UnicodeUTF8));
-        applyButton->setText(QApplication::translate("OptionsDialog", "&Apply", 0, QApplication::UnicodeUTF8));
+        okButton->setText(QApplication::translate("OptionsDialog", "&OK", 0));
+        cancelButton->setText(QApplication::translate("OptionsDialog", "&Cancel", 0));
+        applyButton->setText(QApplication::translate("OptionsDialog", "&Apply", 0));
     } // retranslateUi
 
 };

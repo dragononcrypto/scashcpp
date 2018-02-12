@@ -10,20 +10,20 @@
 #define UI_SIGNVERIFYMESSAGEDIALOG_H
 
 #include <QtCore/QVariant>
-#include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QDialog>
-#include <QtGui/QHBoxLayout>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QPlainTextEdit>
-#include <QtGui/QPushButton>
-#include <QtGui/QSpacerItem>
-#include <QtGui/QTabWidget>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QWidget>
+#include <QtWidgets/QAction>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QButtonGroup>
+#include <QtWidgets/QDialog>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPlainTextEdit>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QSpacerItem>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QWidget>
 #include "qvalidatedlineedit.h"
 
 QT_BEGIN_NAMESPACE
@@ -279,57 +279,57 @@ public:
 
     void retranslateUi(QDialog *SignVerifyMessageDialog)
     {
-        SignVerifyMessageDialog->setWindowTitle(QApplication::translate("SignVerifyMessageDialog", "Signatures - Sign / Verify a Message", 0, QApplication::UnicodeUTF8));
-        infoLabel_SM->setText(QApplication::translate("SignVerifyMessageDialog", "You can sign messages with your addresses to prove you own them. Be careful not to sign anything vague, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.", 0, QApplication::UnicodeUTF8));
+        SignVerifyMessageDialog->setWindowTitle(QApplication::translate("SignVerifyMessageDialog", "Signatures - Sign / Verify a Message", 0));
+        infoLabel_SM->setText(QApplication::translate("SignVerifyMessageDialog", "You can sign messages with your addresses to prove you own them. Be careful not to sign anything vague, as phishing attacks may try to trick you into signing your identity over to them. Only sign fully-detailed statements you agree to.", 0));
 #ifndef QT_NO_TOOLTIP
-        addressIn_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "The address to sign the message with (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)", 0, QApplication::UnicodeUTF8));
+        addressIn_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "The address to sign the message with (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)", 0));
 #endif // QT_NO_TOOLTIP
 #ifndef QT_NO_TOOLTIP
-        addressBookButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Choose an address from the address book", 0, QApplication::UnicodeUTF8));
+        addressBookButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Choose an address from the address book", 0));
 #endif // QT_NO_TOOLTIP
         addressBookButton_SM->setText(QString());
-        addressBookButton_SM->setShortcut(QApplication::translate("SignVerifyMessageDialog", "Alt+A", 0, QApplication::UnicodeUTF8));
+        addressBookButton_SM->setShortcut(QApplication::translate("SignVerifyMessageDialog", "Alt+A", 0));
 #ifndef QT_NO_TOOLTIP
-        pasteButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Paste address from clipboard", 0, QApplication::UnicodeUTF8));
+        pasteButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Paste address from clipboard", 0));
 #endif // QT_NO_TOOLTIP
         pasteButton_SM->setText(QString());
-        pasteButton_SM->setShortcut(QApplication::translate("SignVerifyMessageDialog", "Alt+P", 0, QApplication::UnicodeUTF8));
+        pasteButton_SM->setShortcut(QApplication::translate("SignVerifyMessageDialog", "Alt+P", 0));
 #ifndef QT_NO_TOOLTIP
-        messageIn_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Enter the message you want to sign here", 0, QApplication::UnicodeUTF8));
+        messageIn_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Enter the message you want to sign here", 0));
 #endif // QT_NO_TOOLTIP
 #ifndef QT_NO_TOOLTIP
-        copySignatureButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Copy the current signature to the system clipboard", 0, QApplication::UnicodeUTF8));
+        copySignatureButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Copy the current signature to the system clipboard", 0));
 #endif // QT_NO_TOOLTIP
         copySignatureButton_SM->setText(QString());
 #ifndef QT_NO_TOOLTIP
-        signMessageButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Sign the message to prove you own this Scash address", 0, QApplication::UnicodeUTF8));
+        signMessageButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Sign the message to prove you own this Scash address", 0));
 #endif // QT_NO_TOOLTIP
-        signMessageButton_SM->setText(QApplication::translate("SignVerifyMessageDialog", "&Sign Message", 0, QApplication::UnicodeUTF8));
+        signMessageButton_SM->setText(QApplication::translate("SignVerifyMessageDialog", "&Sign Message", 0));
 #ifndef QT_NO_TOOLTIP
-        clearButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Reset all sign message fields", 0, QApplication::UnicodeUTF8));
+        clearButton_SM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Reset all sign message fields", 0));
 #endif // QT_NO_TOOLTIP
-        clearButton_SM->setText(QApplication::translate("SignVerifyMessageDialog", "Clear &All", 0, QApplication::UnicodeUTF8));
+        clearButton_SM->setText(QApplication::translate("SignVerifyMessageDialog", "Clear &All", 0));
         statusLabel_SM->setText(QString());
-        tabWidget->setTabText(tabWidget->indexOf(tabSignMessage), QApplication::translate("SignVerifyMessageDialog", "&Sign Message", 0, QApplication::UnicodeUTF8));
-        infoLabel_VM->setText(QApplication::translate("SignVerifyMessageDialog", "Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.", 0, QApplication::UnicodeUTF8));
+        tabWidget->setTabText(tabWidget->indexOf(tabSignMessage), QApplication::translate("SignVerifyMessageDialog", "&Sign Message", 0));
+        infoLabel_VM->setText(QApplication::translate("SignVerifyMessageDialog", "Enter the signing address, message (ensure you copy line breaks, spaces, tabs, etc. exactly) and signature below to verify the message. Be careful not to read more into the signature than what is in the signed message itself, to avoid being tricked by a man-in-the-middle attack.", 0));
 #ifndef QT_NO_TOOLTIP
-        addressIn_VM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "The address the message was signed with (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)", 0, QApplication::UnicodeUTF8));
+        addressIn_VM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "The address the message was signed with (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)", 0));
 #endif // QT_NO_TOOLTIP
 #ifndef QT_NO_TOOLTIP
-        addressBookButton_VM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Choose an address from the address book", 0, QApplication::UnicodeUTF8));
+        addressBookButton_VM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Choose an address from the address book", 0));
 #endif // QT_NO_TOOLTIP
         addressBookButton_VM->setText(QString());
-        addressBookButton_VM->setShortcut(QApplication::translate("SignVerifyMessageDialog", "Alt+A", 0, QApplication::UnicodeUTF8));
+        addressBookButton_VM->setShortcut(QApplication::translate("SignVerifyMessageDialog", "Alt+A", 0));
 #ifndef QT_NO_TOOLTIP
-        verifyMessageButton_VM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Verify the message to ensure it was signed with the specified Scash address", 0, QApplication::UnicodeUTF8));
+        verifyMessageButton_VM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Verify the message to ensure it was signed with the specified Scash address", 0));
 #endif // QT_NO_TOOLTIP
-        verifyMessageButton_VM->setText(QApplication::translate("SignVerifyMessageDialog", "&Verify Message", 0, QApplication::UnicodeUTF8));
+        verifyMessageButton_VM->setText(QApplication::translate("SignVerifyMessageDialog", "&Verify Message", 0));
 #ifndef QT_NO_TOOLTIP
-        clearButton_VM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Reset all verify message fields", 0, QApplication::UnicodeUTF8));
+        clearButton_VM->setToolTip(QApplication::translate("SignVerifyMessageDialog", "Reset all verify message fields", 0));
 #endif // QT_NO_TOOLTIP
-        clearButton_VM->setText(QApplication::translate("SignVerifyMessageDialog", "Clear &All", 0, QApplication::UnicodeUTF8));
+        clearButton_VM->setText(QApplication::translate("SignVerifyMessageDialog", "Clear &All", 0));
         statusLabel_VM->setText(QString());
-        tabWidget->setTabText(tabWidget->indexOf(tabVerifyMessage), QApplication::translate("SignVerifyMessageDialog", "&Verify Message", 0, QApplication::UnicodeUTF8));
+        tabWidget->setTabText(tabWidget->indexOf(tabVerifyMessage), QApplication::translate("SignVerifyMessageDialog", "&Verify Message", 0));
     } // retranslateUi
 
 };

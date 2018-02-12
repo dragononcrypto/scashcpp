@@ -12,7 +12,6 @@
 #include "chartdata.h"
 #include "net.h"
 
-#include <unistd.h>
 #include <ios>
 #include <iostream>
 #include <fstream>
@@ -20,8 +19,6 @@
 #include <QPixmap>
 #include <QUrl>
 #include <QPainter>
-
-#include <qrcodegen.h>
 
 
 PerfMonDialog::PerfMonDialog(QWidget *parent) :
@@ -128,7 +125,10 @@ static void drawCharOnImage(QImage &img, ChartData& data, int divisor, QString u
                 img.setPixel(x, y, 0xff00000);
                 if (prevY != -1)
                 {
-                    for (int t = std::min(y, prevY); t < std::max(y, prevY); t++) img.setPixel(x, t, 0xcc4444);
+                    for (int t = (std::min)(y, prevY); t < (std::max)(y, prevY); t++)
+                    {
+                        img.setPixel(x, t, 0xcc4444);
+                    }
                 }
 
                 prevY = y;
@@ -179,6 +179,9 @@ static void prepareAndDrawChartData(QImage &img, QLabel &label, ChartData &data,
 
 int64 getMemUsage()
 {
+#ifdef WIN32
+    return 0; // nah. who cares.
+#else
     // 'file' stat seems to give the most reliable results
     std::ifstream stat_stream("/proc/self/stat", std::ifstream::ios_base::in);
 
@@ -206,6 +209,7 @@ int64 getMemUsage()
      unsigned long resident_set = rss * page_size_kb;
 
     return resident_set;
+#endif
 }
 
 void PerfMonDialog::updateNow()

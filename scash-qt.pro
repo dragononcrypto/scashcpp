@@ -10,6 +10,8 @@ OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
 
+QT += widgets
+
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
     # Mac: compile for maximum compatibility (10.5, 32-bit)
@@ -83,7 +85,7 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
 
 QMAKE_CXXFLAGS += -std=c++11 -msse2
 QMAKE_CFLAGS += -msse2
-QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
+QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall
 
 # Input
 DEPENDPATH += src src/json src/qt
