@@ -13,13 +13,15 @@
 #include "ui_interface.h"
 #include "qtipcserver.h"
 
-#include <QApplication>
-#include <QMessageBox>
-#include <QTextCodec>
-#include <QLocale>
-#include <QTranslator>
-#include <QSplashScreen>
-#include <QLibraryInfo>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMessageBox>
+#include <QtCore/QTextCodec>
+#include <QtCore/QLocale>
+#include <QtCore/QTranslator>
+#include <QtWidgets/QSplashScreen>
+#include <QtCore/QLibraryInfo>
+
+using namespace Qt;
 
 #if defined(BITCOIN_NEED_QT_PLUGINS) && !defined(_BITCOIN_QT_PLUGINS_INCLUDED)
 #define _BITCOIN_QT_PLUGINS_INCLUDED

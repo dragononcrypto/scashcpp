@@ -1,9 +1,9 @@
 #ifndef GUIUTIL_H
 #define GUIUTIL_H
 
-#include <QString>
-#include <QObject>
-#include <QMessageBox>
+#include <QtCore/QString>
+#include <QtCore/QObject>
+#include <QtWidgets/QMessageBox>
 
 QT_BEGIN_NAMESPACE
 class QFont;
