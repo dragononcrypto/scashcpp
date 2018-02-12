@@ -2,7 +2,7 @@ ACLOCAL_AMFLAGS = -I build-aux/m4
 SUBDIRS = ../src
 .PHONY: deploy FORCE
 
-GZIP_ENV="-9n"
+#GZIP_ENV="-9n"
 
 PKG_CHECK_MODULES=
 BITCOIND_BIN=$(top_builddir)/../src/scashd$(EXEEXT)
@@ -46,9 +46,7 @@ distcheck-hook:
 
 $(BITCOIN_WIN_INSTALLER): all-recursive
     $(MKDIR_P) $(top_builddir)/release
-    STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIND_BIN) $(top_builddir)/release
-    STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_QT_BIN) $(top_builddir)/release
-    STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIN_CLI_BIN) $(top_builddir)/release
+#STRIPPROG="$(STRIP)" $(INSTALL_STRIP_PROGRAM) $(BITCOIND_BIN) $(top_builddir)/release
     @test -f $(MAKENSIS) && $(MAKENSIS) -V2 $(top_builddir)/share/setup.nsi || \
       echo error: could not build $@
     @echo built $@
@@ -108,8 +106,8 @@ $(APP_DIST_DIR)/.background/$(OSX_BACKGROUND_IMAGE): contrib/macdeploy/$(OSX_BAC
 $(APP_DIST_DIR)/.DS_Store: contrib/macdeploy/DS_Store
     $(INSTALL) $< $@
 
-$(APP_DIST_DIR)/$(OSX_APP)/Contents/MacOS/Scash-Qt: $(OSX_APP_BUILT) $(OSX_PACKAGING)
-    INSTALLNAMETOOL=$(INSTALLNAMETOOL)  OTOOL=$(OTOOL) STRIP=$(STRIP) $(OSX_DEPLOY_SCRIPT) $(OSX_APP) -translations-dir=$(QT_TRANSLATION_DIR) -add-qt-tr $(OSX_QT_TRANSLATIONS) -verbose 2
+#$(APP_DIST_DIR)/$(OSX_APP)/Contents/MacOS/Scash-Qt: $(OSX_APP_BUILT) $(OSX_PACKAGING)
+#    INSTALLNAMETOOL=$(INSTALLNAMETOOL)  OTOOL=$(OTOOL) STRIP=$(STRIP) $(OSX_DEPLOY_SCRIPT) $(OSX_APP) -translations-dir=$(QT_TRANSLATION_DIR) -add-qt-tr $(OSX_QT_TRANSLATIONS) -verbose 2
 
 deploydir: $(APP_DIST_EXTRAS)
 endif
@@ -130,37 +128,6 @@ $(BITCOIND_BIN): FORCE
 
 $(BITCOIN_CLI_BIN): FORCE
     $(MAKE) -C src $(@F)
-
-if USE_LCOV
-
-baseline.info:
-    $(LCOV) -c -i -d $(abs_builddir)/src -o $@
-
-baseline_filtered.info: baseline.info
-    $(LCOV) -r $< "/usr/include/*" -o $@
-
-leveldb_baseline.info: baseline_filtered.info
-    $(LCOV) -c -i -d $(abs_builddir)/src/leveldb -b $(abs_builddir)/src/leveldb -o $@
-
-leveldb_baseline_filtered.info: leveldb_baseline.info
-    $(LCOV) -r $< "/usr/include/*" -o $@
-
-baseline_filtered_combined.info: leveldb_baseline_filtered.info baseline_filtered.info
-    $(LCOV) -a leveldb_baseline_filtered.info -a baseline_filtered.info -o $@
-
-block_test_filtered.info: block_test.info
-    $(LCOV) -r $< "/usr/include/*" -o $@
-
-rpc_test_filtered.info: rpc_test.info
-    $(LCOV) -r $< "/usr/include/*" -o $@
-
-total.coverage/.dirstamp: total_coverage.info
-    $(GENHTML) -s $< -o $(@D)
-    @touch $@
-
-cov: test_scash.coverage/.dirstamp total.coverage/.dirstamp
-
-endif
 
 dist_noinst_SCRIPTS = autogen.sh
 
