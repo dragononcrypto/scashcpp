@@ -13,7 +13,7 @@
 #include <map>
 #include <vector>
 
-#include <openssl/rand.h>
+#include "openssl/include/openssl/rand.h"
 
 
 /** Extended statistics about a CAddress */

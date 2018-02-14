@@ -29,8 +29,11 @@ namespace boost {
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
 #include <boost/algorithm/string/replace.hpp>
-#include <openssl/crypto.h>
-#include <openssl/rand.h>
+
+#include "openssl/include/openssl/stack.h"
+#include "openssl/include/openssl/crypto.h"
+#include "openssl/include/openssl/rand.h"
+
 #include <stdarg.h>
 
 #ifdef WIN32

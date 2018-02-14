@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'messageentry.ui'
 **
-** Created by: Qt User Interface Compiler version 4.8.7
+** Created by: Qt User Interface Compiler version 5.10.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -32,17 +32,17 @@ public:
     void setupUi(QFrame *MessageEntry)
     {
         if (MessageEntry->objectName().isEmpty())
-            MessageEntry->setObjectName(QString::fromUtf8("MessageEntry"));
+            MessageEntry->setObjectName(QStringLiteral("MessageEntry"));
         MessageEntry->resize(729, 136);
         MessageEntry->setFrameShape(QFrame::StyledPanel);
         MessageEntry->setFrameShadow(QFrame::Sunken);
         gridLayoutMsg = new QGridLayout(MessageEntry);
         gridLayoutMsg->setSpacing(12);
-        gridLayoutMsg->setObjectName(QString::fromUtf8("gridLayoutMsg"));
+        gridLayoutMsg->setObjectName(QStringLiteral("gridLayoutMsg"));
         gridLayout = new QGridLayout();
-        gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+        gridLayout->setObjectName(QStringLiteral("gridLayout"));
         MessageEditor = new QPlainTextEdit(MessageEntry);
-        MessageEditor->setObjectName(QString::fromUtf8("MessageEditor"));
+        MessageEditor->setObjectName(QStringLiteral("MessageEditor"));
 
         gridLayout->addWidget(MessageEditor, 0, 0, 1, 1);
 
@@ -50,7 +50,7 @@ public:
         gridLayoutMsg->addLayout(gridLayout, 0, 0, 1, 1);
 
         MessageDetailsLabel = new QLabel(MessageEntry);
-        MessageDetailsLabel->setObjectName(QString::fromUtf8("MessageDetailsLabel"));
+        MessageDetailsLabel->setObjectName(QStringLiteral("MessageDetailsLabel"));
 
         gridLayoutMsg->addWidget(MessageDetailsLabel, 1, 0, 1, 1);
 
@@ -62,8 +62,8 @@ public:
 
     void retranslateUi(QFrame *MessageEntry)
     {
-        MessageEntry->setWindowTitle(QApplication::translate("MessageEntry", "Form", 0));
-        MessageDetailsLabel->setText(QApplication::translate("MessageEntry", "...", 0));
+        MessageEntry->setWindowTitle(QApplication::translate("MessageEntry", "Form", nullptr));
+        MessageDetailsLabel->setText(QApplication::translate("MessageEntry", "...", nullptr));
     } // retranslateUi
 
 };

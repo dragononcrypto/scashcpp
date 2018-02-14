@@ -140,7 +140,7 @@ static void drawCharOnImage(QImage &img, ChartData& data, int divisor, QString u
     if (p.begin(&img))
     {
         p.setPen(QPen(Qt::darkBlue));
-        p.setFont(QFont("Times", 12, QFont::Bold));
+        p.setFont(QFont("Verdana", 10, QFont::Normal));
         p.drawText(img.rect(), Qt::AlignTop | Qt::AlignRight,
                    QString::fromLatin1("Max: %1 %2  ").arg(maximum / divisor).arg(unit));
 
@@ -177,10 +177,23 @@ static void prepareAndDrawChartData(QImage &img, QLabel &label, ChartData &data,
     label.setPixmap(QPixmap::fromImage(img));
 }
 
+#ifdef WIN32
+#include <windows.h>
+#include <psapi.h>
+#endif
+
 int64 getMemUsage()
 {
 #ifdef WIN32
-    return 0; // nah. who cares.
+    PROCESS_MEMORY_COUNTERS pmc;
+    if ( GetProcessMemoryInfo( GetCurrentProcess(), &pmc, sizeof(pmc)) )
+    {
+        return pmc.WorkingSetSize / 1024;
+    }
+    else
+    {
+        return 0;
+    }
 #else
     // 'file' stat seems to give the most reliable results
     std::ifstream stat_stream("/proc/self/stat", std::ifstream::ios_base::in);

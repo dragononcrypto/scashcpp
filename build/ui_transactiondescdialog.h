@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading UI file 'transactiondescdialog.ui'
 **
-** Created by: Qt User Interface Compiler version 4.8.7
+** Created by: Qt User Interface Compiler version 5.10.0
 **
 ** WARNING! All changes made in this file will be lost when recompiling UI file!
 ********************************************************************************/
@@ -31,18 +31,18 @@ public:
     void setupUi(QDialog *TransactionDescDialog)
     {
         if (TransactionDescDialog->objectName().isEmpty())
-            TransactionDescDialog->setObjectName(QString::fromUtf8("TransactionDescDialog"));
+            TransactionDescDialog->setObjectName(QStringLiteral("TransactionDescDialog"));
         TransactionDescDialog->resize(620, 339);
         verticalLayout = new QVBoxLayout(TransactionDescDialog);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
         detailText = new QTextEdit(TransactionDescDialog);
-        detailText->setObjectName(QString::fromUtf8("detailText"));
+        detailText->setObjectName(QStringLiteral("detailText"));
         detailText->setReadOnly(true);
 
         verticalLayout->addWidget(detailText);
 
         buttonBox = new QDialogButtonBox(TransactionDescDialog);
-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+        buttonBox->setObjectName(QStringLiteral("buttonBox"));
         buttonBox->setOrientation(Qt::Horizontal);
         buttonBox->setStandardButtons(QDialogButtonBox::Close);
 
@@ -58,9 +58,9 @@ public:
 
     void retranslateUi(QDialog *TransactionDescDialog)
     {
-        TransactionDescDialog->setWindowTitle(QApplication::translate("TransactionDescDialog", "Transaction details", 0));
+        TransactionDescDialog->setWindowTitle(QApplication::translate("TransactionDescDialog", "Transaction details", nullptr));
 #ifndef QT_NO_TOOLTIP
-        detailText->setToolTip(QApplication::translate("TransactionDescDialog", "This pane shows a detailed description of the transaction", 0));
+        detailText->setToolTip(QApplication::translate("TransactionDescDialog", "This pane shows a detailed description of the transaction", nullptr));
 #endif // QT_NO_TOOLTIP
     } // retranslateUi
 
