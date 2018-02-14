@@ -13,6 +13,8 @@
 #include "ui_interface.h"
 #include "qtipcserver.h"
 
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMessageBox>
 #include <QTextCodec>
 #include <QLocale>
 #include <QTranslator>
