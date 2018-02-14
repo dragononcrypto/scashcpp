@@ -25,14 +25,10 @@
 #include <ifaddrs.h>
 #endif
 
-<<<<<<< HEAD
-//typedef u_int SOCKET;
-=======
 #ifndef WIN32
 typedef u_int SOCKET;
 #endif
 
->>>>>>> Qt5
 #ifdef WIN32
 #define MSG_NOSIGNAL        0
 #define MSG_DONTWAIT        0
