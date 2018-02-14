@@ -10,6 +10,8 @@ OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
 
+QT += widgets
+
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
     # Mac: compile for maximum compatibility (10.5, 32-bit)
@@ -83,7 +85,7 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
 
 QMAKE_CXXFLAGS += -std=c++11 -msse2
 QMAKE_CFLAGS += -msse2
-QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
+QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option
 
 # Input
 DEPENDPATH += src src/json src/qt
@@ -116,7 +118,6 @@ HEADERS += src/qt/bitcoingui.h \
     src/random.h \
     src/uint256.h \
     src/kernel.h \
-    src/scrypt_mine.h \
     src/pbkdf2.h \
     src/serialize.h \
     src/strlcpy.h \
@@ -261,9 +262,6 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/rpcconsole.cpp \
     src/noui.cpp \
     src/kernel.cpp \
-    src/scrypt-x86.S \
-    src/scrypt-x86_64.S \
-    src/scrypt_mine.cpp \
     src/pbkdf2.cpp \
     src/aes_helper.c \
     src/blake.c \
@@ -278,8 +276,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/simd.c \
     src/skein.c \
     src/fugue.c \
-    src/hamsi.c \
-    src/scrypt.cpp
+    src/hamsi.c
 
 RESOURCES += \
     src/qt/bitcoin.qrc
@@ -367,6 +364,9 @@ isEmpty(BOOST_INCLUDE_PATH) {
 
 windows:DEFINES += WIN32 WIN32_LEAN_AND_MEAN
 windows:RC_FILE = src/qt/res/bitcoin-qt.rc
+
+windows:LIBS += -llibcrypto32MT
+windows:LIBS += -llibssl32MT
 
 windows:!contains(MINGW_THREAD_BUGFIX, 0) {
     # At least qmake's win32-g++-cross profile is missing the -lmingwthrd

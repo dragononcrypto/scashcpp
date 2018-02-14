@@ -1,7 +1,7 @@
 #ifndef SENDCOINSENTRY_H
 #define SENDCOINSENTRY_H
 
-#include <QFrame>
+#include <QtWidgets/QFrame>
 
 namespace Ui {
     class SendCoinsEntry;

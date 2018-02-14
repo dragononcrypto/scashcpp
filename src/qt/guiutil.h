@@ -1,8 +1,13 @@
 #ifndef GUIUTIL_H
 #define GUIUTIL_H
 
+<<<<<<< HEAD
 #include <QtCore/QString>
 #include <QtCore/QObject>
+=======
+#include <QString>
+#include <QObject>
+>>>>>>> Qt5
 #include <QtWidgets/QMessageBox>
 
 QT_BEGIN_NAMESPACE

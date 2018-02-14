@@ -1,7 +1,7 @@
 #ifndef ASKPASSPHRASEDIALOG_H
 #define ASKPASSPHRASEDIALOG_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 
 namespace Ui {
     class AskPassphraseDialog;

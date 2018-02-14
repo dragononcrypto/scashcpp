@@ -8,8 +8,8 @@
 #include "guiconstants.h"
 #include "walletmodel.h"
 
-#include <QMessageBox>
-#include <QPushButton>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QPushButton>
 #include <QKeyEvent>
 
 extern bool fWalletUnlockMintOnly;

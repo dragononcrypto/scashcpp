@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.0" language="ru">
-<defaultcodec>UTF-8</defaultcodec>
+<TS version="2.1" language="ru">
 <context>
     <name>AboutDialog</name>
     <message>
@@ -16,11 +15,17 @@
     </message>
     <message>
         <location line="+41"/>
-        <source>Copyright © 2017-2018 The Scash developers</source>
-        <translation>Все права защищены © 2017-2018 Разработчики Scash</translation>
+        <source>
+Copyright © 2017-2018 Scash Developers
+</source>
+        <translation>Права принадлежат © 2017-2018 Scash Developers</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <source>Copyright © 2017-2018 The Scash developers</source>
+        <translation type="vanished">Все права защищены © 2017-2018 Разработчики Scash</translation>
+    </message>
+    <message>
+        <location line="+15"/>
         <source>
 Distributed under the MIT/X11 software license, see the accompanying file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -104,7 +109,7 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>&amp;Удалить</translation>
     </message>
     <message>
-        <location filename="../addressbookpage.cpp" line="+65"/>
+        <location filename="../addressbookpage.cpp" line="+66"/>
         <source>Copy &amp;Label</source>
         <translation>Копировать &amp;метку</translation>
     </message>
@@ -137,7 +142,7 @@ This product includes software developed by the OpenSSL Project for use in the O
 <context>
     <name>AddressTableModel</name>
     <message>
-        <location filename="../addresstablemodel.cpp" line="+142"/>
+        <location filename="../addresstablemodel.cpp" line="+146"/>
         <source>Label</source>
         <translation>Метка</translation>
     </message>
@@ -175,7 +180,17 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Повторите новый пароль</translation>
     </message>
     <message>
-        <location filename="../askpassphrasedialog.cpp" line="+33"/>
+        <location line="+33"/>
+        <source>Serves to disable trivial use of sendmoney when the OS account is compromised. Provides no real security.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>For staking only</source>
+        <translation>Только для стейкинга</translation>
+    </message>
+    <message>
+        <location filename="../askpassphrasedialog.cpp" line="+39"/>
         <source>Enter the new passphrase to the wallet.&lt;br/&gt;Please use a passphrase of &lt;b&gt;10 or more random characters&lt;/b&gt;, or &lt;b&gt;eight or more words&lt;/b&gt;.</source>
         <translation>Введите новый пароль для бумажника. &lt;br/&gt; Пожалуйста, используйте фразы из &lt;b&gt;10 или более случайных символов,&lt;/b&gt; или &lt;b&gt;восьми и более слов.&lt;/b&gt;</translation>
     </message>
@@ -185,7 +200,7 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Зашифровать бумажник</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="+8"/>
         <source>This operation needs your wallet passphrase to unlock the wallet.</source>
         <translation>Для выполнения операции требуется пароль вашего бумажника.</translation>
     </message>
@@ -235,49 +250,49 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>ВАЖНО: все предыдущие резервные копии вашего кошелька должны быть заменены новым зашифрованным файлом. В целях безопасности предыдущие резервные копии нешифрованного кошелька станут бесполезны, как только вы начнёте использовать новый шифрованный кошелёк.</translation>
     </message>
     <message>
-        <location line="+100"/>
+        <location line="+103"/>
         <location line="+24"/>
         <source>Warning: The Caps Lock key is on!</source>
         <translation>Внимание: Caps Lock включен!</translation>
     </message>
     <message>
-        <location line="-130"/>
-        <location line="+58"/>
+        <location line="-133"/>
+        <location line="+60"/>
         <source>Wallet encrypted</source>
         <translation>Бумажник зашифрован</translation>
     </message>
     <message>
-        <location line="-56"/>
+        <location line="-58"/>
         <source>Scash will close now to finish the encryption process. Remember that encrypting your wallet cannot fully protect your coins from being stolen by malware infecting your computer.</source>
         <translation>Сейчас программа закроется для завершения процесса шифрования. Помните, что шифрование вашего бумажника не может полностью защитить ваши монеты от кражи с помощью инфицирования вашего компьютера вредоносным ПО.</translation>
     </message>
     <message>
         <location line="+13"/>
         <location line="+7"/>
-        <location line="+42"/>
+        <location line="+44"/>
         <location line="+6"/>
         <source>Wallet encryption failed</source>
         <translation>Не удалось зашифровать бумажник</translation>
     </message>
     <message>
-        <location line="-54"/>
+        <location line="-56"/>
         <source>Wallet encryption failed due to an internal error. Your wallet was not encrypted.</source>
         <translation>Шифрование бумажника не удалось из-за внутренней ошибки. Ваш бумажник не был зашифрован.</translation>
     </message>
     <message>
         <location line="+7"/>
-        <location line="+48"/>
+        <location line="+50"/>
         <source>The supplied passphrases do not match.</source>
         <translation>Введённые пароли не совпадают.</translation>
     </message>
     <message>
-        <location line="-37"/>
+        <location line="-38"/>
         <source>Wallet unlock failed</source>
         <translation>Разблокировка бумажника не удалась</translation>
     </message>
     <message>
         <location line="+1"/>
-        <location line="+11"/>
+        <location line="+12"/>
         <location line="+19"/>
         <source>The passphrase entered for the wallet decryption was incorrect.</source>
         <translation>Указанный пароль не подходит.</translation>
@@ -296,17 +311,17 @@ This product includes software developed by the OpenSSL Project for use in the O
 <context>
     <name>BitcoinGUI</name>
     <message>
-        <location filename="../bitcoingui.cpp" line="+257"/>
+        <location filename="../bitcoingui.cpp" line="+304"/>
         <source>Sign &amp;message...</source>
         <translation>&amp;Подписать сообщение</translation>
     </message>
     <message>
-        <location line="+237"/>
+        <location line="+249"/>
         <source>Synchronizing with network...</source>
         <translation>Синхронизация с сетью...</translation>
     </message>
     <message>
-        <location line="-299"/>
+        <location line="-312"/>
         <source>&amp;Overview</source>
         <translation>О&amp;бзор</translation>
     </message>
@@ -396,7 +411,7 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>&amp;Изменить пароль</translation>
     </message>
     <message numerus="yes">
-        <location line="+241"/>
+        <location line="+254"/>
         <source>~%n block(s) remaining</source>
         <translation>
             <numerusform>остался ~%n блок</numerusform>
@@ -410,12 +425,12 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Загружено %1 из %2 блоков истории операций (%3% завершено).</translation>
     </message>
     <message>
-        <location line="-242"/>
+        <location line="-254"/>
         <source>&amp;Export...</source>
         <translation>&amp;Экспорт...</translation>
     </message>
     <message>
-        <location line="-58"/>
+        <location line="-59"/>
         <source>Send coins to a Scash address</source>
         <translation>Отправить монеты на указанный адрес Scash</translation>
     </message>
@@ -425,12 +440,12 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Изменить параметры конфигурации Scash</translation>
     </message>
     <message>
-        <location line="+14"/>
+        <location line="+15"/>
         <source>Export the data in the current tab to a file</source>
         <translation>Экспортировать данные из вкладки в файл</translation>
     </message>
     <message>
-        <location line="-10"/>
+        <location line="-11"/>
         <source>Encrypt or decrypt wallet</source>
         <translation>Зашифровать или расшифровать бумажник</translation>
     </message>
@@ -445,7 +460,7 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Изменить пароль шифрования бумажника</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+8"/>
         <source>&amp;Debug window</source>
         <translation>&amp;Окно отладки</translation>
     </message>
@@ -455,12 +470,12 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Открыть консоль отладки и диагностики</translation>
     </message>
     <message>
-        <location line="-5"/>
+        <location line="-6"/>
         <source>&amp;Verify message...</source>
         <translation>&amp;Проверить сообщение...</translation>
     </message>
     <message>
-        <location line="-186"/>
+        <location line="-210"/>
         <source>Scash</source>
         <translation>Scash</translation>
     </message>
@@ -470,7 +485,7 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Бумажник</translation>
     </message>
     <message>
-        <location line="+168"/>
+        <location line="+191"/>
         <source>&amp;About Scash</source>
         <translation>&amp;О Scash</translation>
     </message>
@@ -480,7 +495,17 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>&amp;Показать / Скрыть</translation>
     </message>
     <message>
-        <location line="+39"/>
+        <location line="+18"/>
+        <source>&amp;Performance monitor</source>
+        <translation>Производительность</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Open performance monitor window</source>
+        <translation>Открыть окно монитора производительности</translation>
+    </message>
+    <message>
+        <location line="+26"/>
         <source>&amp;File</source>
         <translation>&amp;Файл</translation>
     </message>
@@ -490,12 +515,12 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>&amp;Настройки</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+7"/>
         <source>&amp;Help</source>
         <translation>&amp;Помощь</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+13"/>
         <source>Tabs toolbar</source>
         <translation>Панель вкладок</translation>
     </message>
@@ -505,7 +530,7 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Панель действий</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+14"/>
         <location line="+9"/>
         <source>[testnet]</source>
         <translation>[тестовая сеть]</translation>
@@ -517,7 +542,7 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Scash клиент</translation>
     </message>
     <message numerus="yes">
-        <location line="+69"/>
+        <location line="+70"/>
         <source>%n active connection(s) to Scash network</source>
         <translation>
             <numerusform>%n активное соединение с сетью</numerusform>
@@ -530,8 +555,13 @@ This product includes software developed by the OpenSSL Project for use in the O
         <source>Downloaded %1 blocks of transaction history.</source>
         <translation>Загружено %1 блоков истории транзакций.</translation>
     </message>
+    <message>
+        <location line="+11"/>
+        <source>Current difficulty is %1.</source>
+        <translation>Сложность %1.</translation>
+    </message>
     <message numerus="yes">
-        <location line="+22"/>
+        <location line="+13"/>
         <source>%n second(s) ago</source>
         <translation>
             <numerusform>%n секунду назад</numerusform>
@@ -582,24 +612,145 @@ This product includes software developed by the OpenSSL Project for use in the O
         <translation>Последний полученный блок был сгенерирован %1.</translation>
     </message>
     <message>
-        <location line="+59"/>
-        <source>This transaction is over the size limit.  You can still send it for a fee of %1, which goes to the nodes that process your transaction and helps to support the network.  Do you want to pay the fee?</source>
-        <translation>Данная транзакция превышает предельно допустимый размер.  Но Вы можете всё равно совершить её, добавив комиссию в %1, которая отправится тем узлам, которые обработают Вашу транзакцию, и поможет поддержать сеть.  Вы хотите добавить комиссию?</translation>
+        <location line="+233"/>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;.</source>
+        <translation>Кошелек зашифрован и разблокирован.</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>&amp;Lock Wallet</source>
+        <translation>Заблокировать</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Lock wallet</source>
+        <translation>Заблокировать</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Wallet unlocked!</source>
+        <translation>Разблокирован</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <location line="+15"/>
+        <source>Time: %1
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-10"/>
+        <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;.</source>
+        <translation>Кошелек зашифрован и заблокирован</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>&amp;Unlock Wallet...</source>
+        <translation>Разблокировать...</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Unlock wallet</source>
+        <translation type="unfinished">Разблокировать бумажник</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Wallet locked!</source>
+        <translation>Кошелек заблокирован!</translation>
+    </message>
+    <message>
+        <location line="+95"/>
+        <source>Not minting because wallet is locked.</source>
+        <translation>Нет генерации, т.к. кошелек заблокирован.</translation>
     </message>
     <message>
         <location line="+5"/>
-        <source>Confirm transaction fee</source>
-        <translation>Подтвердите комиссию</translation>
+        <source>Not minting because wallet is offline.</source>
+        <translation>Нет генерации, т.к. в оффлайне</translation>
     </message>
     <message>
-        <location line="+27"/>
+        <location line="+5"/>
+        <source>Not minting because wallet is syncing.</source>
+        <translation>Нет генерации пока синхронизируем.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Not minting because you don&apos;t have mature coins.</source>
+        <translation>Нет подтвержденных монет для генерации</translation>
+    </message>
+    <message numerus="yes">
+        <location line="+10"/>
+        <source>%n second(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+4"/>
+        <source>%n minute(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+4"/>
+        <source>%n hour(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message numerus="yes">
+        <location line="+4"/>
+        <source>%n day(s)</source>
+        <translation type="unfinished">
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+            <numerusform></numerusform>
+        </translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Minting.&lt;br&gt;Your weight is %1.&lt;br&gt;Network weight is %2.&lt;br&gt;Expected time to earn reward is %3.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>Not minting.</source>
+        <translation>Не генерируем</translation>
+    </message>
+    <message>
+        <source>This transaction is over the size limit.  You can still send it for a fee of %1, which goes to the nodes that process your transaction and helps to support the network.  Do you want to pay the fee?</source>
+        <translation type="vanished">Данная транзакция превышает предельно допустимый размер.  Но Вы можете всё равно совершить её, добавив комиссию в %1, которая отправится тем узлам, которые обработают Вашу транзакцию, и поможет поддержать сеть.  Вы хотите добавить комиссию?</translation>
+    </message>
+    <message>
+        <source>Confirm transaction fee</source>
+        <translation type="vanished">Подтвердите комиссию</translation>
+    </message>
+    <message>
+        <location line="-299"/>
         <source>Sent transaction</source>
         <translation>Исходящая транзакция</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Sent message</source>
+        <translation>Отправленное сообщение</translation>
     </message>
     <message>
         <location line="+1"/>
         <source>Incoming transaction</source>
         <translation>Входящая транзакция</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>Incoming message</source>
+        <translation>Входящее сообщение</translation>
     </message>
     <message>
         <location line="+1"/>
@@ -627,17 +778,15 @@ Address: %4
         <translation>Не удалось обработать URI! Это может быть связано с неверным адресом Scash или неправильными параметрами URI.</translation>
     </message>
     <message>
-        <location line="+16"/>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;unlocked&lt;/b&gt;</source>
-        <translation>Бумажник &lt;b&gt;зашифрован&lt;/b&gt; и в настоящее время &lt;b&gt;разблокирован&lt;/b&gt;</translation>
+        <translation type="vanished">Бумажник &lt;b&gt;зашифрован&lt;/b&gt; и в настоящее время &lt;b&gt;разблокирован&lt;/b&gt;</translation>
     </message>
     <message>
-        <location line="+8"/>
         <source>Wallet is &lt;b&gt;encrypted&lt;/b&gt; and currently &lt;b&gt;locked&lt;/b&gt;</source>
-        <translation>Бумажник &lt;b&gt;зашифрован&lt;/b&gt; и в настоящее время &lt;b&gt;заблокирован&lt;/b&gt;</translation>
+        <translation type="vanished">Бумажник &lt;b&gt;зашифрован&lt;/b&gt; и в настоящее время &lt;b&gt;заблокирован&lt;/b&gt;</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+64"/>
         <source>Backup Wallet</source>
         <translation>Сделать резервную копию бумажника</translation>
     </message>
@@ -657,7 +806,7 @@ Address: %4
         <translation>При попытке сохранения данных бумажника в новое место произошла ошибка.</translation>
     </message>
     <message>
-        <location filename="../bitcoin.cpp" line="+109"/>
+        <location filename="../bitcoin.cpp" line="+110"/>
         <source>A fatal error occurred. Scash can no longer continue safely and will quit.</source>
         <translation>Произошла неисправимая ошибка. Scash не может безопасно продолжать работу и будет закрыт.</translation>
     </message>
@@ -668,6 +817,275 @@ Address: %4
         <location filename="../clientmodel.cpp" line="+87"/>
         <source>Network Alert</source>
         <translation>Сетевая Тревога</translation>
+    </message>
+</context>
+<context>
+    <name>CoinControlDialog</name>
+    <message>
+        <location filename="../forms/coincontroldialog.ui" line="+14"/>
+        <source>Coin Control</source>
+        <translation>Управление</translation>
+    </message>
+    <message>
+        <location line="+31"/>
+        <source>Quantity:</source>
+        <translation>Всего:</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <location line="+32"/>
+        <source>0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-19"/>
+        <source>Bytes:</source>
+        <translation>Байты:</translation>
+    </message>
+    <message>
+        <location line="+48"/>
+        <source>Amount:</source>
+        <translation>Количество:</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <location line="+80"/>
+        <location line="+86"/>
+        <location line="+38"/>
+        <source>0.00 SCS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-191"/>
+        <source>Priority:</source>
+        <translation>Приоритет:</translation>
+    </message>
+    <message>
+        <location line="+48"/>
+        <source>Fee:</source>
+        <translation>Комиссия:</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Low Output:</source>
+        <translation>Мал. выход:</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <location filename="../coincontroldialog.cpp" line="+551"/>
+        <source>no</source>
+        <translation>нет</translation>
+    </message>
+    <message>
+        <location line="+29"/>
+        <source>After Fee:</source>
+        <translation>После комиссии:</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Change:</source>
+        <translation>Сдача:</translation>
+    </message>
+    <message>
+        <location line="+69"/>
+        <source>(un)select all</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>Tree mode</source>
+        <translation>Дерево</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>List mode</source>
+        <translation>Список</translation>
+    </message>
+    <message>
+        <location line="+45"/>
+        <source>Amount</source>
+        <translation>Количество</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Label</source>
+        <translation>Метка</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Address</source>
+        <translation>Адрес</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Date</source>
+        <translation>Дата</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Confirmations</source>
+        <translation>Подтверждения</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Confirmed</source>
+        <translation>Подтверждено</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Priority</source>
+        <translation>Приоритет</translation>
+    </message>
+    <message>
+        <location filename="../coincontroldialog.cpp" line="-515"/>
+        <source>Copy address</source>
+        <translation>Копировать адрес</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy label</source>
+        <translation>Копировать метку</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <location line="+26"/>
+        <source>Copy amount</source>
+        <translation>Скопировать сумму</translation>
+    </message>
+    <message>
+        <location line="-25"/>
+        <source>Copy transaction ID</source>
+        <translation>Скопировать ID транзакции</translation>
+    </message>
+    <message>
+        <location line="+24"/>
+        <source>Copy quantity</source>
+        <translation>Скопировать количество</translation>
+    </message>
+    <message>
+        <location line="+2"/>
+        <source>Copy fee</source>
+        <translation>Скопировать комиссию</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy after fee</source>
+        <translation>Скопировать после комиссии</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy bytes</source>
+        <translation>Скопировать размер</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy priority</source>
+        <translation>Скопировать приоритет</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy low output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+317"/>
+        <source>highest</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>high</source>
+        <translation>высокий</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>medium-high</source>
+        <translation>выше среднего</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>medium</source>
+        <translation>средний</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>low-medium</source>
+        <translation>сойдет</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>low</source>
+        <translation>низкий</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>lowest</source>
+        <translation>самый низкий</translation>
+    </message>
+    <message>
+        <location line="+155"/>
+        <source>DUST</source>
+        <translation>ПЫЛЬ</translation>
+    </message>
+    <message>
+        <location line="+0"/>
+        <source>yes</source>
+        <translation>да</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>This label turns red, if the transaction size is bigger than 10000 bytes.
+
+ This means a fee of at least %1 per kb is required.
+
+ Can vary +/- 1 Byte per input.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Transactions with higher priority get more likely into a block.
+
+This label turns red, if the priority is smaller than &quot;medium&quot;.
+
+ This means a fee of at least %1 per kb is required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>This label turns red, if any recipient receives an amount smaller than %1.
+
+ This means a fee of at least %2 is required. 
+
+ Amounts below 0.546 times the minimum relay fee are shown as DUST.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>This label turns red, if the change is smaller than %1.
+
+ This means a fee of at least %2 is required.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+37"/>
+        <location line="+66"/>
+        <source>(no label)</source>
+        <translation type="unfinished">[нет метки]</translation>
+    </message>
+    <message>
+        <location line="-9"/>
+        <source>change from %1 (%2)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>(change)</source>
+        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -741,7 +1159,7 @@ Address: %4
 <context>
     <name>GUIUtil::HelpMessageBox</name>
     <message>
-        <location filename="../guiutil.cpp" line="+419"/>
+        <location filename="../guiutil.cpp" line="+417"/>
         <location line="+12"/>
         <source>scash-qt</source>
         <translation>scash-qt</translation>
@@ -780,6 +1198,39 @@ Address: %4
         <location line="+1"/>
         <source>Show splash screen on startup (default: 1)</source>
         <translation>Показывать сплэш при запуске (по умолчанию: 1)</translation>
+    </message>
+</context>
+<context>
+    <name>MessageEntry</name>
+    <message>
+        <location filename="../forms/messageentry.ui" line="+14"/>
+        <source>Form</source>
+        <translation>Форма</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <source>...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../messageentry.cpp" line="+33"/>
+        <source>Enter message you want to send among with transaction in the field above.</source>
+        <translation>Введите сообщение, которое вы хотите прикрепить к транзакции, в поле выше.</translation>
+    </message>
+    <message>
+        <location line="+39"/>
+        <source>Message length: %1 chars; additional fee estimate is %2 SCS</source>
+        <translation>Количество символов: %1; дополнительная плата: %2 SCS</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Message is too large to send in single transaction, please split</source>
+        <translation>Слишком большое сообщение для пересылки в одной транзакции</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Message cleared and detached from transaction</source>
+        <translation>Сообщение сброшено</translation>
     </message>
 </context>
 <context>
@@ -940,6 +1391,16 @@ Address: %4
         <translation>&amp;Показывать адреса в списке транзакций</translation>
     </message>
     <message>
+        <location line="+7"/>
+        <source>Whether to show coin control features or not.</source>
+        <translation>Показывать Coin Control</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Display coin &amp;control settings (experimental feature)</source>
+        <translation>Показывать Coin Control</translation>
+    </message>
+    <message>
         <location line="+71"/>
         <source>&amp;OK</source>
         <translation>О&amp;К</translation>
@@ -960,7 +1421,7 @@ Address: %4
         <translation>по умолчанию</translation>
     </message>
     <message>
-        <location line="+147"/>
+        <location line="+149"/>
         <location line="+9"/>
         <source>Warning</source>
         <translation>Внимание</translation>
@@ -986,75 +1447,163 @@ Address: %4
     </message>
     <message>
         <location line="+33"/>
-        <location line="+183"/>
+        <location line="+212"/>
         <source>The displayed information may be out of date. Your wallet automatically synchronizes with the Scash network after a connection is established, but this process has not completed yet.</source>
         <translation>Отображаемая информация может быть устаревшей. Ваш бумажник автоматически синхронизируется с сетью Scash после подключения, но этот процесс пока не завершён.</translation>
     </message>
     <message>
-        <location line="-141"/>
+        <location line="-170"/>
         <source>Balance:</source>
         <translation>Баланс:</translation>
     </message>
     <message>
-        <location line="+118"/>
+        <location line="+29"/>
         <source>Stake:</source>
-        <translation>Доля:</translation>
+        <translation>На стейкинге:</translation>
     </message>
     <message>
-        <location line="+58"/>
+        <location line="+84"/>
         <source>Number of transactions:</source>
         <translation>Количество транзакций:</translation>
     </message>
     <message>
-        <location line="-29"/>
+        <location line="-55"/>
         <source>Unconfirmed:</source>
         <translation>Не подтверждено:</translation>
     </message>
     <message>
-        <location line="-78"/>
+        <location line="-107"/>
         <source>Wallet</source>
         <translation>Бумажник</translation>
     </message>
     <message>
-        <location line="+124"/>
+        <location line="+136"/>
         <source>Immature:</source>
-        <translation>Незрелые:</translation>
+        <translation>Недостаточно подтверждений:</translation>
     </message>
     <message>
         <location line="+13"/>
         <source>Mined balance that has not yet matured</source>
-        <translation>Баланс добытых монет, который ещё не созрел</translation>
+        <translation>Баланс добытых монет, который ещё не получил нужного кол-ва подтверждений</translation>
     </message>
     <message>
-        <location line="+46"/>
+        <location line="+63"/>
         <source>&lt;b&gt;Recent transactions&lt;/b&gt;</source>
         <translation>&lt;b&gt;Последние транзакции&lt;/b&gt;</translation>
     </message>
     <message>
-        <location line="-118"/>
+        <location line="-147"/>
         <source>Your current balance</source>
         <translation>Ваш текущий баланс</translation>
     </message>
     <message>
-        <location line="+29"/>
+        <location line="+58"/>
         <source>Total of transactions that have yet to be confirmed, and do not yet count toward the current balance</source>
         <translation>Общая сумма всех транзакций, которые до сих пор не подтверждены, и до сих пор не учитываются в текущем балансе</translation>
     </message>
     <message>
-        <location line="+134"/>
+        <location line="-29"/>
         <source>Total of coins that was staked, and do not yet count toward the current balance</source>
         <translation>Общая сумма всех монет, используемых для Proof-of-Stake, и не учитывающихся на балансе</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+75"/>
         <source>Total number of transactions in wallet</source>
         <translation>Общее количество транзакций в Вашем бумажнике</translation>
     </message>
     <message>
-        <location filename="../overviewpage.cpp" line="+112"/>
+        <location filename="../overviewpage.cpp" line="+114"/>
         <location line="+1"/>
         <source>out of sync</source>
         <translation>не синхронизировано</translation>
+    </message>
+</context>
+<context>
+    <name>PerfMonDialog</name>
+    <message>
+        <location filename="../forms/perfmondialog.ui" line="+20"/>
+        <source>Scash - Performance monitor</source>
+        <translation>Scash - монитор производительности</translation>
+    </message>
+    <message>
+        <location line="+10"/>
+        <source>&amp;Network performance</source>
+        <translation>Сетевая производительность</translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>Incoming traffic:</source>
+        <translation>Входящий трафик:</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <location line="+20"/>
+        <location line="+20"/>
+        <location line="+20"/>
+        <location line="+20"/>
+        <location line="+20"/>
+        <location line="+32"/>
+        <location line="+20"/>
+        <location line="+20"/>
+        <location line="+20"/>
+        <location line="+20"/>
+        <source>                Loading...</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-199"/>
+        <source>Outgoing traffic:</source>
+        <translation>Исходящий трафик:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Total traffic amount:</source>
+        <translation>Общий объем трафика:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Incoming connections count:</source>
+        <translation>Входящие подключения:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Outgoing connections count:</source>
+        <translation>Исходящие подключения:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Banned hosts:</source>
+        <translation>Заблокированные узлы:</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>&amp;Local performance</source>
+        <translation>Локальная производительность</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Memory usage:</source>
+        <translation>Использование памяти:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Database file accesses:</source>
+        <translation>Доступы к БД:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Database access time:</source>
+        <translation>Время доступа к БД:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Blocks added:</source>
+        <translation>Блоков принято:</translation>
+    </message>
+    <message>
+        <location line="+20"/>
+        <source>Blocks rejected:</source>
+        <translation>Блоков отвергнуто:</translation>
     </message>
 </context>
 <context>
@@ -1090,12 +1639,12 @@ Address: %4
         <translation>&amp;Сохранить как...</translation>
     </message>
     <message>
-        <location filename="../qrcodedialog.cpp" line="+62"/>
+        <location filename="../qrcodedialog.cpp" line="+68"/>
         <source>Error encoding URI into QR Code.</source>
         <translation>Ошибка кодирования URI в QR-код</translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+39"/>
         <source>The entered amount is invalid, please check.</source>
         <translation>Введено неверное количество, проверьте ещё раз.</translation>
     </message>
@@ -1105,7 +1654,7 @@ Address: %4
         <translation>Получившийся URI слишком длинный, попробуйте сократить текст метки / сообщения.</translation>
     </message>
     <message>
-        <location line="+25"/>
+        <location line="+26"/>
         <source>Save QR Code</source>
         <translation>Сохранить QR-код</translation>
     </message>
@@ -1124,15 +1673,14 @@ Address: %4
     </message>
     <message>
         <location line="+10"/>
-        <location line="+23"/>
-        <location line="+26"/>
+        <location line="+49"/>
         <location line="+23"/>
         <location line="+23"/>
         <location line="+36"/>
         <location line="+53"/>
         <location line="+23"/>
         <location line="+23"/>
-        <location filename="../rpcconsole.cpp" line="+348"/>
+        <location filename="../rpcconsole.cpp" line="+355"/>
         <source>N/A</source>
         <translation>Н/Д</translation>
     </message>
@@ -1147,7 +1695,12 @@ Address: %4
         <translation>&amp;Информация</translation>
     </message>
     <message>
-        <location line="+68"/>
+        <location line="+55"/>
+        <source>1.0.0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
         <source>Using OpenSSL version</source>
         <translation>Используется версия OpenSSL</translation>
     </message>
@@ -1247,7 +1800,7 @@ Address: %4
         <translation>Очистить консоль</translation>
     </message>
     <message>
-        <location filename="../rpcconsole.cpp" line="-33"/>
+        <location filename="../rpcconsole.cpp" line="-35"/>
         <source>Welcome to the Scash RPC console.</source>
         <translation>Добро пожаловать в RPC-консоль scash.</translation>
     </message>
@@ -1266,7 +1819,9 @@ Address: %4
     <name>SendCoinsDialog</name>
     <message>
         <location filename="../forms/sendcoinsdialog.ui" line="+14"/>
-        <location filename="../sendcoinsdialog.cpp" line="+124"/>
+        <location filename="../sendcoinsdialog.cpp" line="+233"/>
+        <location line="+5"/>
+        <location line="+5"/>
         <location line="+5"/>
         <location line="+5"/>
         <location line="+5"/>
@@ -1277,7 +1832,116 @@ Address: %4
         <translation>Отправка</translation>
     </message>
     <message>
+        <location line="+76"/>
+        <source>Coin Control Features</source>
+        <translation>Coin Control</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Source addresses for payment</source>
+        <translation>Исходный адрес:</translation>
+    </message>
+    <message>
+        <location line="+6"/>
+        <source>Inputs...</source>
+        <translation>Входы...</translation>
+    </message>
+    <message>
+        <location line="+7"/>
+        <source>automatically selected</source>
+        <translation>автоматически</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>Insufficient funds!</source>
+        <translation>Мало средств!</translation>
+    </message>
+    <message>
+        <location line="+86"/>
+        <source>Quantity:</source>
+        <translation>Всего:</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <location line="+35"/>
+        <source>0</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-19"/>
+        <source>Bytes:</source>
+        <translation>Байты:</translation>
+    </message>
+    <message>
+        <location line="+51"/>
+        <source>Amount:</source>
+        <translation>Количество:</translation>
+    </message>
+    <message>
+        <location line="+22"/>
+        <location line="+86"/>
+        <location line="+86"/>
+        <location line="+32"/>
+        <source>0.00 SCS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="-191"/>
+        <source>Priority:</source>
+        <translation>Приоритет:</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>medium</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>Fee:</source>
+        <translation>Комиссия:</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Low Output:</source>
+        <translation>Мал. выход:</translation>
+    </message>
+    <message>
+        <location line="+19"/>
+        <source>no</source>
+        <translation>нет</translation>
+    </message>
+    <message>
+        <location line="+32"/>
+        <source>After Fee:</source>
+        <translation>После комисси:</translation>
+    </message>
+    <message>
+        <location line="+35"/>
+        <source>Change</source>
+        <translation>Сдача</translation>
+    </message>
+    <message>
         <location line="+50"/>
+        <source>DO NOT ENABLE UNLESS YOU ARE FULLY UNDERSTAND WHAT ARE YOU DOING! YOU MAY LOSE FUNDS OTHEWISE!</source>
+        <translation>НЕ ИСПОЛЬЗУЙТЕ ЕСЛИ НЕ ПОНИМАЕТЕ В ДЕТАЛЯХ ЗАЧЕМ, ИНАЧЕ МОЖЕТЕ ПОТЕРЯТЬ СРЕДСТВА!</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>custom change address</source>
+        <translation>Адрес для сдачи</translation>
+    </message>
+    <message>
+        <location line="+16"/>
+        <source>DO NOT FILL UNLESS YOU ARE FULLY UNDERSTAND WHAT ARE YOU DOING! YOU MAY LOSE FUNDS OTHEWISE!</source>
+        <translation>НЕ ИСПОЛЬЗУЙТЕ ЕСЛИ НЕ ПОНИМАЕТЕ В ДЕТАЛЯХ ЗАЧЕМ, ИНАЧЕ МОЖЕТЕ ПОТЕРЯТЬ СРЕДСТВА!</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Your Scash address</source>
+        <translation>Ваш адрес Scash</translation>
+    </message>
+    <message>
+        <location line="+102"/>
         <source>Send to multiple recipients at once</source>
         <translation>Отправить нескольким получателям одновременно</translation>
     </message>
@@ -1297,14 +1961,38 @@ Address: %4
         <translation>Очистить &amp;всё</translation>
     </message>
     <message>
+        <location line="+23"/>
+        <source>Show or hide additional transaction params</source>
+        <translation>Показать дополнительные параметры транзакции</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Toggle &amp;Coin Control</source>
+        <translation>Показать Coin Control</translation>
+    </message>
+    <message>
+        <location line="+17"/>
+        <source>Add message to transaction (will be visible to everyone)</source>
+        <translation>Добавить публичное сообщение к транзакции</translation>
+    </message>
+    <message>
+        <location line="+3"/>
+        <source>Message</source>
+        <translation>Сообщение</translation>
+    </message>
+    <message>
         <location line="+22"/>
         <source>Balance:</source>
         <translation>Баланс:</translation>
     </message>
     <message>
-        <location line="+10"/>
+        <location line="+16"/>
+        <source>123.456 SCS</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>123.456 BTC</source>
-        <translation>123.456 BTC</translation>
+        <translation type="vanished">123.456 BTC</translation>
     </message>
     <message>
         <location line="+31"/>
@@ -1317,12 +2005,61 @@ Address: %4
         <translation>&amp;Отправить</translation>
     </message>
     <message>
-        <location filename="../sendcoinsdialog.cpp" line="-59"/>
         <source>&lt;b&gt;%1&lt;/b&gt; to %2 (%3)</source>
-        <translation>&lt;b&gt;%1&lt;/b&gt; адресату %2 (%3)</translation>
+        <translation type="vanished">&lt;b&gt;%1&lt;/b&gt; адресату %2 (%3)</translation>
     </message>
     <message>
-        <location line="+5"/>
+        <location filename="../sendcoinsdialog.cpp" line="-229"/>
+        <source>Enter a Scash address (e.g. BkWBHmmcV2CrdLJF8xXi4dgaNzdKHMQrs3)</source>
+        <translation>Введите адрес Scash (напр. SkWBHmmcV2CrdLJF8xXi4dgaNzdKHMQrs3)</translation>
+    </message>
+    <message>
+        <location line="+15"/>
+        <source>Copy quantity</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy amount</source>
+        <translation type="unfinished">Скопировать сумму</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy fee</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy after fee</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy bytes</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy priority</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy low output</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Copy change</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+87"/>
+        <source>&lt;b&gt;%1&lt;/b&gt; to &lt;i&gt;%2&lt;/i&gt;&lt;font color=&quot;DarkRed&quot;&gt;%3&lt;/font&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>Confirm send coins</source>
         <translation>Подтвердите отправку монет</translation>
     </message>
@@ -1337,9 +2074,24 @@ Address: %4
         <translation> и </translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+28"/>
+        <source>Send message error</source>
+        <translation>Ошибка отправки сообщения</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Message size is out of allowed constrains</source>
+        <translation>Сообщение превышает допустимый размер</translation>
+    </message>
+    <message>
+        <location line="+42"/>
         <source>The recipient address is not valid, please recheck.</source>
         <translation>Адрес получателя неверный, пожалуйста, перепроверьте.</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>Wallet is locked. Unlock wallet before send.</source>
+        <translation>Кошелек заблокирован, разблокируйте перед отправкой.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -1350,6 +2102,11 @@ Address: %4
         <location line="+5"/>
         <source>The amount exceeds your balance.</source>
         <translation>Количество отправляемых монет превышает Ваш баланс</translation>
+    </message>
+    <message>
+        <location line="+5"/>
+        <source>The attached message is too long.</source>
+        <translation>Приложенное сообщение слишком длинное.</translation>
     </message>
     <message>
         <location line="+5"/>
@@ -1371,6 +2128,21 @@ Address: %4
         <source>Error: The transaction was rejected. This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
         <translation>Ошибка: В транзакции отказано.  Такое может произойти, если некоторые монеты уже были потрачены, например, если Вы используете одну копию файла wallet.dat, а монеты были потрачены из другой копии, но не были отмечены как потраченные в этой.</translation>
     </message>
+    <message>
+        <location line="+285"/>
+        <source>WARNING: Invalid Scash address</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+13"/>
+        <source>(no label)</source>
+        <translation>[нет метки]</translation>
+    </message>
+    <message>
+        <location line="+4"/>
+        <source>WARNING: unknown change address</source>
+        <translation type="unfinished"></translation>
+    </message>
 </context>
 <context>
     <name>SendCoinsEntry</name>
@@ -1391,7 +2163,7 @@ Address: %4
     </message>
     <message>
         <location line="+24"/>
-        <location filename="../sendcoinsentry.cpp" line="+25"/>
+        <location filename="../sendcoinsentry.cpp" line="+30"/>
         <source>Enter a label for this address to add it to your address book</source>
         <translation>Введите метку для данного адреса (для добавления в адресную книгу)</translation>
     </message>
@@ -1402,8 +2174,12 @@ Address: %4
     </message>
     <message>
         <location line="+18"/>
+        <source>The address to send the payment to  (e.g. SQTt7TNjchsstoNeyCAVWgHVmXN5zPZmSt)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <source>The address to send the payment to  (e.g. 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</source>
-        <translation>Адрес получателя платежа (например 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</translation>
+        <translation type="vanished">Адрес получателя платежа (например 4Zo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</translation>
     </message>
     <message>
         <location line="+10"/>
@@ -1426,14 +2202,18 @@ Address: %4
         <translation>Alt+P</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+23"/>
         <source>Remove this recipient</source>
         <translation>Удалить этого получателя</translation>
     </message>
     <message>
-        <location filename="../sendcoinsentry.cpp" line="+1"/>
         <source>Enter a Scash address (e.g. BBo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</source>
-        <translation>Введите scash-адрес (например BBo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</translation>
+        <translation type="vanished">Введите scash-адрес (например BBo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</translation>
+    </message>
+    <message>
+        <location filename="../sendcoinsentry.cpp" line="+1"/>
+        <source>Enter a valid Scash address</source>
+        <translation>Введите адрес Scash</translation>
     </message>
 </context>
 <context>
@@ -1534,10 +2314,14 @@ Address: %4
         <translation>Сбросить все поля проверки сообщения</translation>
     </message>
     <message>
+        <source>Enter a Scash address (e.g. BBo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</source>
+        <translation type="vanished">Введите адрес Scash (напр. BBo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</translation>
+    </message>
+    <message>
         <location filename="../signverifymessagedialog.cpp" line="+27"/>
         <location line="+3"/>
-        <source>Enter a Scash address (e.g. BBo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</source>
-        <translation>Введите адрес Scash (напр. BBo1ga6xuKuQ7JV7M9rGDoxdbYwV5zgQJ5)</translation>
+        <source>Enter a valid Scash address</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="-2"/>
@@ -1705,12 +2489,12 @@ Address: %4
         <location line="+12"/>
         <location line="+45"/>
         <location line="+17"/>
-        <location line="+30"/>
+        <location line="+47"/>
         <source>Credit</source>
         <translation>Кредит</translation>
     </message>
     <message numerus="yes">
-        <location line="-102"/>
+        <location line="-119"/>
         <source>matures in %n more block(s)</source>
         <translation>
             <numerusform>будет доступно через %n блок</numerusform>
@@ -1727,12 +2511,12 @@ Address: %4
         <location line="+44"/>
         <location line="+8"/>
         <location line="+15"/>
-        <location line="+30"/>
+        <location line="+47"/>
         <source>Debit</source>
         <translation>Дебет</translation>
     </message>
     <message>
-        <location line="-39"/>
+        <location line="-56"/>
         <source>Transaction fee</source>
         <translation>Комиссия</translation>
     </message>
@@ -1742,12 +2526,22 @@ Address: %4
         <translation>Чистая сумма</translation>
     </message>
     <message>
-        <location line="+6"/>
+        <location line="+7"/>
+        <source>Note</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+9"/>
+        <source>Generated coins must mature %1 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+7"/>
         <source>Message</source>
         <translation>Сообщение</translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="-13"/>
         <source>Comment</source>
         <translation>Комментарий:</translation>
     </message>
@@ -1757,17 +2551,15 @@ Address: %4
         <translation>ID транзакции</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>Generated coins must mature 520 blocks before they can be spent. When you generated this block, it was broadcast to the network to be added to the block chain. If it fails to get into the chain, its state will change to &quot;not accepted&quot; and it won&apos;t be spendable. This may occasionally happen if another node generates a block within a few seconds of yours.</source>
-        <translation>Сгенерированные монеты должны подождать 520 блоков, прежде чем они могут быть потрачены. Когда Вы сгенерировали этот блок, он был отправлен в сеть для добавления в цепочку блоков. Если данная процедура не удастся, статус изменится на «не подтверждено», и монеты будут недействительны. Это иногда происходит в случае, если другой узел сгенерирует блок на несколько секунд раньше вас.</translation>
+        <translation type="vanished">Сгенерированные монеты должны подождать 520 блоков, прежде чем они могут быть потрачены. Когда Вы сгенерировали этот блок, он был отправлен в сеть для добавления в цепочку блоков. Если данная процедура не удастся, статус изменится на «не подтверждено», и монеты будут недействительны. Это иногда происходит в случае, если другой узел сгенерирует блок на несколько секунд раньше вас.</translation>
     </message>
     <message>
-        <location line="+4"/>
-        <source>Staked coins must wait 520 blocks before they can return to balance and be spent.  When you generated this proof-of-stake block, it was broadcast to the network to be added to the block chain.  If it fails to get into the chain, it will change to \"not accepted\" and not be a valid stake.  This may occasionally happen if another node generates a proof-of-stake block within a few seconds of yours.</source>
-        <translation>Использованные в Proof-of-Stake монеты должны подождать 520 блоков, прежде чем они вернутся на баланс и смогут быть потрачены. Когда вы сгенерировали этот proof-of-stake блок, он был отправлен в сеть для добавления в цепочку блоков. Если данная процедура не удается, статус изменится на \"не подтверждени\" и блок будет недействителен. Это иногда происходит в случае, если другой узел сгенерирует блок на несколько секунд раньше вас.</translation>
+        <source>Staked coins must wait 520 blocks before they can return to balance and be spent.  When you generated this proof-of-stake block, it was broadcast to the network to be added to the block chain.  If it fails to get into the chain, it will change to \&quot;not accepted\&quot; and not be a valid stake.  This may occasionally happen if another node generates a proof-of-stake block within a few seconds of yours.</source>
+        <translation type="vanished">Использованные в Proof-of-Stake монеты должны подождать 520 блоков, прежде чем они вернутся на баланс и смогут быть потрачены. Когда вы сгенерировали этот proof-of-stake блок, он был отправлен в сеть для добавления в цепочку блоков. Если данная процедура не удается, статус изменится на \&quot;не подтверждени\&quot; и блок будет недействителен. Это иногда происходит в случае, если другой узел сгенерирует блок на несколько секунд раньше вас.</translation>
     </message>
     <message>
-        <location line="+7"/>
+        <location line="+25"/>
         <source>Detailed view</source>
         <translation>Детали транзакции</translation>
     </message>
@@ -1782,7 +2574,7 @@ Address: %4
         <translation>Входы</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+24"/>
         <source>Amount</source>
         <translation>Количество</translation>
     </message>
@@ -1797,7 +2589,7 @@ Address: %4
         <translation>ложь</translation>
     </message>
     <message>
-        <location line="-211"/>
+        <location line="-229"/>
         <source>, has not been successfully broadcast yet</source>
         <translation>, ещё не было успешно разослано</translation>
     </message>
@@ -1823,7 +2615,7 @@ Address: %4
 <context>
     <name>TransactionTableModel</name>
     <message>
-        <location filename="../transactiontablemodel.cpp" line="+226"/>
+        <location filename="../transactiontablemodel.cpp" line="+230"/>
         <source>Date</source>
         <translation>Дата</translation>
     </message>
@@ -1862,17 +2654,27 @@ Address: %4
         <translation>Оффлайн (%1 подтверждений)</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="+5"/>
         <source>Unconfirmed (%1 of %2 confirmations)</source>
         <translation>Не подтверждено (%1 из %2 подтверждений)</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="+5"/>
+        <source>Unconfirmed</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
         <source>Confirmed (%1 confirmations)</source>
         <translation>Подтверждено (%1 подтверждений)</translation>
     </message>
+    <message>
+        <location line="+4"/>
+        <source>Has %1 confirmations</source>
+        <translation type="unfinished"></translation>
+    </message>
     <message numerus="yes">
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Mined balance will be available when it matures in %n more block(s)</source>
         <translation>
             <numerusform>Добытыми монетами можно будет воспользоваться через %n блок</numerusform>
@@ -1911,12 +2713,12 @@ Address: %4
         <translation>Отправлено себе</translation>
     </message>
     <message>
-        <location line="+2"/>
+        <location line="+3"/>
         <source>Mined</source>
         <translation>Добыто</translation>
     </message>
     <message>
-        <location line="+38"/>
+        <location line="+57"/>
         <source>(n/a)</source>
         <translation>[не доступно]</translation>
     </message>
@@ -1949,7 +2751,7 @@ Address: %4
 <context>
     <name>TransactionView</name>
     <message>
-        <location filename="../transactionview.cpp" line="+55"/>
+        <location filename="../transactionview.cpp" line="+59"/>
         <location line="+16"/>
         <source>All</source>
         <translation>Все</translation>
@@ -1998,6 +2800,11 @@ Address: %4
         <location line="+2"/>
         <source>To yourself</source>
         <translation>Отправленные себе</translation>
+    </message>
+    <message>
+        <location line="+1"/>
+        <source>Minted</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location line="+1"/>
@@ -2113,7 +2920,7 @@ Address: %4
 <context>
     <name>WalletModel</name>
     <message>
-        <location filename="../walletmodel.cpp" line="+192"/>
+        <location filename="../walletmodel.cpp" line="+232"/>
         <source>Sending...</source>
         <translation>Отправка....</translation>
     </message>
@@ -2121,33 +2928,32 @@ Address: %4
 <context>
     <name>bitcoin-core</name>
     <message>
-        <location filename="../bitcoinstrings.cpp" line="+82"/>
+        <location filename="../bitcoinstrings.cpp" line="+126"/>
         <source>Scash version</source>
         <translation>Версия</translation>
     </message>
     <message>
-        <location line="+82"/>
+        <location line="+39"/>
         <source>Usage:</source>
         <translation>Использование:</translation>
     </message>
     <message>
-        <location line="-25"/>
         <source>Send command to -server or bitcoind</source>
-        <translation>Отправить команду на -server или bitcoind</translation>
+        <translation type="vanished">Отправить команду на -server или bitcoind</translation>
     </message>
     <message>
-        <location line="-19"/>
+        <location line="-47"/>
         <source>List commands</source>
         <translation>Список команд
 </translation>
     </message>
     <message>
-        <location line="-11"/>
+        <location line="-12"/>
         <source>Get help for a command</source>
         <translation>Получить помощь по команде</translation>
     </message>
     <message>
-        <location line="+20"/>
+        <location line="+23"/>
         <source>Options:</source>
         <translation>Опции:</translation>
     </message>
@@ -2162,7 +2968,7 @@ Address: %4
         <translation>Указать pid-файл (по умолчанию: scash.pid)</translation>
     </message>
     <message>
-        <location line="-47"/>
+        <location line="-50"/>
         <source>Generate coins</source>
         <translation>Генерировать монеты</translation>
     </message>
@@ -2172,7 +2978,7 @@ Address: %4
         <translation>Не генерировать монеты</translation>
     </message>
     <message>
-        <location line="+60"/>
+        <location line="+63"/>
         <source>Specify data directory</source>
         <translation>Укажите каталог данных</translation>
     </message>
@@ -2187,7 +2993,7 @@ Address: %4
         <translation>Установить размер лога базы данных в мегабайтах (по умолчанию: 100)</translation>
     </message>
     <message>
-        <location line="-26"/>
+        <location line="-28"/>
         <source>Listen for connections on &lt;port&gt; (default: 27104 or testnet: 37104)</source>
         <translation>Принимать входящие подключения на &lt;port&gt; (по умолчанию: 27104 или 37104 в тестовой сети)</translation>
     </message>
@@ -2197,32 +3003,32 @@ Address: %4
         <translation>Поддерживать не более &lt;n&gt; подключений к узлам (по умолчанию: 125)</translation>
     </message>
     <message>
-        <location line="-33"/>
+        <location line="-34"/>
         <source>Connect to a node to retrieve peer addresses, and disconnect</source>
         <translation>Подключиться к узлу, чтобы получить список адресов других участников и отключиться</translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location line="+67"/>
         <source>Specify your own public address</source>
         <translation>Укажите ваш собственный публичный адрес</translation>
     </message>
     <message>
-        <location line="-75"/>
+        <location line="-76"/>
         <source>Bind to given address. Use [host]:port notation for IPv6</source>
         <translation>Привязаться (bind) к указанному адресу. Используйте запись вида [хост]:порт для IPv6</translation>
     </message>
     <message>
-        <location line="+77"/>
+        <location line="+78"/>
         <source>Threshold for disconnecting misbehaving peers (default: 100)</source>
         <translation>Порог для отключения неправильно ведущих себя узлов (по умолчанию: 100)</translation>
     </message>
     <message>
-        <location line="-112"/>
+        <location line="-110"/>
         <source>Number of seconds to keep misbehaving peers from reconnecting (default: 86400)</source>
         <translation>Число секунд блокирования неправильно ведущих себя узлов (по умолчанию: 86400)</translation>
     </message>
     <message>
-        <location line="-25"/>
+        <location line="-27"/>
         <source>An error occurred while setting up the RPC port %u for listening on IPv4: %s</source>
         <translation>Произошла ошибка при открытии RPC-порта %u для прослушивания на IPv4: %s</translation>
     </message>
@@ -2242,12 +3048,17 @@ Address: %4
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+10"/>
+        <source>Error: Wallet unlocked for block minting only, unable to create transaction.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+5"/>
         <source>Listen for JSON-RPC connections on &lt;port&gt; (default: 8344 or testnet: 18344)</source>
         <translation>Прослушивать подключения JSON-RPC на &lt;порту&gt; (по умолчанию: 8344 или для testnet: 18344)</translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+16"/>
         <source>Warning: error reading wallet.dat! All keys read correctly, but transaction data or address book entries might be missing or incorrect.</source>
         <translation>Внимание: ошибка чтения wallet.dat! Все ключи восстановлены, но записи в адресной книге и истории транзакций могут быть некорректными.</translation>
     </message>
@@ -2267,7 +3078,12 @@ Address: %4
         <translation>Попытка восстановления ключей из поврежденного wallet.dat</translation>
     </message>
     <message>
-        <location line="+32"/>
+        <location line="+24"/>
+        <source>Find peers using DNS lookup (default: 0)</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
         <source>Importing blockchain data file.</source>
         <translation>Импортируется файл цепи блоков.</translation>
     </message>
@@ -2277,22 +3093,22 @@ Address: %4
         <translation>Импортируется bootstrap-файл цепи блоков.</translation>
     </message>
     <message>
-        <location line="+23"/>
+        <location line="+26"/>
         <source>Run in the background as a daemon and accept commands</source>
         <translation>Запускаться в фоне как демон и принимать команды</translation>
     </message>
     <message>
-        <location line="+33"/>
+        <location line="+34"/>
         <source>Use the test network</source>
         <translation>Использовать тестовую сеть</translation>
     </message>
     <message>
-        <location line="-93"/>
+        <location line="-95"/>
         <source>Accept connections from outside (default: 1 if no -proxy or -connect)</source>
         <translation>Принимать подключения извне (по умолчанию: 1, если не используется -proxy или -connect)</translation>
     </message>
     <message>
-        <location line="-42"/>
+        <location line="-41"/>
         <source>Error: The transaction was rejected.  This might happen if some of the coins in your wallet were already spent, such as if you used a copy of wallet.dat and coins were spent in the copy but not marked as spent here.</source>
         <translation>Ошибка: В транзакции отказано.  Такое может произойти, если некоторые монеты уже были потрачены, например, если Вы используете одну копию файла wallet.dat, а монеты были потрачены из другой копии, но не были отмечены как потраченные в этой.</translation>
     </message>
@@ -2302,7 +3118,7 @@ Address: %4
         <translation>Ошибка: эта транзакция требует комиссию в размере как минимум %s из-за её объёма, сложности или использования недавно полученных средств  </translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+13"/>
         <source>Set maximum size of high-priority/low-fee transactions in bytes (default: 27000)</source>
         <translation>Максимальный размер высокоприоритетных/низкокомиссионных транзакций в байтах (по умолчанию: 27000)</translation>
     </message>
@@ -2312,9 +3128,8 @@ Address: %4
         <translation>Внимание: установлено очень большое значение -paytxfee. Это комиссия, которую вы заплатите при проведении транзакции.</translation>
     </message>
     <message>
-        <location line="+3"/>
         <source>Warning: Displayed transactions may not be correct! You may need to upgrade, or other nodes may need to upgrade.</source>
-        <translation>Внимание: отображаемые транзакции могут быть некорректны! Вам или другим узлам, возможно, следует обновиться.</translation>
+        <translation type="vanished">Внимание: отображаемые транзакции могут быть некорректны! Вам или другим узлам, возможно, следует обновиться.</translation>
     </message>
     <message>
         <location line="+3"/>
@@ -2322,7 +3137,7 @@ Address: %4
         <translation>Внимание: убедитесь, что дата и время на Вашем компьютере выставлены верно. Если Ваши часы идут неправильно, Scash будет работать некорректно.</translation>
     </message>
     <message>
-        <location line="+24"/>
+        <location line="+22"/>
         <source>Block creation options:</source>
         <translation>Параметры создания блоков:</translation>
     </message>
@@ -2352,17 +3167,21 @@ Address: %4
         <translation>Не удалось начать прослушивание на порту. Используйте -listen=0 если вас это устраивает.</translation>
     </message>
     <message>
-        <location line="+2"/>
         <source>Find peers using DNS lookup (default: 0 unless -connect)</source>
-        <translation>Искать узлы с помощью DNS (по умолчанию: 0)</translation>
+        <translation type="vanished">Искать узлы с помощью DNS (по умолчанию: 0)</translation>
     </message>
     <message>
-        <location line="+11"/>
+        <location line="+13"/>
         <source>Invalid -tor address: &apos;%s&apos;</source>
         <translation>Неверный адрес -tor: &apos;%s&apos;</translation>
     </message>
     <message>
-        <location line="+9"/>
+        <location line="+2"/>
+        <source>Invalid amount for -reservebalance=&lt;amount&gt;</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+8"/>
         <source>Maximum per-connection receive buffer, &lt;n&gt;*1000 bytes (default: 5000)</source>
         <translation>Максимальный размер буфера приёма на соединение, &lt;n&gt;*1000 байт (по умолчанию: 5000)</translation>
     </message>
@@ -2372,7 +3191,7 @@ Address: %4
         <translation>Максимальный размер буфера отправки на соединение, &lt;n&gt;*1000 байт (по умолчанию: 1000)</translation>
     </message>
     <message>
-        <location line="+1"/>
+        <location line="+3"/>
         <source>Only connect to nodes in network &lt;net&gt; (IPv4, IPv6 or Tor)</source>
         <translation>Подключаться только к узлам из сети &lt;net&gt; (IPv4, IPv6 или Tor)</translation>
     </message>
@@ -2403,7 +3222,12 @@ Address: %4
         <translation>Выберите версию SOCKS-прокси (4-5, по умолчанию: 5)</translation>
     </message>
     <message>
-        <location line="+3"/>
+        <location line="+1"/>
+        <source>Send command to -server or scashd</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+2"/>
         <source>Send trace/debug info to console instead of debug.log file</source>
         <translation>Выводить информацию трассировки/отладки на консоль вместо файла debug.log</translation>
     </message>
@@ -2433,7 +3257,13 @@ Address: %4
         <translation>Таймаут соединения в миллисекундах (по умолчанию: 5000)</translation>
     </message>
     <message>
-        <location line="+13"/>
+        <location line="+8"/>
+        <source>Unable to sign checkpoint, wrong checkpointkey?
+</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location line="+6"/>
         <source>Use UPnP to map the listening port (default: 0)</source>
         <translation>Использовать UPnP для проброса порта (по умолчанию: 0)</translation>
     </message>
@@ -2473,32 +3303,32 @@ Address: %4
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location line="-43"/>
+        <location line="-44"/>
         <source>Password for JSON-RPC connections</source>
         <translation>Пароль для подключений JSON-RPC</translation>
     </message>
     <message>
-        <location line="-53"/>
+        <location line="-54"/>
         <source>Allow JSON-RPC connections from specified IP address</source>
         <translation>Разрешить подключения JSON-RPC с указанного IP</translation>
     </message>
     <message>
-        <location line="+61"/>
+        <location line="+62"/>
         <source>Send commands to node running on &lt;ip&gt; (default: 127.0.0.1)</source>
         <translation>Посылать команды узлу, запущенному на &lt;ip&gt; (по умолчанию: 127.0.0.1)</translation>
     </message>
     <message>
-        <location line="-99"/>
+        <location line="-97"/>
         <source>Execute command when the best block changes (%s in cmd is replaced by block hash)</source>
         <translation>Выполнить команду, когда появляется новый блок (%s в команде заменяется на хэш блока)</translation>
     </message>
     <message>
-        <location line="+122"/>
+        <location line="+121"/>
         <source>Upgrade wallet to latest format</source>
         <translation>Обновить бумажник до последнего формата</translation>
     </message>
     <message>
-        <location line="-15"/>
+        <location line="-16"/>
         <source>Set key pool size to &lt;n&gt; (default: 100)</source>
         <translation>Установить размер запаса ключей в &lt;n&gt; (по умолчанию: 100)</translation>
     </message>
@@ -2508,7 +3338,7 @@ Address: %4
         <translation>Перепроверить цепь блоков на предмет отсутствующих в бумажнике транзакций</translation>
     </message>
     <message>
-        <location line="-24"/>
+        <location line="-27"/>
         <source>How many blocks to check at startup (default: 2500, 0 = all)</source>
         <translation>Сколько блоков проверять при запуске (по умолчанию: 2500, 0 = все)</translation>
     </message>
@@ -2523,12 +3353,12 @@ Address: %4
         <translation>Импортировать блоки из внешнего файла blk000?.dat</translation>
     </message>
     <message>
-        <location line="+51"/>
+        <location line="+55"/>
         <source>Use OpenSSL (https) for JSON-RPC connections</source>
         <translation>Использовать OpenSSL (https) для подключений JSON-RPC</translation>
     </message>
     <message>
-        <location line="-21"/>
+        <location line="-22"/>
         <source>Server certificate file (default: server.cert)</source>
         <translation>Файл серверного сертификата (по умолчанию: server.cert)</translation>
     </message>
@@ -2553,32 +3383,32 @@ Address: %4
         <translation>Невозможно установить блокировку на рабочую директорию %s.  Возможно, бумажник уже запущен.</translation>
     </message>
     <message>
-        <location line="+57"/>
+        <location line="+101"/>
         <source>Scash</source>
         <translation>Scash</translation>
     </message>
     <message>
-        <location line="+77"/>
+        <location line="+33"/>
         <source>Unable to bind to %s on this computer (bind returned error %d, %s)</source>
         <translation>Невозможно привязаться к %s на этом компьютере (bind вернул ошибку %d, %s)</translation>
     </message>
     <message>
-        <location line="-69"/>
+        <location line="-72"/>
         <source>Connect through socks proxy</source>
         <translation>Подключаться через socks прокси</translation>
     </message>
     <message>
-        <location line="-13"/>
+        <location line="-11"/>
         <source>Allow DNS lookups for -addnode, -seednode and -connect</source>
         <translation>Разрешить поиск в DNS для -addnode, -seednode и -connect</translation>
     </message>
     <message>
-        <location line="+44"/>
+        <location line="+43"/>
         <source>Loading addresses...</source>
         <translation>Загрузка адресов...</translation>
     </message>
     <message>
-        <location line="-26"/>
+        <location line="-27"/>
         <source>Error loading blkindex.dat</source>
         <translation>Ошибка чтения blkindex.dat</translation>
     </message>
@@ -2593,12 +3423,12 @@ Address: %4
         <translation>Ошибка загрузки wallet.dat: бумажник требует более новую версию Scash</translation>
     </message>
     <message>
-        <location line="+73"/>
+        <location line="+77"/>
         <source>Wallet needed to be rewritten: restart Scash to complete</source>
         <translation>Необходимо перезаписать бумажник, перезапустите Scash для завершения операции.</translation>
     </message>
     <message>
-        <location line="-75"/>
+        <location line="-79"/>
         <source>Error loading wallet.dat</source>
         <translation>Ошибка при загрузке wallet.dat</translation>
     </message>
@@ -2608,7 +3438,7 @@ Address: %4
         <translation>Неверный адрес -proxy: &apos;%s&apos;</translation>
     </message>
     <message>
-        <location line="+46"/>
+        <location line="+50"/>
         <source>Unknown network specified in -onlynet: &apos;%s&apos;</source>
         <translation>В параметре -onlynet указана неизвестная сеть: &apos;%s&apos;</translation>
     </message>
@@ -2618,7 +3448,7 @@ Address: %4
         <translation>В параметре -socks запрошена неизвестная версия: %i</translation>
     </message>
     <message>
-        <location line="-74"/>
+        <location line="-78"/>
         <source>Cannot resolve -bind address: &apos;%s&apos;</source>
         <translation>Не удаётся разрешить адрес в параметре -bind: &apos;%s&apos;</translation>
     </message>
@@ -2638,37 +3468,37 @@ Address: %4
         <translation>Ошибка: не удалось запустить узел</translation>
     </message>
     <message>
-        <location line="+40"/>
+        <location line="+43"/>
         <source>Sending...</source>
         <translation>Отправка...</translation>
     </message>
     <message>
-        <location line="-24"/>
+        <location line="-26"/>
         <source>Invalid amount</source>
         <translation>Неверное количество</translation>
     </message>
     <message>
-        <location line="-4"/>
+        <location line="-5"/>
         <source>Insufficient funds</source>
         <translation>Недостаточно монет</translation>
     </message>
     <message>
-        <location line="+8"/>
+        <location line="+9"/>
         <source>Loading block index...</source>
         <translation>Загрузка индекса блоков...</translation>
     </message>
     <message>
-        <location line="-46"/>
+        <location line="-45"/>
         <source>Add a node to connect to and attempt to keep the connection open</source>
         <translation>Добавить узел для подключения и пытаться поддерживать соединение открытым</translation>
     </message>
     <message>
-        <location line="-25"/>
+        <location line="-22"/>
         <source>Unable to bind to %s on this computer. Scash is probably already running.</source>
         <translation>Невозможно привязаться к %s на этом компьютере.  Возможно, Scash уже работает.</translation>
     </message>
     <message>
-        <location line="+55"/>
+        <location line="+50"/>
         <source>Find peers using internet relay chat (default: 1)</source>
         <translation>Найти участников через IRC (по умолчанию: 1)</translation>
     </message>
@@ -2678,12 +3508,12 @@ Address: %4
         <translation>Комиссия на килобайт, добавляемая к вашим транзакциям</translation>
     </message>
     <message>
-        <location line="+19"/>
+        <location line="+20"/>
         <source>Loading wallet...</source>
         <translation>Загрузка бумажника...</translation>
     </message>
     <message>
-        <location line="-39"/>
+        <location line="-40"/>
         <source>Cannot downgrade wallet</source>
         <translation>Не удаётся понизить версию бумажника</translation>
     </message>
@@ -2698,17 +3528,17 @@ Address: %4
         <translation>Не удаётся записать адрес по умолчанию</translation>
     </message>
     <message>
-        <location line="+46"/>
+        <location line="+49"/>
         <source>Rescanning...</source>
         <translation>Сканирование...</translation>
     </message>
     <message>
-        <location line="-40"/>
+        <location line="-43"/>
         <source>Done loading</source>
         <translation>Загрузка завершена</translation>
     </message>
     <message>
-        <location line="+64"/>
+        <location line="+67"/>
         <source>To use the %s option</source>
         <translation>Чтобы использовать опцию %s</translation>
     </message>
@@ -2732,12 +3562,12 @@ rpcpassword=%s
 </translation>
     </message>
     <message>
-        <location line="+91"/>
+        <location line="+88"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location line="-30"/>
+        <location line="-28"/>
         <source>You must set rpcpassword=&lt;password&gt; in the configuration file:
 %s
 If the file does not exist, create it with owner-readable-only file permissions.</source>

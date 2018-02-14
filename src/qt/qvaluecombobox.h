@@ -1,7 +1,7 @@
 #ifndef QVALUECOMBOBOX_H
 #define QVALUECOMBOBOX_H
 
-#include <QComboBox>
+#include <QtWidgets/QComboBox>
 #include <QVariant>
 
 /* QComboBox that can be used with QDataWidgetMapper to select ordinal values from a model. */

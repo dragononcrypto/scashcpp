@@ -33,40 +33,42 @@
 #include "wallet.h"
 #include "bitcoinrpc.h"
 
+#include <QMimeData>
+
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
 #endif
 
-#include <QApplication>
-#include <QMainWindow>
-#include <QMenuBar>
-#include <QMenu>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMenu>
 #include <QIcon>
-#include <QTabWidget>
-#include <QVBoxLayout>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QToolBar>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
 #include <QLocale>
-#include <QMessageBox>
-#include <QProgressBar>
-#include <QStackedWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QProgressBar>
+#include <QtWidgets/QStackedWidget>
 #include <QDateTime>
 #include <QMovie>
-#include <QFileDialog>
+#include <QtWidgets/QFileDialog>
 #include <QDesktopServices>
 #include <QTimer>
 #include <QDragEnterEvent>
 #include <QUrl>
-#include <QStyle>
+#include <QtWidgets/QStyle>
 
 #include <iostream>
 
 extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
-extern unsigned int nStakeTargetSpacing;
+extern int nStakeTargetSpacing;
 
 static BitcoinGUI *pGUIMain = NULL;
 void BitcoinGUI::switchToTransactionPage()
@@ -92,8 +94,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     resize(850, 550);
     setWindowTitle(tr("Scash") + " - " + tr("Wallet"));
 #ifndef Q_OS_MAC
-    qApp->setWindowIcon(QIcon(":icons/bitcoin"));
-    setWindowIcon(QIcon(":icons/bitcoin"));
+    qApp->setWindowIcon(QIcon(":/icons/client_ico_new"));
+    setWindowIcon(QIcon(":/icons/client_ico_new"));
 #else
     setUnifiedTitleAndToolBarOnMac(true);
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
@@ -383,12 +385,12 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
     if(clientModel)
     {
         // Replace some strings and icons, when using the testnet
-        if(clientModel->isTestNet())
+/*        //if(clientModel->isTestNet())
         {
-            setWindowTitle(windowTitle() + QString(" ") + tr("[testnet]"));
+            //setWindowTitle(windowTitle() + QString(" ") + tr("[testnet]"));
 #ifndef Q_OS_MAC
-            qApp->setWindowIcon(QIcon(":icons/bitcoin_testnet"));
-            setWindowIcon(QIcon(":icons/bitcoin_client"));
+            qApp->setWindowIcon(QIcon(":/icons/client_ico"));
+            setWindowIcon(QIcon(":/icons/client_ico"));
 #else
             MacDockIconHandler::instance()->setIcon(QIcon(":icons/bitcoin_testnet"));
 #endif
@@ -399,8 +401,10 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
                 toggleHideAction->setIcon(QIcon(":/icons/client_ico"));
             }
 
-            aboutAction->setIcon(QIcon(":/icons/toolbar_testnet"));
+            //aboutAction->setIcon(QIcon(":/icons/toolbar_testnet"));
         }
+*/
+
 
         // Keep up to date with client
         setNumConnections(clientModel->getNumConnections());
@@ -455,7 +459,7 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu = new QMenu(this);
     trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setToolTip(tr("Scash client"));
-    trayIcon->setIcon(QIcon(":/icons/client_ico"));
+    trayIcon->setIcon(QIcon(":/icons/client_ico_new"));
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
     trayIcon->show();
@@ -900,7 +904,7 @@ void BitcoinGUI::encryptWallet(bool status)
 
 void BitcoinGUI::backupWallet()
 {
-    QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+    QString saveDir = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).at(0);
     QString filename = QFileDialog::getSaveFileName(this, tr("Backup Wallet"), saveDir, tr("Wallet Data (*.dat)"));
     if(!filename.isEmpty()) {
         if(!walletModel->backupWallet(filename)) {

@@ -36,6 +36,7 @@ namespace Checkpoints
         ( 25609, uint256("0x00000000ba4a732ee10b7ad0247833824f42e6f4c1fc99823dd898048aff825d") )
         ( 43961, uint256("0x0000031b3b4acc1cd9b16a17f9f327cc6c5d6e2e77797148ac11a6cb88c89e4b") )
         ( 48874, uint256("0x0000006bb9505c269042377a0f4057addc7230bcd03a167ada9e4f16141abc2d") )
+        ( 65536, uint256("0x00000010cd4e9d12c7983ac8a848b7beaf742514f92fdef8b7fcf18f5dbc6bfb") )
     ;
 
     static MapCheckpoints mapCheckpointsTestnet =
@@ -205,7 +206,9 @@ namespace Checkpoints
         // Select the last proof-of-work block
         const CBlockIndex *pindex = GetLastBlockIndex(pindexBest, false);
         // Search forward for a block within max span and maturity window
-        while (pindex->pnext && (pindex->GetBlockTime() + CHECKPOINT_MAX_SPAN <= pindexBest->GetBlockTime() || pindex->nHeight + std::min(6, nCoinbaseMaturity - 20) <= pindexBest->nHeight))
+        while (pindex->pnext && (pindex->GetBlockTime() + CHECKPOINT_MAX_SPAN
+                                 <= pindexBest->GetBlockTime() ||
+                                 pindex->nHeight + (std::min)(6, nCoinbaseMaturity - 20) <= pindexBest->nHeight))
             pindex = pindex->pnext;
         return pindex->GetBlockHash();
     }

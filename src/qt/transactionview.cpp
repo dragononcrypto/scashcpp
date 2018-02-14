@@ -16,22 +16,22 @@
 #include "optionsmodel.h"
 #include "guiutil.h"
 
-#include <QScrollBar>
-#include <QComboBox>
+#include <QtWidgets/QScrollBar>
+#include <QtWidgets/QComboBox>
 #include <QDoubleValidator>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QLineEdit>
-#include <QTableView>
-#include <QHeaderView>
-#include <QPushButton>
-#include <QMessageBox>
+#include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QTableView>
+#include <QtWidgets/QHeaderView>
+#include <QtWidgets/QPushButton>
+#include <QtWidgets/QMessageBox>
 #include <QPoint>
-#include <QMenu>
-#include <QApplication>
+#include <QtWidgets/QMenu>
+#include <QtWidgets/QApplication>
 #include <QClipboard>
-#include <QLabel>
-#include <QDateTimeEdit>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QDateTimeEdit>
 
 TransactionView::TransactionView(QWidget *parent) :
     QWidget(parent), model(0), transactionProxyModel(0),
@@ -184,7 +184,7 @@ void TransactionView::setModel(WalletModel *model)
                 TransactionTableModel::Date, 120);
         transactionView->horizontalHeader()->resizeSection(
                 TransactionTableModel::Type, 120);
-        transactionView->horizontalHeader()->setResizeMode(
+        transactionView->horizontalHeader()->setSectionResizeMode(
                 TransactionTableModel::ToAddress, QHeaderView::Stretch);
         transactionView->horizontalHeader()->resizeSection(
                 TransactionTableModel::Amount, 100);

@@ -1,7 +1,7 @@
 #ifndef MESSAGEENTRY_H
 #define MESSAGEENTRY_H
 
-#include <QFrame>
+#include <QtWidgets/QFrame>
 
 namespace Ui {
     class MessageEntry;

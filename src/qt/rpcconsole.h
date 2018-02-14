@@ -1,7 +1,7 @@
 #ifndef RPCCONSOLE_H
 #define RPCCONSOLE_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 
 namespace Ui {
     class RPCConsole;

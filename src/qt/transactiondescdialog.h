@@ -1,7 +1,7 @@
 #ifndef TRANSACTIONDESCDIALOG_H
 #define TRANSACTIONDESCDIALOG_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 
 namespace Ui {
     class TransactionDescDialog;
