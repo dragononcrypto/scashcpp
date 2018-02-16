@@ -615,7 +615,7 @@ bool updateBlockInfo(CBlock& block)
         stat.nTimeMs = getTicksCountToMeasure();
         stat.nSize = block.GetSerializeSize(SER_NETWORK, CLIENT_VERSION);
         stat.isPos = block.IsProofOfStake();
-        blockStats.push_back(stat);
+        blockStats.insert(blockStats.begin(), stat);
     }
     catch (std::exception &ex)
     {
