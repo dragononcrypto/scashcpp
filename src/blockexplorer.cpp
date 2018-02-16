@@ -783,13 +783,13 @@ bool  BlocksContainer::UpdateIndex(bool force)
         if (calculateNetworkStats(metrics))
         {
             fileIndex << "<div class='row'><table with='100%'><tr><td><div class='col-md-3 text-center'><div class='panel panel-warning'><div class='panel-heading'><h3 class='panel-title'>Confirmation time</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average single confirmation time'>"
-                << std::setprecision(2) << metrics.averageConfSpeed / 1000 << "s</span></h4></div></div></div>"
+                << std::setprecision(3) << (metrics.averageConfSpeed / 1000) << "s</span></h4></div></div></div>"
                 << "</td><td><div class='col-md-2 text-center'><div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>Full TX time</h3></div><div class='panel-body'><h4> <span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average full transaction confirmation time'>"
-                << std::setprecision(2) << metrics.averageTxSpeed / 1000 << "s</span></h4></div></div></div>"
+                << std::setprecision(3) << (metrics.averageTxSpeed / 1000) << "s</span></h4></div></div></div>"
                 << "</td><td><div class='col-md-2 text-center'><div class='panel panel-primary'><div class='panel-heading'><h3 class='panel-title'>PoS/PoW ratio</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of PoS blocks to PoW-generated blocks'>"
-                << std::setprecision(2) << metrics.posRatio * 100 <<"%</span></h4></div></div></div>"
+                << std::setprecision(2) << (metrics.posRatio * 100) <<"%</span></h4></div></div></div>"
                 << "</td><td><div class='col-md-2 text-center'><div class='panel panel-success'><div class='panel-heading'><h3 class='panel-title'>Network utilization</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of data actually stored over blockchain to maximal possible amount'>"
-                << std::setprecision(2) << metrics.utilization * 100 << "%</span></h4></div></div></div></div>"
+                << std::setprecision(2) << (metrics.utilization * 100) << "%</span></h4></div></div></div></div>"
                 << "</td></tr></table><p>";
         }
         else
