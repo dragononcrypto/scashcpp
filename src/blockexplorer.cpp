@@ -38,6 +38,16 @@ enum ObjectTypes {
 
 std::map<std::string, ObjectTypes> g_ids;
 
+static const int MaxBlocksStat = 100;
+class BlockStatInfo
+{
+public:
+    unsigned int nTimeMs;
+    bool isPos;
+    unsigned int nSize;
+};
+std::vector<BlockStatInfo> blockStats;
+
 struct BlockDataInfo
 {
     std::string id;
@@ -592,6 +602,82 @@ bool writeBlockTransactions(int height, CBlock& block)
     return result;
 }
 
+bool updateBlockInfo(CBlock& block)
+{
+    try
+    {
+        // we should be here under LOCK(g_cs_be_fatlock);
+
+        while (blockStats.size() > MaxBlocksStat)
+            blockStats.pop_back();
+
+        BlockStatInfo stat;
+        stat.nTimeMs = getTicksCountToMeasure();
+        stat.nSize = block.GetSerializeSize(SER_NETWORK, CLIENT_VERSION);
+        stat.isPos = block.IsProofOfStake();
+        blockStats.push_back(stat);
+    }
+    catch (std::exception &ex)
+    {
+        return false;
+    }
+    return true;
+}
+
+class DisplayNetworkMetrics
+{
+public:
+    float posRatio;
+    float averageConfSpeed;
+    float averageTxSpeed;
+    float utilization;
+};
+
+bool calculateNetworkStats(DisplayNetworkMetrics &res)
+{
+    res.posRatio = 0;
+    res.averageTxSpeed = 0;
+    res.averageConfSpeed = 0;
+    res.utilization = 0;
+
+    try
+    {
+        // we should be here under LOCK(g_cs_be_fatlock);
+
+        if (blockStats.size() <= 2) // NO stat for 2 or less blocks.
+            return false;
+
+        for (unsigned int n = 0; n < blockStats.size(); n++)
+        {
+            res.posRatio += blockStats[n].isPos ? 1.0f : 0.0f;
+            res.utilization += (float)blockStats[n].nSize / MAX_BLOCK_SIZE;
+
+            if (n > 0)
+            {
+                int diff = (int)blockStats[n-1].nTimeMs - (int)blockStats[n].nTimeMs;
+                res.averageConfSpeed += diff > 0 ? diff : 0;
+            }
+
+            if (n > 4)
+            {
+                int diff = (int)blockStats[n-4].nTimeMs - (int)blockStats[n].nTimeMs;
+                res.averageTxSpeed += diff > 0 ? diff : 0;
+            }
+        }
+
+        res.posRatio /= blockStats.size();
+        res.utilization /= blockStats.size();
+        res.averageConfSpeed /= (blockStats.size() - 1);
+        if (blockStats.size() > 4) res.averageTxSpeed /= (blockStats.size() - 4);
+    }
+    catch (std::exception &ex)
+    {
+        return false;
+    }
+    return true;
+}
+
+
 bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
 {
     LOCK(g_cs_be_fatlock);
@@ -611,6 +697,7 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
         boost::filesystem::create_directory(pathBe);
 
         writeBlockTransactions(height, block);
+        updateBlockInfo(block);
 
         std::string blockFileName = safeEncodeFileNameWithoutExtension(blockId) + ".html";
 
@@ -692,8 +779,23 @@ bool  BlocksContainer::UpdateIndex(bool force)
         std::fstream fileIndex(pathIndexFile.c_str(), std::ios::out);
         fileIndex << getHead("", true);
 
-        fileIndex << "<br>"; // TODO: block generation graph
-                // if (fChartsEnabled || BlockExplorer::fBlockExplorerEnabled) Charts::BlocksAdded().AddData(1);
+        DisplayNetworkMetrics metrics;
+        if (calculateNetworkStats(metrics))
+        {
+            fileIndex << "<div class='row'><table with='100%'><tr><td><div class='col-md-3 text-center'><div class='panel panel-warning'><div class='panel-heading'><h3 class='panel-title'>Confirmation time</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average single confirmation time'>"
+                << std::setprecision(2) << metrics.averageConfSpeed / 1000 << "s</span></h4></div></div></div>"
+                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>Full TX time</h3></div><div class='panel-body'><h4> <span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average full transaction confirmation time'>"
+                << std::setprecision(2) << metrics.averageTxSpeed / 1000 << "s</span></h4></div></div></div>"
+                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-primary'><div class='panel-heading'><h3 class='panel-title'>PoS/PoW ratio</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of PoS blocks to PoW-generated blocks'>"
+                << std::setprecision(2) << metrics.posRatio * 100 <<"%</span></h4></div></div></div>"
+                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-success'><div class='panel-heading'><h3 class='panel-title'>Network utilization</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of data actually stored over blockchain to maximal possible amount'>"
+                << std::setprecision(2) << metrics.utilization * 100 << "%</span></h4></div></div></div></div>"
+                << "</td></tr></table><p>";
+        }
+        else
+        {
+            fileIndex << "<br>";
+        }
 
         fileIndex << "<table width=\"788px\">";
         fileIndex << "<thead><tr><th>Block hash</th><th>PoS</th><th>Height</th><th>Time</th><th>Age</th></tr></thead>";
