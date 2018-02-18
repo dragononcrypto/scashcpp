@@ -197,6 +197,59 @@ std::string unixTimeToAgeFromNow(unsigned int ts, unsigned int from)
 }
 
 
+int GetTotalSupply()
+{
+    try
+    {
+        boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
+        boost::filesystem::create_directory(pathBe);
+
+        std::string addressFileName = "circulating_supply";
+        boost::filesystem::path pathSupplyFile = pathBe / addressFileName;
+
+        std::fstream fileIn(pathSupplyFile.c_str(), std::ifstream::in);
+
+        int supply;
+        fileIn >> supply;
+
+        fileIn.close();
+        return supply;
+    }
+    catch (std::exception& ex)
+    {
+        printf("Read supply file failed [%s]\n", ex.what());
+    }
+    return 0;
+}
+
+bool AddTotalSupply(int coins)
+{
+    int newSupply = GetTotalSupply();
+    if (!newSupply) return false;
+    newSupply += coins;
+
+    try
+    {
+        boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
+        boost::filesystem::create_directory(pathBe);
+
+        std::string addressFileName = "circulating_supply";
+        boost::filesystem::path pathSupplyFile = pathBe / addressFileName;
+
+        std::fstream fileOut(pathSupplyFile.c_str(), std::ofstream::out);
+
+        fileOut << newSupply;
+
+        fileOut.close();
+    }
+    catch (std::exception& ex)
+    {
+        printf("Write supply file failed [%s]\n", ex.what());
+        return false;
+    }
+    return true;
+}
+
 static const std::string searchScript = + "<script>function nav() { window.location.href=\"search?q=\" + window.document.getElementById(\"search\").value; return false; }</script>";
 
 static const std::string searchForm = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
@@ -452,7 +505,19 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
     }
     stream << "</table>";
 
-    if (nonZeroInputAddr.empty()) nonZeroInputAddr = Address_NoAddress;
+    if (nonZeroInputAddr.empty())
+    {
+        nonZeroInputAddr = Address_NoAddress;
+
+        // mined blocks
+        for (size_t u = 0; u < nonZeroAmountOuts.size() && u < nonZeroOutputAddrs.size(); u++)
+        {
+            if (nonZeroAmountOuts[u] == 8*COIN)
+            {
+                AddTotalSupply(nonZeroAmountOuts[u] / COIN);
+            }
+        }
+    }
 
     if (hasPoSOutputs)
     {
@@ -758,6 +823,8 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
     return true;
 }
 
+
+
 bool  BlocksContainer::UpdateIndex(bool force)
 {
     if (!force && (getTicksCountToMeasure() - g_lastUpdateTime < AutoUpdateTimeMs))
@@ -789,8 +856,11 @@ bool  BlocksContainer::UpdateIndex(bool force)
                 << "</td><td><div class='col-md-2 text-center'><div class='panel panel-primary'><div class='panel-heading'><h3 class='panel-title'>PoS/PoW ratio</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of PoS blocks to PoW-generated blocks'>"
                 << std::setprecision(2) << (metrics.posRatio * 100) <<"%</span></h4></div></div></div>"
                 << "</td><td><div class='col-md-2 text-center'><div class='panel panel-success'><div class='panel-heading'><h3 class='panel-title'>Network utilization</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of data actually stored over blockchain to maximal possible amount'>"
-                << std::setprecision(2) << (metrics.utilization * 100) << "%</span></h4></div></div></div></div>"
-                << "</td></tr></table><p>";
+                << std::setprecision(2) << (metrics.utilization * 100) << "%</span></h4></div></div></div>"
+                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-danger'><div class='panel-heading'><h3 class='panel-title'>Circulating supply</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Count of coins in use'>"
+                << "<a href='circulatingsupply.txt'>" << std::setprecision(2) << (GetTotalSupply()) << "SCS</a></span></h4></div></div></div></div>"
+                << "</td></tr>"
+                << "</table><p>";
         }
         else
         {
@@ -1170,6 +1240,11 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
         if (reqSafe == "mystyle.css")
         {
             return Style::getStyleCssFileContent();
+        }
+
+        if (reqSafe.find("circulatingsupply") != std::string::npos)
+        {
+            return std::to_string(GetTotalSupply());
         }
 
         if (!searchRequest)
