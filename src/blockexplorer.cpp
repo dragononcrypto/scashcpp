@@ -58,6 +58,18 @@ struct BlockDataInfo
 
 static std::vector<BlockDataInfo> g_latestBlocksAdded;
 
+static const int MaxMessagesShow = 30;
+struct MessageInfo
+{
+    std::string message;
+    std::string from;
+    std::string to;
+    std::string amount;
+    std::string msgTime;
+};
+
+static std::vector<MessageInfo> g_messages;
+
 std::string safeEncodeFileNameWithoutExtension(const std::string& name)
 {
     std::string result = "";
@@ -253,11 +265,11 @@ bool AddTotalSupply(int coins)
 static const std::string searchScript = + "<script>function nav() { window.location.href=\"search?q=\" + window.document.getElementById(\"search\").value; return false; }</script>";
 
 static const std::string searchForm = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
-     " <input type='text' id='search' placeholder='Search address, block, transaction, tag...' value='' width=\"588px\" required> "
+     " <input type='text' id='search' placeholder='Search address, block, transaction, tag...' value='' width=\"628px\" required> "
      " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
 
 static const std::string searchFormBalanceChecker = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
-     " <input type='text' id='search' placeholder='Search by Scash address...' value='' width=\"588px\" required> "
+     " <input type='text' id='search' placeholder='Search by Scash address...' value='' width=\"628px\" required> "
      " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
 
 std::string getHead(const std::string& titleAdd = "", bool addRefreshTag = false,
@@ -517,6 +529,28 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
                 AddTotalSupply(nonZeroAmountOuts[u] / COIN);
             }
         }
+    }
+    else if (t.HasMessage())
+    {
+        MessageInfo msg;
+        msg.from =  nonZeroInputAddr;
+        msg.message = simpleHTMLSafeDisplayFilter(t.message);
+        msg.to = "";
+
+        int totalAmount = 0;
+        for (size_t u = 0; u < nonZeroAmountOuts.size() && u < nonZeroOutputAddrs.size(); u++)
+        {
+            totalAmount += nonZeroAmountOuts[u];
+            msg.to += nonZeroOutputAddrs[u] + " ";
+        }
+
+        msg.amount = std::to_string((float)totalAmount / (float)COIN) + "SCS";
+        msg.msgTime = txDate;
+
+        while (g_messages.size() > MaxMessagesShow)
+            g_messages.pop_back();
+
+        g_messages.insert(g_messages.begin(), msg);
     }
 
     if (hasPoSOutputs)
@@ -824,6 +858,43 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
 }
 
 
+void UpdateMessagesList(unsigned long nowTime)
+{
+    try
+    {
+        LOCK(g_cs_be_fatlock);
+
+        boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
+        boost::filesystem::create_directory(pathBe);
+
+        std::string blockFileName = "messages.html";
+
+        boost::filesystem::path pathIndexFile = pathBe / blockFileName;
+
+        std::fstream fileIndex(pathIndexFile.c_str(), std::ios::out);
+        fileIndex << getHead("Messages", true);
+
+        for (size_t u = 0; u < g_messages.size(); u++)
+        {
+            fileIndex << "<div class=rectangle-speech-border><div class=msgtime><b>Date sent: </b>"
+                      << g_messages[u].msgTime << "</div><div class=msgfrom><b>From: </b>"
+                      << fixupKnownObjects(g_messages[u].from) << "</div><div class=msgto><b>To: </b>"
+                      << fixupKnownObjects(g_messages[u].to) << "</div><div class=msgamount><b>Money amount: </b>"
+                      << g_messages[u].amount << "</div><div class=msgmsg><b>Message: </b>"
+                      << g_messages[u].message << "</div></div><div class=spacer1>&nbsp;</div>";
+        }
+        fileIndex << "<br><p style=\"margin-left: auto; margin-right: auto; width: 780px\">"
+                 <<"Updated at " << unixTimeToString(nowTime) << ".";
+
+        fileIndex << getTail();
+        fileIndex.close();
+    }
+    catch (std::exception& ex)
+    {
+        printf("Write message index failed: %s\n", ex.what());
+    }
+}
+
 
 bool  BlocksContainer::UpdateIndex(bool force)
 {
@@ -835,6 +906,8 @@ bool  BlocksContainer::UpdateIndex(bool force)
         LOCK(g_cs_be_fatlock);
 
         unsigned long nowTime = getNowTime();
+
+        UpdateMessagesList(nowTime);
 
         boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
         boost::filesystem::create_directory(pathBe);
@@ -867,7 +940,7 @@ bool  BlocksContainer::UpdateIndex(bool force)
             fileIndex << "<br>";
         }
 
-        fileIndex << "<table width=\"788px\">";
+        fileIndex << "<table width=\"832px\">";
         fileIndex << "<thead><tr><th>Block hash</th><th>PoS</th><th>Height</th><th>Time</th><th>Age</th></tr></thead>";
         int upToBlock = 0;
 
@@ -1245,6 +1318,11 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
         if (reqSafe.find("circulatingsupply") != std::string::npos)
         {
             return std::to_string(GetTotalSupply());
+        }
+
+        if (reqSafe.find("favicon") != std::string::npos)
+        {
+            return ""; // TODO
         }
 
         if (!searchRequest)
