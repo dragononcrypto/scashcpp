@@ -23,7 +23,7 @@ MessageEntry::MessageEntry(QWidget *parent) :
     ui->setupUi(this);
 
 #ifdef Q_OS_MAC
-    ui->payToLayout->setSpacing(4);
+    //ui->payToLayout->setSpacing(4);
 #endif
 
     setFocusPolicy(Qt::TabFocus);

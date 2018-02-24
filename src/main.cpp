@@ -13,7 +13,9 @@
 #include "kernel.h"
 #include "blockexplorer.h"
 
+#ifndef WIN32
 #include <sys/time.h>
+#endif
 
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/filesystem.hpp>
@@ -46,8 +48,8 @@ static CBigNum bnProofOfWorkLimitTestNet(~uint256(0) >> 0);
 static CBigNum bnProofOfStakeLimitTestNet(~uint256(0) >> 30);
 
 unsigned int nStakeMinAge = 60 * 60 * 1 * 1; //1H, minimum age for coin age
-unsigned int nStakeMaxAge = 60 * 60 * 4 * 1; //4H, stake age of full weigh
-unsigned int nStakeTargetSpacing = 40; // 40 sec block spacing
+int nStakeMaxAge = 60 * 60 * 4 * 1; //4H, stake age of full weigh
+int nStakeTargetSpacing = 40; // 40 sec block spacing
 
 static const int64 nTargetTimespan = 30 * nStakeTargetSpacing; // 30 blocks
 static const int64 nTargetSpacingWorkMax = 3 * nStakeTargetSpacing;
@@ -2590,7 +2592,7 @@ static unsigned int nCurrentBlockFile = 1;
 FILE* AppendBlockFile(unsigned int& nFileRet)
 {
     nFileRet = 0;
-    loop
+    LOOP
     {
         FILE* file = OpenBlockFile(nCurrentBlockFile, 0, "ab");
         if (!file)
@@ -2877,7 +2879,7 @@ bool LoadExternalBlockFile(FILE* fileIn)
         }
         catch (std::exception &e) {
             printf("%s() : Deserialize or I/O error caught during load\n",
-                   __PRETTY_FUNCTION__);
+                   __FUNCTION__);
         }
     }
     printf("Loaded %i blocks from external file in %" PRI64d "ms\n", nLoaded, GetTimeMillis() - nStart);
@@ -3716,7 +3718,7 @@ bool ProcessMessages(CNode* pfrom)
     //  (x) data
     //
 
-    loop
+    LOOP
     {
         // Don't bother if send buffer is too full to respond anyway
         if (pfrom->vSend.size() >= SendBufferSize())
@@ -4551,7 +4553,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
         uint256 hashTarget = CBigNum().SetCompact(pblock->nBits).getuint256();
         uint256 hash;
 
-        loop
+        LOOP
         {
             hash = pblock->GetHash();
             if (hash <= hashTarget){
@@ -4677,11 +4679,15 @@ void GenerateBitcoins(bool fGenerate, CWallet* pwallet)
 
 unsigned int getTicksCountToMeasure()
 {
+#ifndef WIN32
     struct timeval tv;
     if(gettimeofday(&tv, NULL) != 0)
         return 0;
 
     return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+#else
+    return GetTickCount();
+#endif
 }
 
 

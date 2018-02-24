@@ -8,14 +8,14 @@
 
 #include "guiconstants.h"
 
-#include <QLabel>
-#include <QLineEdit>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
 #include <QRegExpValidator>
-#include <QHBoxLayout>
+#include <QtWidgets/QHBoxLayout>
 #include <QKeyEvent>
-#include <QDoubleSpinBox>
-#include <QComboBox>
-#include <QApplication>
+#include <QtWidgets/QDoubleSpinBox>
+#include <QtWidgets/QComboBox>
+#include <QtWidgets/QApplication>
 #include <qmath.h>
 
 BitcoinAmountField::BitcoinAmountField(QWidget *parent):

@@ -8,18 +8,18 @@
 #include "optionsmodel.h"
 #include "coincontrol.h"
 
-#include <QApplication>
-#include <QCheckBox>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QCheckBox>
 #include <QClipboard>
 #include <QColor>
 #include <QCursor>
 #include <QDateTime>
-#include <QDialogButtonBox>
+#include <QtWidgets/QDialogButtonBox>
 #include <QFlags>
 #include <QIcon>
 #include <QString>
-#include <QTreeWidget>
-#include <QTreeWidgetItem>
+#include <QtWidgets/QTreeWidget>
+#include <QtWidgets/QTreeWidgetItem>
 
 using namespace std;
 QList<qint64> CoinControlDialog::payAmounts;
@@ -95,7 +95,7 @@ CoinControlDialog::CoinControlDialog(QWidget *parent) :
     connect(ui->treeWidget, SIGNAL(itemChanged( QTreeWidgetItem*, int)), this, SLOT(viewItemChanged( QTreeWidgetItem*, int)));
 
     // click on header
-    ui->treeWidget->header()->setClickable(true);
+    ui->treeWidget->header()->setSectionsClickable(true);
     connect(ui->treeWidget->header(), SIGNAL(sectionClicked(int)), this, SLOT(headerSectionClicked(int)));
 
     // ok button

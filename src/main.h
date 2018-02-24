@@ -278,17 +278,17 @@ public:
 
     CTxIn()
     {
-        nSequence = std::numeric_limits<unsigned int>::max();
+        nSequence = 0xffffffff;
     }
 
-    explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn=CScript(), unsigned int nSequenceIn=std::numeric_limits<unsigned int>::max())
+    explicit CTxIn(COutPoint prevoutIn, CScript scriptSigIn=CScript(), unsigned int nSequenceIn=0xffffffff)
     {
         prevout = prevoutIn;
         scriptSig = scriptSigIn;
         nSequence = nSequenceIn;
     }
 
-    CTxIn(uint256 hashPrevTx, unsigned int nOut, CScript scriptSigIn=CScript(), unsigned int nSequenceIn=std::numeric_limits<unsigned int>::max())
+    CTxIn(uint256 hashPrevTx, unsigned int nOut, CScript scriptSigIn=CScript(), unsigned int nSequenceIn=0xffffffff)
     {
         prevout = COutPoint(hashPrevTx, nOut);
         scriptSig = scriptSigIn;
@@ -304,7 +304,7 @@ public:
 
     bool IsFinal() const
     {
-        return (nSequence == std::numeric_limits<unsigned int>::max());
+        return (nSequence == 0xffffffff);
     }
 
     friend bool operator==(const CTxIn& a, const CTxIn& b)
@@ -333,7 +333,7 @@ public:
             str += strprintf(", coinbase %s", HexStr(scriptSig).c_str());
         else
             str += strprintf(", scriptSig=%s", scriptSig.ToString().substr(0,24).c_str());
-        if (nSequence != std::numeric_limits<unsigned int>::max())
+        if (nSequence != 0xffffffff)
             str += strprintf(", nSequence=%u", nSequence);
         str += ")";
         return str;
@@ -557,7 +557,7 @@ public:
                 return false;
 
         bool fNewer = false;
-        unsigned int nLowest = std::numeric_limits<unsigned int>::max();
+        unsigned int nLowest = 0xffffffff;
         for (unsigned int i = 0; i < vin.size(); i++)
         {
             if (vin[i].nSequence != old.vin[i].nSequence)
@@ -669,7 +669,7 @@ public:
             filein >> *this;
         }
         catch (std::exception &e) {
-            return error("%s() : deserialize or I/O error", __PRETTY_FUNCTION__);
+            return error("%s() : deserialize or I/O error", __FUNCTION__);
         }
 
         // Return file pointer
@@ -1038,7 +1038,7 @@ public:
     {
         int64 maxTransactionTime = 0;
         BOOST_FOREACH(const CTransaction& tx, vtx)
-            maxTransactionTime = std::max(maxTransactionTime, (int64)tx.nTime);
+            maxTransactionTime = (std::max)(maxTransactionTime, (int64)tx.nTime);
         return maxTransactionTime;
     }
 
@@ -1052,7 +1052,7 @@ public:
         {
             for (int i = 0; i < nSize; i += 2)
             {
-                int i2 = std::min(i+1, nSize-1);
+                int i2 = (std::min)(i+1, nSize-1);
                 vMerkleTree.push_back(Hash(BEGIN(vMerkleTree[j+i]),  END(vMerkleTree[j+i]),
                                            BEGIN(vMerkleTree[j+i2]), END(vMerkleTree[j+i2])));
             }
@@ -1069,7 +1069,7 @@ public:
         int j = 0;
         for (int nSize = vtx.size(); nSize > 1; nSize = (nSize + 1) / 2)
         {
-            int i = std::min(nIndex^1, nSize-1);
+            int i = (std::min)(nIndex^1, nSize-1);
             vMerkleBranch.push_back(vMerkleTree[j+i]);
             nIndex >>= 1;
             j += nSize;
@@ -1143,7 +1143,7 @@ public:
             filein >> *this;
         }
         catch (std::exception &e) {
-            return error("%s() : deserialize or I/O error", __PRETTY_FUNCTION__);
+            return error("%s() : deserialize or I/O error", __FUNCTION__);
         }
 
         // Check the header

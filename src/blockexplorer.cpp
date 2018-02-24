@@ -38,16 +38,6 @@ enum ObjectTypes {
 
 std::map<std::string, ObjectTypes> g_ids;
 
-static const int MaxBlocksStat = 100;
-class BlockStatInfo
-{
-public:
-    unsigned int nTimeMs;
-    bool isPos;
-    unsigned int nSize;
-};
-std::vector<BlockStatInfo> blockStats;
-
 struct BlockDataInfo
 {
     std::string id;
@@ -57,18 +47,6 @@ struct BlockDataInfo
 };
 
 static std::vector<BlockDataInfo> g_latestBlocksAdded;
-
-static const int MaxMessagesShow = 30;
-struct MessageInfo
-{
-    std::string message;
-    std::string from;
-    std::string to;
-    std::string amount;
-    std::string msgTime;
-};
-
-static std::vector<MessageInfo> g_messages;
 
 std::string safeEncodeFileNameWithoutExtension(const std::string& name)
 {
@@ -192,7 +170,7 @@ unsigned int getNowTime()
 std::string unixTimeToString(unsigned int ts)
 {
     struct tm epoch_time;
-    long int tsLI = ts;
+    time_t tsLI = ts;
     memcpy(&epoch_time, gmtime(&tsLI), sizeof (struct tm));
     char res[64];
     strftime(res, sizeof(res), "%Y-%m-%d %H:%M:%S UTC", &epoch_time);
@@ -209,67 +187,14 @@ std::string unixTimeToAgeFromNow(unsigned int ts, unsigned int from)
 }
 
 
-int GetTotalSupply()
-{
-    try
-    {
-        boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
-        boost::filesystem::create_directory(pathBe);
-
-        std::string addressFileName = "circulating_supply";
-        boost::filesystem::path pathSupplyFile = pathBe / addressFileName;
-
-        std::fstream fileIn(pathSupplyFile.c_str(), std::ifstream::in);
-
-        int supply;
-        fileIn >> supply;
-
-        fileIn.close();
-        return supply;
-    }
-    catch (std::exception& ex)
-    {
-        printf("Read supply file failed [%s]\n", ex.what());
-    }
-    return 0;
-}
-
-bool AddTotalSupply(int coins)
-{
-    int newSupply = GetTotalSupply();
-    if (!newSupply) return false;
-    newSupply += coins;
-
-    try
-    {
-        boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
-        boost::filesystem::create_directory(pathBe);
-
-        std::string addressFileName = "circulating_supply";
-        boost::filesystem::path pathSupplyFile = pathBe / addressFileName;
-
-        std::fstream fileOut(pathSupplyFile.c_str(), std::ofstream::out);
-
-        fileOut << newSupply;
-
-        fileOut.close();
-    }
-    catch (std::exception& ex)
-    {
-        printf("Write supply file failed [%s]\n", ex.what());
-        return false;
-    }
-    return true;
-}
-
 static const std::string searchScript = + "<script>function nav() { window.location.href=\"search?q=\" + window.document.getElementById(\"search\").value; return false; }</script>";
 
 static const std::string searchForm = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
-     " <input type='text' id='search' placeholder='Search address, block, transaction, tag...' value='' width=\"628px\" required> "
+     " <input type='text' id='search' placeholder='Search address, block, transaction, tag...' value='' width=\"588px\" required> "
      " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
 
 static const std::string searchFormBalanceChecker = "<form id='searchForm' onSubmit='return nav();' class='form-wrapper' > "
-     " <input type='text' id='search' placeholder='Search by Scash address...' value='' width=\"628px\" required> "
+     " <input type='text' id='search' placeholder='Search by Scash address...' value='' width=\"588px\" required> "
      " <input style='margin-top: -1px' type='button' value='find' id='submit' onclick='return nav();'></form>";
 
 std::string getHead(const std::string& titleAdd = "", bool addRefreshTag = false,
@@ -517,41 +442,7 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
     }
     stream << "</table>";
 
-    if (nonZeroInputAddr.empty())
-    {
-        nonZeroInputAddr = Address_NoAddress;
-
-        // mined blocks
-        for (size_t u = 0; u < nonZeroAmountOuts.size() && u < nonZeroOutputAddrs.size(); u++)
-        {
-            if (nonZeroAmountOuts[u] == 8*COIN)
-            {
-                AddTotalSupply(nonZeroAmountOuts[u] / COIN);
-            }
-        }
-    }
-    else if (t.HasMessage())
-    {
-        MessageInfo msg;
-        msg.from =  nonZeroInputAddr;
-        msg.message = simpleHTMLSafeDisplayFilter(t.message);
-        msg.to = "";
-
-        int totalAmount = 0;
-        for (size_t u = 0; u < nonZeroAmountOuts.size() && u < nonZeroOutputAddrs.size(); u++)
-        {
-            totalAmount += nonZeroAmountOuts[u];
-            msg.to += nonZeroOutputAddrs[u] + " ";
-        }
-
-        msg.amount = std::to_string((float)totalAmount / (float)COIN) + "SCS";
-        msg.msgTime = txDate;
-
-        while (g_messages.size() > MaxMessagesShow)
-            g_messages.pop_back();
-
-        g_messages.insert(g_messages.begin(), msg);
-    }
+    if (nonZeroInputAddr.empty()) nonZeroInputAddr = Address_NoAddress;
 
     if (hasPoSOutputs)
     {
@@ -701,82 +592,6 @@ bool writeBlockTransactions(int height, CBlock& block)
     return result;
 }
 
-bool updateBlockInfo(CBlock& block)
-{
-    try
-    {
-        // we should be here under LOCK(g_cs_be_fatlock);
-
-        while (blockStats.size() > MaxBlocksStat)
-            blockStats.pop_back();
-
-        BlockStatInfo stat;
-        stat.nTimeMs = getTicksCountToMeasure();
-        stat.nSize = block.GetSerializeSize(SER_NETWORK, CLIENT_VERSION);
-        stat.isPos = block.IsProofOfStake();
-        blockStats.insert(blockStats.begin(), stat);
-    }
-    catch (std::exception &ex)
-    {
-        return false;
-    }
-    return true;
-}
-
-class DisplayNetworkMetrics
-{
-public:
-    float posRatio;
-    float averageConfSpeed;
-    float averageTxSpeed;
-    float utilization;
-};
-
-bool calculateNetworkStats(DisplayNetworkMetrics &res)
-{
-    res.posRatio = 0;
-    res.averageTxSpeed = 0;
-    res.averageConfSpeed = 0;
-    res.utilization = 0;
-
-    try
-    {
-        // we should be here under LOCK(g_cs_be_fatlock);
-
-        if (blockStats.size() <= 2) // NO stat for 2 or less blocks.
-            return false;
-
-        for (unsigned int n = 0; n < blockStats.size(); n++)
-        {
-            res.posRatio += blockStats[n].isPos ? 1.0f : 0.0f;
-            res.utilization += (float)blockStats[n].nSize / MAX_BLOCK_SIZE;
-
-            if (n > 0)
-            {
-                int diff = (int)blockStats[n-1].nTimeMs - (int)blockStats[n].nTimeMs;
-                res.averageConfSpeed += diff > 0 ? diff : 0;
-            }
-
-            if (n > 4)
-            {
-                int diff = (int)blockStats[n-4].nTimeMs - (int)blockStats[n].nTimeMs;
-                res.averageTxSpeed += diff > 0 ? diff : 0;
-            }
-        }
-
-        res.posRatio /= blockStats.size();
-        res.utilization /= blockStats.size();
-        res.averageConfSpeed /= (blockStats.size() - 1);
-        if (blockStats.size() > 4) res.averageTxSpeed /= (blockStats.size() - 4);
-    }
-    catch (std::exception &ex)
-    {
-        return false;
-    }
-    return true;
-}
-
-
 bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
 {
     LOCK(g_cs_be_fatlock);
@@ -796,7 +611,6 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
         boost::filesystem::create_directory(pathBe);
 
         writeBlockTransactions(height, block);
-        updateBlockInfo(block);
 
         std::string blockFileName = safeEncodeFileNameWithoutExtension(blockId) + ".html";
 
@@ -857,45 +671,6 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
     return true;
 }
 
-
-void UpdateMessagesList(unsigned long nowTime)
-{
-    try
-    {
-        LOCK(g_cs_be_fatlock);
-
-        boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
-        boost::filesystem::create_directory(pathBe);
-
-        std::string blockFileName = "messages.html";
-
-        boost::filesystem::path pathIndexFile = pathBe / blockFileName;
-
-        std::fstream fileIndex(pathIndexFile.c_str(), std::ios::out);
-        fileIndex << getHead("Messages", true);
-
-        for (size_t u = 0; u < g_messages.size(); u++)
-        {
-            fileIndex << "<div class=rectangle-speech-border><div class=msgtime><b>Date sent: </b>"
-                      << g_messages[u].msgTime << "</div><div class=msgfrom><b>From: </b>"
-                      << fixupKnownObjects(g_messages[u].from) << "</div><div class=msgto><b>To: </b>"
-                      << fixupKnownObjects(g_messages[u].to) << "</div><div class=msgamount><b>Money amount: </b>"
-                      << g_messages[u].amount << "</div><div class=msgmsg><b>Message: </b>"
-                      << g_messages[u].message << "</div></div><div class=spacer1>&nbsp;</div>";
-        }
-        fileIndex << "<br><p style=\"margin-left: auto; margin-right: auto; width: 780px\">"
-                 <<"Updated at " << unixTimeToString(nowTime) << ".";
-
-        fileIndex << getTail();
-        fileIndex.close();
-    }
-    catch (std::exception& ex)
-    {
-        printf("Write message index failed: %s\n", ex.what());
-    }
-}
-
-
 bool  BlocksContainer::UpdateIndex(bool force)
 {
     if (!force && (getTicksCountToMeasure() - g_lastUpdateTime < AutoUpdateTimeMs))
@@ -907,8 +682,6 @@ bool  BlocksContainer::UpdateIndex(bool force)
 
         unsigned long nowTime = getNowTime();
 
-        UpdateMessagesList(nowTime);
-
         boost::filesystem::path pathBe = GetDataDir() / "blockexplorer";
         boost::filesystem::create_directory(pathBe);
 
@@ -919,28 +692,10 @@ bool  BlocksContainer::UpdateIndex(bool force)
         std::fstream fileIndex(pathIndexFile.c_str(), std::ios::out);
         fileIndex << getHead("", true);
 
-        DisplayNetworkMetrics metrics;
-        if (calculateNetworkStats(metrics))
-        {
-            fileIndex << "<div class='row'><table with='100%'><tr><td><div class='col-md-3 text-center'><div class='panel panel-warning'><div class='panel-heading'><h3 class='panel-title'>Confirmation time</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average single confirmation time'>"
-                << std::setprecision(3) << (metrics.averageConfSpeed / 1000) << "s</span></h4></div></div></div>"
-                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>Full TX time</h3></div><div class='panel-body'><h4> <span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average full transaction confirmation time'>"
-                << std::setprecision(3) << (metrics.averageTxSpeed / 1000) << "s</span></h4></div></div></div>"
-                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-primary'><div class='panel-heading'><h3 class='panel-title'>PoS/PoW ratio</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of PoS blocks to PoW-generated blocks'>"
-                << std::setprecision(2) << (metrics.posRatio * 100) <<"%</span></h4></div></div></div>"
-                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-success'><div class='panel-heading'><h3 class='panel-title'>Network utilization</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of data actually stored over blockchain to maximal possible amount'>"
-                << std::setprecision(2) << (metrics.utilization * 100) << "%</span></h4></div></div></div>"
-                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-danger'><div class='panel-heading'><h3 class='panel-title'>Circulating supply</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Count of coins in use'>"
-                << "<a href='circulatingsupply.txt'>" << std::setprecision(2) << (GetTotalSupply()) << "SCS</a></span></h4></div></div></div></div>"
-                << "</td></tr>"
-                << "</table><p>";
-        }
-        else
-        {
-            fileIndex << "<br>";
-        }
+        fileIndex << "<br>"; // TODO: block generation graph
+                // if (fChartsEnabled || BlockExplorer::fBlockExplorerEnabled) Charts::BlocksAdded().AddData(1);
 
-        fileIndex << "<table width=\"832px\">";
+        fileIndex << "<table width=\"788px\">";
         fileIndex << "<thead><tr><th>Block hash</th><th>PoS</th><th>Height</th><th>Time</th><th>Age</th></tr></thead>";
         int upToBlock = 0;
 
@@ -1313,16 +1068,6 @@ std::string BlocksContainer::GetFileDataByURL(const std::string& urlUnsafe)
         if (reqSafe == "mystyle.css")
         {
             return Style::getStyleCssFileContent();
-        }
-
-        if (reqSafe.find("circulatingsupply") != std::string::npos)
-        {
-            return std::to_string(GetTotalSupply());
-        }
-
-        if (reqSafe.find("favicon") != std::string::npos)
-        {
-            return ""; // TODO
         }
 
         if (!searchRequest)

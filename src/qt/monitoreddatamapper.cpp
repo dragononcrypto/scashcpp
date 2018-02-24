@@ -1,6 +1,6 @@
 #include "monitoreddatamapper.h"
 
-#include <QWidget>
+#include <QtWidgets/QWidget>
 #include <QMetaObject>
 #include <QMetaProperty>
 
