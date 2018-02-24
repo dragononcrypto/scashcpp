@@ -645,7 +645,8 @@ void BitcoinGUI::error(const QString &title, const QString &message, bool modal)
     {
         QMessageBox::critical(this, title, message, QMessageBox::Ok, QMessageBox::Ok);
     } else {
-        notificator->notify(Notificator::Critical, title, message);
+        if (trayIcon) trayIcon->showMessage(title, message);
+        //notificator->notify(Notificator::Critical, title, message);
     }
 }
 
@@ -723,7 +724,7 @@ void BitcoinGUI::incomingTransaction(const QModelIndex & parent, int start, int 
 
         bool hasMessage = ttm->hasMessage(start, TransactionTableModel::ToAddress, parent);
 
-        notificator->notify(Notificator::Information,
+        if (trayIcon) trayIcon->showMessage(
                             (amount)<0 ? (hasMessage ? tr("Sent message") : tr("Sent transaction")) :
                                          (hasMessage ? tr("Incoming message") :tr("Incoming transaction")),
                               tr("Date: %1\n"

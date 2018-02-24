@@ -22,7 +22,23 @@
 
 #ifdef Q_OS_MAC
 #include <ApplicationServices/ApplicationServices.h>
-extern bool qt_mac_execute_apple_script(const QString &script, AEDesc *ret);
+bool qt_mac_execute_apple_script(const char *script, long script_len, AEDesc *ret)
+{
+    // Not supported anymore
+    return false;
+}
+
+bool qt_mac_execute_apple_script(const char *script, AEDesc *ret)
+{
+    return qt_mac_execute_apple_script(script, qstrlen(script), ret);
+}
+
+bool qt_mac_execute_apple_script(const QString &script, AEDesc *ret)
+{
+    const QByteArray l = script.toUtf8(); return qt_mac_execute_apple_script(l.constData(), l.size(), ret);
+}
+
+
 #endif
 
 // https://wiki.ubuntu.com/NotificationDevelopmentGuidelines recommends at least 128
