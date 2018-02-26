@@ -54,6 +54,8 @@ struct BlockDataInfo
     int height;
     unsigned int unixTs;
     bool isPoS;
+    int txCount;
+    std::string scsAmount;
 };
 
 static std::vector<BlockDataInfo> g_latestBlocksAdded;
@@ -66,6 +68,7 @@ struct MessageInfo
     std::string to;
     std::string amount;
     std::string msgTime;
+    std::string blockId;
 };
 
 static std::vector<MessageInfo> g_messages;
@@ -402,6 +405,83 @@ bool addAddressTx(const std::string& fileAddress,
     return true;
 }
 
+bool isMessageHiddenToPublic(const std::string& source)
+{
+    return source.find("%HIDE") == 0;
+}
+
+bool isMessageServiceOne(const std::string& source)
+{
+    return source.find("%SERVICE") == 0;
+}
+
+std::string allowSomeBBcodes(const std::string& source)
+{
+    std::string result = source;
+
+    return result; // TODO.
+
+    if (!result.empty())
+    {
+        bool doneSomething;
+
+    tryFurther:
+        doneSomething = false;
+
+        size_t urlPos = result.find("[url=");
+        std::string temp = "";
+        if (urlPos != std::string::npos)
+        {
+            urlPos += 4;
+            while (urlPos < result.length())
+            {
+                char c = result[urlPos];
+                if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') ||
+                    (c >= '0' && c <= '9') || (c == ':') || (c == '/')
+                        || (c == '-') || (c == '.'))
+                {
+                    temp += c;
+                }
+                else break;
+
+                if (temp.length() > 32) break;
+
+                urlPos++;
+            }
+        }
+        if (!temp.empty())
+        {
+            std::string replaceFrom = "[url=" + temp + "]";
+            std::string replaceTo = "<a href=\"" + temp + "\">" + temp + "</a>";
+
+            std::string prevResult = result;
+            boost::replace_all(result, replaceFrom, replaceTo);
+            if (result != prevResult) doneSomething = true;
+            if (doneSomething) goto tryFurther;
+        }
+    }
+    return result;
+}
+
+std::string calcTxsAmount(const std::vector<CTransaction>& txs)
+{
+    int amount = 0;
+    for (size_t i = 0; i < txs.size(); i++)
+    {
+        for (size_t j = 0; j < txs[i].vout.size(); j++)
+        {
+//            CTxDestination address;
+//            bool ok = ExtractDestination(txs[i].vout[j].scriptPubKey, address);
+
+            if (true) // ok)
+            {
+                amount += txs[i].vout[j].nValue;
+            }
+        }
+    }
+    return std::to_string((float)amount / (float)COIN);
+}
+
 void printTxToStream(CTransaction& t, std::ostringstream& stream,
                      int height,
                      const std::string& blockId,
@@ -530,12 +610,13 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
             }
         }
     }
-    else if (t.HasMessage())
+    else if (t.HasMessage() && !isMessageHiddenToPublic(t.message) && !isMessageServiceOne(t.message))
     {
         MessageInfo msg;
         msg.from =  nonZeroInputAddr;
-        msg.message = simpleHTMLSafeDisplayFilter(t.message);
+        msg.message = allowSomeBBcodes(simpleHTMLSafeDisplayFilter(t.message));
         msg.to = "";
+        msg.blockId = blockId;
 
         int totalAmount = 0;
         for (size_t u = 0; u < nonZeroAmountOuts.size() && u < nonZeroOutputAddrs.size(); u++)
@@ -550,7 +631,20 @@ void printTxToStream(CTransaction& t, std::ostringstream& stream,
         while (g_messages.size() > MaxMessagesShow)
             g_messages.pop_back();
 
-        g_messages.insert(g_messages.begin(), msg);
+        bool alreadyFound = false;
+        for (size_t i = 0; i < g_messages.size(); i++)
+        {
+            if (msg.from == g_messages[i].from && msg.blockId == g_messages[i].blockId)
+            {
+                alreadyFound = true;
+                break;
+            }
+        }
+
+        if (!alreadyFound)
+        {
+            g_messages.insert(g_messages.begin(), msg);
+        }
     }
 
     if (hasPoSOutputs)
@@ -841,6 +935,8 @@ bool BlocksContainer::WriteBlockInfo(int height, CBlock& block)
             bs.height = height;
             bs.unixTs = block.nTime;
             bs.isPoS = block.IsProofOfStake();
+            bs.txCount = block.vtx.size();
+            bs.scsAmount = calcTxsAmount(block.vtx);
             g_latestBlocksAdded.insert(g_latestBlocksAdded.begin(), bs);
 
             while (g_latestBlocksAdded.size() > MaxLatestBlocks)
@@ -874,12 +970,14 @@ void UpdateMessagesList(unsigned long nowTime)
         std::fstream fileIndex(pathIndexFile.c_str(), std::ios::out);
         fileIndex << getHead("Messages", true);
 
+        fileIndex << "<br><div style=\"margin-left: auto; margin-right: auto; width: 780px\"><a href=\"index.html\" style=\"font-size: 20px; text-decoration: none\"><i class=\"icono-chain\"></i>&nbsp;Back to the blockchain info</a></div><p>&nbsp;<br>";
+
         for (size_t u = 0; u < g_messages.size(); u++)
         {
             fileIndex << "<div class=rectangle-speech-border><div class=msgtime><b>Date sent: </b>"
                       << g_messages[u].msgTime << "</div><div class=msgfrom><b>From: </b>"
                       << fixupKnownObjects(g_messages[u].from) << "</div><div class=msgto><b>To: </b>"
-                      << fixupKnownObjects(g_messages[u].to) << "</div><div class=msgamount><b>Money amount: </b>"
+                      << fixupKnownObjects(g_messages[u].to) << "</div><div class=msgamount><b>Amount: </b>"
                       << g_messages[u].amount << "</div><div class=msgmsg><b>Message: </b>"
                       << g_messages[u].message << "</div></div><div class=spacer1>&nbsp;</div>";
         }
@@ -922,15 +1020,15 @@ bool  BlocksContainer::UpdateIndex(bool force)
         DisplayNetworkMetrics metrics;
         if (calculateNetworkStats(metrics))
         {
-            fileIndex << "<div class='row'><table with='100%'><tr><td><div class='col-md-3 text-center'><div class='panel panel-warning'><div class='panel-heading'><h3 class='panel-title'>Confirmation time</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average single confirmation time'>"
+            fileIndex << "<div class='row'><table with='100%'><tr><td><div class='col-md-3 text-center'><div class='panel panel-warning'><div class='panel-heading'><div class='panel-title'><h3>Confirmation time</h3></div></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average single confirmation time'>"
                 << std::setprecision(3) << (metrics.averageConfSpeed / 1000) << "s</span></h4></div></div></div>"
-                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-info'><div class='panel-heading'><h3 class='panel-title'>Full TX time</h3></div><div class='panel-body'><h4> <span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average full transaction confirmation time'>"
+                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-info'><div class='panel-heading'><div class='panel-title'><h3>Full TX time</h3></div></div><div class='panel-body'><h4> <span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Average full transaction confirmation time'>"
                 << std::setprecision(3) << (metrics.averageTxSpeed / 1000) << "s</span></h4></div></div></div>"
-                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-primary'><div class='panel-heading'><h3 class='panel-title'>PoS/PoW ratio</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of PoS blocks to PoW-generated blocks'>"
+                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-primary'><div class='panel-heading'><div class='panel-title'><h3>PoS/PoW ratio</h3></div></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of PoS blocks to PoW-generated blocks'>"
                 << std::setprecision(2) << (metrics.posRatio * 100) <<"%</span></h4></div></div></div>"
-                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-success'><div class='panel-heading'><h3 class='panel-title'>Network utilization</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of data actually stored over blockchain to maximal possible amount'>"
+                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-success'><div class='panel-heading'><div class='panel-title'><h3>Network utilization</h3></div></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Ratio of data actually stored over blockchain to maximal possible amount'>"
                 << std::setprecision(2) << (metrics.utilization * 100) << "%</span></h4></div></div></div>"
-                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-danger'><div class='panel-heading'><h3 class='panel-title'>Circulating supply</h3></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Count of coins in use'>"
+                << "</td><td><div class='col-md-2 text-center'><div class='panel panel-danger'><div class='panel-heading'><div class='panel-title'><h3>Circulating supply</h3></div></div></div><div class='panel-body'><h4><span data-toggle='tooltip' data-placement='top' title='' class='just_span' data-original-title='Count of coins in use'>"
                 << "<a href='circulatingsupply.txt'>" << std::setprecision(2) << (GetTotalSupply()) << "SCS</a></span></h4></div></div></div></div>"
                 << "</td></tr>"
                 << "</table><p>";
@@ -940,8 +1038,10 @@ bool  BlocksContainer::UpdateIndex(bool force)
             fileIndex << "<br>";
         }
 
+        fileIndex << "<br><div style=\"margin-left: auto; margin-right: auto; width: 780px\"><a href=\"messages.html\" style=\"font-size: 20px; text-decoration: none\"><i class=\"icono-comment\"></i>&nbsp;Display live feed of messages in this blockchain</a></div><p>&nbsp;<br>";
+
         fileIndex << "<table width=\"832px\">";
-        fileIndex << "<thead><tr><th>Block hash</th><th>PoS</th><th>Height</th><th>Time</th><th>Age</th></tr></thead>";
+        fileIndex << "<thead><tr><th>Block hash</th><th>PoS</th><th>Height</th><th>Time</th><th>TXs</th><th>Amount</th><th>Age</th></tr></thead>";
         int upToBlock = 0;
 
         {
@@ -953,6 +1053,8 @@ bool  BlocksContainer::UpdateIndex(bool force)
                           << (g_latestBlocksAdded[u].isPoS ? "&#10004;" : "") << "</td><td>"
                           << g_latestBlocksAdded[u].height << "</td><td>"
                           << unixTimeToString(g_latestBlocksAdded[u].unixTs) << "</td><td>"
+                          << std::to_string(g_latestBlocksAdded[u].txCount) << "</td><td>"
+                          << g_latestBlocksAdded[u].scsAmount << "</td><td>"
                           << unixTimeToAgeFromNow(g_latestBlocksAdded[u].unixTs, nowTime)
                           << "</td></tr>\n";
                 if (u == 0) upToBlock = g_latestBlocksAdded[u].height;
@@ -960,8 +1062,15 @@ bool  BlocksContainer::UpdateIndex(bool force)
         }
 
         fileIndex << "</table>";
+
+        if (g_latestBlocksAdded.size() < MaxLatestBlocks)
+        {
+            fileIndex << "<br><p style=\"margin-left: auto; margin-right: auto; width: 780px\"><font size=\"+2\">"
+                << "Block explorer now is reloading blocks due to maintenance or update, this is not an error and the process will be completed in short time.</font></p>";
+        }
+
         fileIndex << "<br><p style=\"margin-left: auto; margin-right: auto; width: 780px\">"
-                 <<"Updated at " << unixTimeToString(nowTime) << " up to block " << upToBlock << ".";
+                 << "Updated at " << unixTimeToString(nowTime) << " up to block " << upToBlock << ".";
 
         fileIndex << getTail();
         fileIndex.close();
@@ -1111,10 +1220,16 @@ std::string fixupDynamicStatuses(const std::string& data)
 
         if (needUpdateBalance)
         {
-            std::string balanceUnconf = std::to_string((double)balanceAmount / (double)COIN) + " SCS";
-            std::string balanceConf = std::to_string((double)balanceAmountConfirmed / (double)COIN) + " SCS";
-            boost::replace_all(result, BALANCE_CONFIRMED_PLACEHOLDER, balanceConf);
-            boost::replace_all(result, BALANCE_PLACEHOLDER, balanceUnconf);
+            if (balanceAmount > 0)
+            {
+                std::string balanceUnconf = std::to_string((double)balanceAmount / (double)COIN) + " SCS";
+                boost::replace_all(result, BALANCE_PLACEHOLDER, balanceUnconf);
+            }
+            if (balanceAmountConfirmed > 0)
+            {
+                std::string balanceConf = std::to_string((double)balanceAmountConfirmed / (double)COIN) + " SCS";
+                boost::replace_all(result, BALANCE_CONFIRMED_PLACEHOLDER, balanceConf);
+            }
         }
 
         return result;
