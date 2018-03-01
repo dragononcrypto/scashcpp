@@ -12,10 +12,12 @@ UI_DIR = build
 
 QT += widgets
 
+QMAKE_MACOSX_DEPLOYMENT_TARGET=10.9
+
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
     # Mac: compile for maximum compatibility (10.9, 32-bit)
-    macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.9 -arch i386 -isysroot /Developer/SDKs/MacOSX10.9.sdk
+    macx:QMAKE_CXXFLAGS += -arch i386
 
     !windows:!macx {
         # Linux: static link
