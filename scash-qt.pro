@@ -17,7 +17,7 @@ QMAKE_MACOSX_DEPLOYMENT_TARGET=10.9
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
     # Mac: compile for maximum compatibility (10.9, 32-bit)
-    macx:QMAKE_CXXFLAGS += -arch i386
+    # macx:QMAKE_CXXFLAGS += -arch x86_64
 
     !windows:!macx {
         # Linux: static link
@@ -34,6 +34,8 @@ QMAKE_LFLAGS *= -fstack-protector-all --param ssp-buffer-size=1
 }
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
+
+macx:QMAKE_LFLAGS += -rpath @executable_path/../Frameworks
 
 # use: qmake "USE_UPNP=1" (enabled)
 #  or: qmake "USE_UPNP=0" (disabled, default)

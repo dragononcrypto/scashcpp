@@ -20,6 +20,7 @@
 #include <QTranslator>
 #include <QtWidgets/QSplashScreen>
 #include <QLibraryInfo>
+#include <QDir>
 
 #if defined(BITCOIN_NEED_QT_PLUGINS) && !defined(_BITCOIN_QT_PLUGINS_INCLUDED)
 #define _BITCOIN_QT_PLUGINS_INCLUDED
@@ -120,6 +121,12 @@ int main(int argc, char *argv[])
     // Internal string conversion is all UTF-8
     //QTextCodec::setCodecForTr(QTextCodec::codecForName("UTF-8"));
     //QTextCodec::setCodecForCStrings(QTextCodec::codecForTr());
+
+  //  QDir dir(argv[0]);
+   // dir.cdUp();
+   // dir.cdUp();
+   // dir.cd("PlugIns");
+  //  QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
 
     Q_INIT_RESOURCE(bitcoin);
     QApplication app(argc, argv);

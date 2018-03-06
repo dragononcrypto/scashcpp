@@ -108,7 +108,7 @@ void SendCoinsDialog::setModel(WalletModel *model)
         connect(model->getOptionsModel(), SIGNAL(coinControlFeaturesChanged(bool)), this, SLOT(coinControlFeatureChanged(bool)));
         connect(model->getOptionsModel(), SIGNAL(transactionFeeChanged(qint64)), this, SLOT(coinControlUpdateLabels()));
         ui->frameCoinControl->setVisible(fCoinControlShow);
-        ui->toggleCoinControlButton->setVisible(model->getOptionsModel()->getCoinControlFeatures());
+        ui->toggleCoinControlButton->setVisible(true);
         coinControlUpdateLabels();
     }
 }
@@ -485,7 +485,7 @@ void SendCoinsDialog::coinControlClipboardChange()
 // Coin Control: settings menu - coin control enabled/disabled by user
 void SendCoinsDialog::coinControlFeatureChanged(bool checked)
 {
-    ui->toggleCoinControlButton->setVisible(checked);
+    ui->toggleCoinControlButton->setVisible(true);
     if (!checked && fCoinControlShow)
     {
         // hide already opened coin control

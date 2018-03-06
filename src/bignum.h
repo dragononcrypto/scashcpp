@@ -7,6 +7,9 @@
 
 #include <stdexcept>
 #include <vector>
+
+#define OPENSSL_USE_DEPRECATED 1
+
 #include "openssl/include/openssl/bn.h"
 
 #include "util.h" // for uint64
