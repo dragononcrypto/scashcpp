@@ -285,13 +285,13 @@ void BitcoinGUI::createActions()
     quitAction->setMenuRole(QAction::QuitRole);
     aboutAction = new QAction(QIcon(":/icons/bitcoin"), tr("&About Scash"), this);
     aboutAction->setToolTip(tr("Show information about Scash"));
-    aboutAction->setMenuRole(QAction::AboutRole);
+    //aboutAction->setMenuRole(QAction::AboutRole);
     aboutQtAction = new QAction(QIcon(":/trolltech/qmessagebox/images/qtlogo-64.png"), tr("About &Qt"), this);
     aboutQtAction->setToolTip(tr("Show information about Qt"));
-    aboutQtAction->setMenuRole(QAction::AboutQtRole);
-    optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
+    //aboutQtAction->setMenuRole(QAction::AboutQtRole);
+    optionsAction = new QAction(QIcon(":/icons/options"), tr("&Settings..."), this);
     optionsAction->setToolTip(tr("Modify configuration options for Scash"));
-    optionsAction->setMenuRole(QAction::PreferencesRole);
+    //optionsAction->setMenuRole(QAction::PreferencesRole);
     toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
@@ -342,22 +342,30 @@ void BitcoinGUI::createMenuBar()
     file->addAction(exportAction);
     file->addAction(signMessageAction);
     file->addAction(verifyMessageAction);
+#ifndef Q_OS_MAC
     file->addSeparator();
     file->addAction(quitAction);
+#endif
 
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
     settings->addAction(encryptWalletAction);
     settings->addAction(changePassphraseAction);
-	settings->addAction(lockWalletToggleAction);
+    settings->addAction(lockWalletToggleAction);
+#ifndef Q_OS_MAC
     settings->addSeparator();
+#endif
     settings->addAction(optionsAction);
+
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
     help->addAction(openPerfMonDlgAction);
+#ifndef Q_OS_MAC
     help->addSeparator();
+#endif
     help->addAction(aboutAction);
     help->addAction(aboutQtAction);
+
 
 	// QString ss("QMenuBar::item { background-color: #effbef; color: black }"); 
     // appMenuBar->setStyleSheet(ss);
@@ -481,6 +489,7 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
+    trayIconMenu->addAction(openPerfMonDlgAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);

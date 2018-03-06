@@ -714,7 +714,7 @@ recoveryCheckpoint:
         }
     }
 
-    if (!bitdb.Open(GetDataDir()), recoveryAttempt)
+    if (!bitdb.Open(GetDataDir()) && recoveryAttempt)
     {
         string msg = strprintf(_("Error initializing database environment %s!"
                                  " To recover, BACKUP THAT DIRECTORY, then remove"
