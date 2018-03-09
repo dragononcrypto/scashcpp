@@ -1145,7 +1145,7 @@ int GetNumBlocksOfPeers()
 
 bool IsInitialBlockDownload()
 {
-    if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
+    if (pindexBest == NULL || ((nBestHeight + 20) < GetNumBlocksOfPeers()))
         return true;
     static int64 nLastUpdate;
     static CBlockIndex* pindexLastBest;
@@ -2984,6 +2984,7 @@ bool static AlreadyHave(CTxDB& txdb, const CInv& inv)
 }
 
 
+int nAskedForBlocks = 0;
 
 
 // The message start string is designed to be unlikely to occur in normal data.
@@ -3095,15 +3096,15 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         }
 
         // Ask the first connected node for block updates
-        static int nAskedForBlocks = 0;
-        if (!pfrom->fClient && !pfrom->fOneShot &&
-            (pfrom->nStartingHeight > (nBestHeight - 144)) &&
-            (pfrom->nVersion < NOBLKS_VERSION_START ||
-             pfrom->nVersion >= NOBLKS_VERSION_END) &&
-             (nAskedForBlocks < 1 || vNodes.size() <= 1))
+        if ((nAskedForBlocks < 0) || (!pfrom->fClient && !pfrom->fOneShot &&
+                            (pfrom->nStartingHeight > (nBestHeight - 144)) &&
+                            (pfrom->nVersion < NOBLKS_VERSION_START ||
+                             pfrom->nVersion >= NOBLKS_VERSION_END) &&
+                             (nAskedForBlocks < 1 || vNodes.size() <= 1)))
         {
             nAskedForBlocks++;
-            pfrom->PushGetBlocks(pindexBest, uint256(0));
+            pfrom->PushGetBlocks(pindexBest, uint256(0), nAskedForBlocks < 0);
+            printf("Asked for blocks the peer %s", pfrom->addr.ToString().c_str());
         }
 
         // Relay alerts
@@ -3241,7 +3242,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
             pfrom->AddInventoryKnown(inv);
 
             bool fAlreadyHave = AlreadyHave(txdb, inv);
-            if (fDebug)
+            if (true)
                 printf("  got inventory: %s  %s\n", inv.ToString().c_str(), fAlreadyHave ? "have" : "new");
 
             if (!fAlreadyHave)
@@ -4471,6 +4472,8 @@ static bool fGenerateBitcoins = false;
 static bool fLimitProcessors = false;
 static int nLimitProcessors = -1;
 
+bool fPoSBlockFound = true;
+
 void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 {
     printf("CPUMiner started for proof-of-%s\n", fProofOfStake? "stake" : "work");
@@ -4496,6 +4499,12 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 return;
             if (!fGenerateBitcoins && !fProofOfStake)
                 return;
+        }
+
+        if (fProofOfStake && fPoSBlockFound)
+        {
+            Sleep(5 * 60 * 1000);
+            fPoSBlockFound = false;
         }
 
         //
@@ -4558,6 +4567,8 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 // nHashesDone += pblock->nNonce;
                 if (!pblock->SignBlock(*pwalletMain))
                     break;
+
+                fPoSBlockFound = true;
 
                 SetThreadPriority(THREAD_PRIORITY_NORMAL);
 

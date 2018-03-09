@@ -465,18 +465,12 @@ std::string allowSomeBBcodes(const std::string& source)
 
 std::string calcTxsAmount(const std::vector<CTransaction>& txs)
 {
-    int amount = 0;
+    int64 amount = 0;
     for (size_t i = 0; i < txs.size(); i++)
     {
         for (size_t j = 0; j < txs[i].vout.size(); j++)
         {
-//            CTxDestination address;
-//            bool ok = ExtractDestination(txs[i].vout[j].scriptPubKey, address);
-
-            if (true) // ok)
-            {
-                amount += txs[i].vout[j].nValue;
-            }
+            amount += txs[i].vout[j].nValue;
         }
     }
     return std::to_string((float)amount / (float)COIN);
@@ -1220,12 +1214,12 @@ std::string fixupDynamicStatuses(const std::string& data)
 
         if (needUpdateBalance)
         {
-            if (balanceAmount > 0)
+            if (balanceAmount >= 0)
             {
                 std::string balanceUnconf = std::to_string((double)balanceAmount / (double)COIN) + " SCS";
                 boost::replace_all(result, BALANCE_PLACEHOLDER, balanceUnconf);
             }
-            if (balanceAmountConfirmed > 0)
+            if (balanceAmountConfirmed >= 0)
             {
                 std::string balanceConf = std::to_string((double)balanceAmountConfirmed / (double)COIN) + " SCS";
                 boost::replace_all(result, BALANCE_CONFIRMED_PLACEHOLDER, balanceConf);
