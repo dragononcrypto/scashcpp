@@ -37,7 +37,7 @@ const std::string CLIENT_NAME("Scash-qt");
 #define GIT_ARCHIVE 1
 #ifdef GIT_ARCHIVE
 #    define GIT_COMMIT_ID ""
-#    define GIT_COMMIT_DATE "14th Jan 2018 03:24:00"
+#    define GIT_COMMIT_DATE "9th Mar 2018 22:41:00"
 #endif
 
 #define BUILD_DESC_FROM_COMMIT(maj,min,rev,build,commit) \
