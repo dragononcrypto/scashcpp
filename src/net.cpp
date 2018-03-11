@@ -111,10 +111,10 @@ unsigned short GetListenPort()
     return (unsigned short)(GetArg("-port", GetDefaultPort()));
 }
 
-void CNode::PushGetBlocks(CBlockIndex* pindexBegin, uint256 hashEnd)
+void CNode::PushGetBlocks(CBlockIndex* pindexBegin, uint256 hashEnd, bool force)
 {
     // Filter out duplicate requests
-    if (pindexBegin == pindexLastGetBlocksBegin && hashEnd == hashLastGetBlocksEnd)
+    if (!force && (pindexBegin == pindexLastGetBlocksBegin && hashEnd == hashLastGetBlocksEnd))
         return;
     pindexLastGetBlocksBegin = pindexBegin;
     hashLastGetBlocksEnd = hashEnd;
@@ -394,7 +394,7 @@ void CNode::AskFor(const CInv& inv)
 
     static int askBlockRetryTime = 0;
     if (askBlockRetryTime == 0)
-        askBlockRetryTime = GetArg("-askblockretrytime", 60);
+        askBlockRetryTime = GetArg("-askblockretrytime", 10);
 
     // Each retry is n seconds after the last
     nRequestTime = std::max(nRequestTime + askBlockRetryTime * 1000000, nNow);
@@ -737,6 +737,7 @@ void CNode::copyStats(CNodeStats &stats)
 }
 #undef X
 
+extern int nAskedForBlocks;
 
 void ThreadSocketHandler(void* parg)
 {
@@ -766,6 +767,7 @@ void ThreadSocketHandler(void* parg)
             else if (fForceReconnect)
             {
                 fForceReconnectProcessed = true;
+                fprintf(stderr, "Force network reconnect is processed at %i\n", getTicksCountToMeasure());
             }
         }
     }
@@ -1487,7 +1489,7 @@ void ThreadOpenConnections2(void* parg)
             if (fLastHeightUpdateTime > 0)
             {
                 unsigned int difference = getTicksCountToMeasure() - fLastHeightUpdateTime;
-                unsigned int stuckTimeout = GetArg("-stucktimeout", 60) * 1000;
+                unsigned int stuckTimeout = GetArg("-stucktimeout", 20) * 1000;
                 if (stuckTimeout && difference > stuckTimeout)
                 {
                     printf("****************************************************\n");
@@ -1498,6 +1500,7 @@ void ThreadOpenConnections2(void* parg)
                     fForceReconnect = true;
                     fLastHeightUpdateTime = getTicksCountToMeasure();
                     Sleep(stuckTimeout / 2);
+                    nAskedForBlocks = -3;
                 }
             }
         }

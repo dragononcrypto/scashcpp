@@ -403,7 +403,7 @@ bool mSHA3Db::IsMSHA3PageDatabaseValid(const std::string& fileName)
     }
 
     page0_data = new uint64[PAGE_GRANULARITY]();
-    uint64 fileCrc = 0;
+    unsigned int fileCrc = 0;
     std::fstream filePrecompPage(fileName, std::ios::in | std::ios::binary);
     filePrecompPage.read((char*)page0_data, PAGE_GRANULARITY * sizeof(uint64));
     filePrecompPage.close();
@@ -412,7 +412,7 @@ bool mSHA3Db::IsMSHA3PageDatabaseValid(const std::string& fileName)
         fileCrc ^= page0_data[j];
     }
 
-    return (fileCrc == 17694909919366803121UL);
+    return (fileCrc == 0x59A705C0);
 }
 
 bool mSHA3Db::RecreateMSHA3PageDatabase(const std::string& fileName)
@@ -431,7 +431,7 @@ bool mSHA3Db::RecreateMSHA3PageDatabase(const std::string& fileName)
     {
         uint64 data = ((seed ^ rndg.Next()) << 16) + (seedBase >> (j % 16));
         if (!(j % 8)) { data = sha3UnMem64(data); seedBase = data; }
-        page0_data[j] = data;
+        page0_data[j] = data ^ j;
         seed = page0_data[j];
     }
 

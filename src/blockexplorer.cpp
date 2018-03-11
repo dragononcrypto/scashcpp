@@ -866,10 +866,17 @@ std::string fixupDynamicStatuses(const std::string& data)
 
         if (needUpdateBalance)
         {
-            std::string balanceUnconf = std::to_string((double)balanceAmount / (double)COIN) + " SCS";
-            std::string balanceConf = std::to_string((double)balanceAmountConfirmed / (double)COIN) + " SCS";
-            boost::replace_all(result, BALANCE_CONFIRMED_PLACEHOLDER, balanceConf);
-            boost::replace_all(result, BALANCE_PLACEHOLDER, balanceUnconf);
+            if (balanceAmount >= 0)
+            {
+                std::string balanceUnconf = std::to_string((double)balanceAmount / (double)COIN) + " SCS";
+                boost::replace_all(result, BALANCE_PLACEHOLDER, balanceUnconf);
+            }
+            if (balanceAmountConfirmed >= 0)
+            {
+                std::string balanceConf = std::to_string((double)balanceAmountConfirmed / (double)COIN) + " SCS";
+                boost::replace_all(result, BALANCE_CONFIRMED_PLACEHOLDER, balanceConf);
+            }
+
         }
 
         return result;

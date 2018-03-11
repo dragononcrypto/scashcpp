@@ -1147,7 +1147,7 @@ int GetNumBlocksOfPeers()
 
 bool IsInitialBlockDownload()
 {
-    if (pindexBest == NULL || nBestHeight < Checkpoints::GetTotalBlocksEstimate())
+    if (pindexBest == NULL || ((nBestHeight + 20) < GetNumBlocksOfPeers()))
         return true;
     static int64 nLastUpdate;
     static CBlockIndex* pindexLastBest;
@@ -2338,7 +2338,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         else
             bnRequired.SetCompact(ComputeMinWork(GetLastBlockIndex(pcheckpoint, false)->nBits, deltaTime));
 
-        if (bnNewBlock > bnRequired)
+        if (!pfrom && bnNewBlock > bnRequired)
         {
             if (pfrom)
             {
@@ -2993,6 +2993,9 @@ bool static AlreadyHave(CTxDB& txdb, const CInv& inv)
 // a large 4-byte int at any alignment.
 unsigned char pchMessageStart[4] = { 0x70, 0x35, 0x22, 0x05 };
 
+
+int nAskedForBlocks = 0;
+
 bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
 {
     static map<CService, CPubKey> mapReuseKey;
@@ -3004,10 +3007,6 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         printf("dropmessagestest DROPPING RECV MESSAGE\n");
         return true;
     }
-
-
-
-
 
     if (strCommand == "version")
     {
@@ -3097,16 +3096,16 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv)
         }
 
         // Ask the first connected node for block updates
-        static int nAskedForBlocks = 0;
-        if (!pfrom->fClient && !pfrom->fOneShot &&
-            (pfrom->nStartingHeight > (nBestHeight - 144)) &&
-            (pfrom->nVersion < NOBLKS_VERSION_START ||
-             pfrom->nVersion >= NOBLKS_VERSION_END) &&
-             (nAskedForBlocks < 1 || vNodes.size() <= 1))
+        if ((nAskedForBlocks < 0) || (!pfrom->fClient && !pfrom->fOneShot &&
+                            (pfrom->nStartingHeight > (nBestHeight - 144)) &&
+                            (pfrom->nVersion < NOBLKS_VERSION_START ||
+                             pfrom->nVersion >= NOBLKS_VERSION_END) &&
+                             (nAskedForBlocks < 1 || vNodes.size() <= 1)))
         {
             nAskedForBlocks++;
-            pfrom->PushGetBlocks(pindexBest, uint256(0));
-        }
+            pfrom->PushGetBlocks(pindexBest, uint256(0), nAskedForBlocks < 0);
+            printf("Asked for blocks the peer %s", pfrom->addr.ToString().c_str());
+         }
 
         // Relay alerts
         {
@@ -3992,6 +3991,9 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 // BitcoinMiner
 //
 
+bool fPoSBlockFound = false;
+bool fPoSFirstLaunch = true;
+
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
 {
     unsigned char* pdata = (unsigned char*)pbuffer;
@@ -4500,6 +4502,18 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 return;
         }
 
+        if (fProofOfStake && fPoSBlockFound)
+        {
+              Sleep(5 * 60 * 1000);
+              fPoSBlockFound = false;
+        }
+
+        if (fProofOfStake && fPoSFirstLaunch)
+        {
+              Sleep(15 * 1000);
+              fPoSFirstLaunch = false;
+        }
+
         //
         // Create new block
         //
@@ -4522,6 +4536,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 SetThreadPriority(THREAD_PRIORITY_NORMAL);
                 CheckWork(pblock.get(), *pwalletMain, reservekey);
                 SetThreadPriority(THREAD_PRIORITY_LOWEST);
+                fPoSBlockFound = true;
             }
             Sleep(250);
             continue;
@@ -4569,6 +4584,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 CheckWork(pblock.get(), *pwalletMain, reservekey);
                 SetThreadPriority(THREAD_PRIORITY_LOWEST);
                 break;
+                fPoSBlockFound = true;
             }
             ++pblock->nNonce;
 
