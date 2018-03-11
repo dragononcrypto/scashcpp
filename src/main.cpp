@@ -2336,7 +2336,7 @@ bool ProcessBlock(CNode* pfrom, CBlock* pblock)
         else
             bnRequired.SetCompact(ComputeMinWork(GetLastBlockIndex(pcheckpoint, false)->nBits, deltaTime));
 
-        if (bnNewBlock > bnRequired)
+        if (!pfrom && bnNewBlock > bnRequired)
         {
             if (pfrom)
             {
@@ -4472,7 +4472,8 @@ static bool fGenerateBitcoins = false;
 static bool fLimitProcessors = false;
 static int nLimitProcessors = -1;
 
-bool fPoSBlockFound = true;
+bool fPoSBlockFound = false;
+bool fPoSFirstLaunch = true;
 
 void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 {
@@ -4507,6 +4508,12 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
             fPoSBlockFound = false;
         }
 
+        if (fProofOfStake && fPoSFirstLaunch)
+        {
+            Sleep(15 * 1000);
+            fPoSFirstLaunch = false;
+        }
+
         //
         // Create new block
         //
@@ -4529,6 +4536,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 SetThreadPriority(THREAD_PRIORITY_NORMAL);
                 CheckWork(pblock.get(), *pwalletMain, reservekey);
                 SetThreadPriority(THREAD_PRIORITY_LOWEST);
+                fPoSBlockFound = true;
             }
             Sleep(250);
             continue;
@@ -4568,8 +4576,6 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 if (!pblock->SignBlock(*pwalletMain))
                     break;
 
-                fPoSBlockFound = true;
-
                 SetThreadPriority(THREAD_PRIORITY_NORMAL);
 
                 printf("proof-of-work found \n hash: %s \ntarget: %s\n", hash.GetHex().c_str(), hashTarget.GetHex().c_str());
@@ -4577,6 +4583,7 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
                 CheckWork(pblock.get(), *pwalletMain, reservekey);
                 SetThreadPriority(THREAD_PRIORITY_LOWEST);
+                fPoSBlockFound = true;
                 break;
             }
             ++pblock->nNonce;

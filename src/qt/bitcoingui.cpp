@@ -994,9 +994,17 @@ void BitcoinGUI::updateMintingIcon()
     }
     else if (nLastCoinStakeSearchInterval)
     {
-        uint64 nEstimateTime = nStakeTargetSpacing * nNetworkWeight / nWeight;
+        uint64 nEstimateTimeRaw = nStakeTargetSpacing * nNetworkWeight / nWeight * 24;
+        int nEstimateTime = nEstimateTimeRaw + 3*60;
 
-        nEstimateTime *= 4;
+        if (nWeight > 1000) nEstimateTime += 1;
+        else if (nWeight > 500) nEstimateTime += 1*60;
+        else if (nWeight > 320) nEstimateTime += 30*60;
+        else if (nWeight > 250) nEstimateTime += 1*60*60;
+        else if (nWeight > 125) nEstimateTime += 3*60*60;
+        else if (nWeight > 62) nEstimateTime +=  9*60*60;
+        else if (nWeight > 31) nEstimateTime += 24*60*60;
+
         nEstimateTime += nWeight > 1000 ? 0 : (nWeight > 500 ? (3 * 60) : (60 * 60));
 
         QString text;
