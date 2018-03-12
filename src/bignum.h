@@ -7,6 +7,12 @@
 
 #include <stdexcept>
 #include <vector>
+
+
+#ifdef Q_OS_MAC
+#define OPENSSL_USE_DEPRECATED 1
+#endif
+
 #ifdef WIN32
 #include "openssl/include/openssl/bn.h"
 #else
