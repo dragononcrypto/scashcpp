@@ -4,8 +4,13 @@
 
 #include <map>
 
+#ifdef WIN32
 #include "openssl/include/openssl/ecdsa.h"
 #include "openssl/include/openssl/obj_mac.h"
+#else
+#include <openssl/ecdsa.h>
+#include <openssl/obj_mac.h>
+#endif
 
 #include "key.h"
 

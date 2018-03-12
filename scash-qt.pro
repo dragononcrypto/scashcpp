@@ -381,7 +381,7 @@ windows:!contains(MINGW_THREAD_BUGFIX, 0) {
 
 !windows:!macx {
     DEFINES += LINUX
-    LIBS += -lrt
+    #LIBS += -lrt
 }
 
 macx:HEADERS += src/qt/macdockiconhandler.h

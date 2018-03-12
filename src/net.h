@@ -8,7 +8,12 @@
 #include <deque>
 #include <boost/array.hpp>
 #include <boost/foreach.hpp>
+
+#ifdef WIN32
 #include "openssl/include/openssl/rand.h"
+#else
+#include <openssl/rand.h>
+#endif
 
 #ifndef WIN32
 #include <arpa/inet.h>

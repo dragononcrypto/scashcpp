@@ -6,8 +6,14 @@
 #include <boost/foreach.hpp>
 #include <boost/tuple/tuple.hpp>
 
+#ifdef WIN32
+
 #include "openssl/include/openssl/ec.h"
 #include "openssl/include/openssl/err.h"
+#else
+#include <openssl/ec.h>
+#include <openssl/err.h>
+#endif
 
 #include "keystore.h"
 #include "main.h"

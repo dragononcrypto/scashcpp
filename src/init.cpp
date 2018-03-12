@@ -22,8 +22,7 @@
 #include <boost/filesystem/convenience.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <boost/algorithm/string/predicate.hpp>
-#include "openssl/include/openssl/stack.h"
-#include "openssl/include/openssl/crypto.h"
+#include <openssl/crypto.h>
 
 #ifndef WIN32
 #include <signal.h>

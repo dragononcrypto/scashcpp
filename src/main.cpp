@@ -3991,9 +3991,6 @@ bool SendMessages(CNode* pto, bool fSendTrickle)
 // BitcoinMiner
 //
 
-bool fPoSBlockFound = false;
-bool fPoSFirstLaunch = true;
-
 int static FormatHashBlocks(void* pbuffer, unsigned int len)
 {
     unsigned char* pdata = (unsigned char*)pbuffer;
@@ -4475,6 +4472,9 @@ static bool fGenerateBitcoins = false;
 static bool fLimitProcessors = false;
 static int nLimitProcessors = -1;
 
+bool fPoSBlockFound = false;
+bool fPoSFirstLaunch = true;
+
 void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 {
     printf("CPUMiner started for proof-of-%s\n", fProofOfStake? "stake" : "work");
@@ -4504,14 +4504,14 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
         if (fProofOfStake && fPoSBlockFound)
         {
-              Sleep(5 * 60 * 1000);
-              fPoSBlockFound = false;
+            Sleep(5 * 60 * 1000);
+            fPoSBlockFound = false;
         }
 
         if (fProofOfStake && fPoSFirstLaunch)
         {
-              Sleep(15 * 1000);
-              fPoSFirstLaunch = false;
+            Sleep(15 * 1000);
+            fPoSFirstLaunch = false;
         }
 
         //

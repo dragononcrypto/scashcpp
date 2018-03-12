@@ -30,10 +30,14 @@ namespace boost {
 #include <boost/thread.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
+#ifdef WIN32
 #include "openssl/include/openssl/stack.h"
 #include "openssl/include/openssl/crypto.h"
 #include "openssl/include/openssl/rand.h"
-
+#else
+#include <openssl/crypto.h>
+#include <openssl/rand.h>
+#endif
 #include <stdarg.h>
 
 #ifdef WIN32

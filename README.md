@@ -6,10 +6,6 @@ distribution period lasting up to 476,918 coins mined (estimated at height 300 0
 period is over, the network will transition into an energy efficient Proof of Stake Velocity algorithm which will
 reward balance holders on the network a 8% staking annual interest.
 
-Scash is based on the revolutionary Blockchain concept but has added some very simple and clever layers
-of communication and a sophisticated off-blockchain coin mixing system making it impossible for 3rd parties
-to trace transactions between Scash wallets.
-
 -----------------------------
 Specifications:
 
@@ -23,7 +19,11 @@ PoS annual rate: 8%
 
 PoS minimum stake age: 1 to 4 hours
 
-Block time: 40 to 90 seconds
+PoW Block time: 60 to 90 seconds
+
+PoS blocks rate: 66%
+
+Mixed PoW/PoS block time: 20 to 30 seconds
 
 Block size: up to 2Mb
 

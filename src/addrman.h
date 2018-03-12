@@ -13,7 +13,11 @@
 #include <map>
 #include <vector>
 
+#ifdef WIN32
 #include "openssl/include/openssl/rand.h"
+#else
+#include <openssl/rand.h>
+#endif
 
 
 /** Extended statistics about a CAddress */

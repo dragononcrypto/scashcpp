@@ -412,6 +412,8 @@ bool mSHA3Db::IsMSHA3PageDatabaseValid(const std::string& fileName)
         fileCrc ^= page0_data[j];
     }
 
+    // fprintf(stderr, "FILECRC: %i\n", fileCrc);
+
     return (fileCrc == 0x59A705C0);
 }
 

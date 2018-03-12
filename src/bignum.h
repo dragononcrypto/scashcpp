@@ -7,7 +7,12 @@
 
 #include <stdexcept>
 #include <vector>
+#ifdef WIN32
 #include "openssl/include/openssl/bn.h"
+#else
+#include <openssl/bn.h>
+#endif
+
 
 #include "util.h" // for uint64
 
@@ -117,9 +122,9 @@ public:
     {
         unsigned long n = BN_get_word(this);
         if (!BN_is_negative(this))
-            return (n > (unsigned long)0x7fffffff ? 0x7fffffff : n);
+            return (n > (unsigned long)std::numeric_limits<int>::max() ? std::numeric_limits<int>::max() : n);
         else
-            return (n > (unsigned long)0x7fffffff ? -2147483648 : -(int)n);
+            return (n > (unsigned long)std::numeric_limits<int>::max() ? std::numeric_limits<int>::min() : -(int)n);
     }
 
     void setint64(int64 sn)

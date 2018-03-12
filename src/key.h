@@ -13,7 +13,11 @@
 #include "uint256.h"
 #include "util.h"
 
+#ifdef WIN32
 #include "openssl/include/openssl/ec.h"
+#else
+#include <openssl/ec.h> // for EC_KEY definition
+#endif
 
 // secp160k1
 // const unsigned int PRIVATE_KEY_SIZE = 192;
