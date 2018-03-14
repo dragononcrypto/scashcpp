@@ -195,7 +195,7 @@ unsigned int getNowTime()
 std::string unixTimeToString(unsigned int ts)
 {
     struct tm epoch_time;
-    long int tsLI = ts;
+    time_t tsLI = ts;
     memcpy(&epoch_time, gmtime(&tsLI), sizeof (struct tm));
     char res[64];
     strftime(res, sizeof(res), "%Y-%m-%d %H:%M:%S UTC", &epoch_time);

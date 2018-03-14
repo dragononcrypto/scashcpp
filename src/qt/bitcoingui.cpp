@@ -557,7 +557,11 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
 
         if (strStatusBarWarnings.isEmpty())
         {
+#ifdef Q_OS_MAC
             progressBarLabel->setText(tr("Synchronizing with network (%1 blocks remaining)...").arg(nRemainingBlocks));
+#else
+            progressBarLabel->setText(tr("Synchronizing with network..."));
+#endif
             progressBarLabel->setVisible(true);
             progressBar->setFormat(tr("~%n block(s) remaining", "", nRemainingBlocks));
             progressBar->setMaximum(nTotalBlocks);
