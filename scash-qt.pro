@@ -10,10 +10,14 @@ OBJECTS_DIR = build
 MOC_DIR = build
 UI_DIR = build
 
+QT += widgets
+
+QMAKE_MACOSX_DEPLOYMENT_TARGET=10.9
+
 # use: qmake "RELEASE=1"
 contains(RELEASE, 1) {
-    # Mac: compile for maximum compatibility (10.5, 32-bit)
-    macx:QMAKE_CXXFLAGS += -mmacosx-version-min=10.5 -arch i386 -isysroot /Developer/SDKs/MacOSX10.5.sdk
+    # Mac: compile for maximum compatibility (10.9, 32-bit)
+    # macx:QMAKE_CXXFLAGS += -arch x86_64
 
     !windows:!macx {
         # Linux: static link
@@ -30,6 +34,8 @@ QMAKE_LFLAGS *= -fstack-protector-all --param ssp-buffer-size=1
 }
 # for extra security on Windows: enable ASLR and DEP via GCC linker flags
 win32:QMAKE_LFLAGS *= -Wl,--dynamicbase -Wl,--nxcompat
+
+macx:QMAKE_LFLAGS += -rpath @executable_path/../Frameworks
 
 # use: qmake "USE_UPNP=1" (enabled)
 #  or: qmake "USE_UPNP=0" (disabled, default)
@@ -83,7 +89,7 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
 
 QMAKE_CXXFLAGS += -std=c++11 -msse2
 QMAKE_CFLAGS += -msse2
-QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter -Wstack-protector
+QMAKE_CXXFLAGS_WARN_ON = -fdiagnostics-show-option
 
 # Input
 DEPENDPATH += src src/json src/qt
@@ -116,7 +122,6 @@ HEADERS += src/qt/bitcoingui.h \
     src/random.h \
     src/uint256.h \
     src/kernel.h \
-    src/scrypt_mine.h \
     src/pbkdf2.h \
     src/serialize.h \
     src/strlcpy.h \
@@ -261,9 +266,6 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/rpcconsole.cpp \
     src/noui.cpp \
     src/kernel.cpp \
-    src/scrypt-x86.S \
-    src/scrypt-x86_64.S \
-    src/scrypt_mine.cpp \
     src/pbkdf2.cpp \
     src/aes_helper.c \
     src/blake.c \
@@ -278,8 +280,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/simd.c \
     src/skein.c \
     src/fugue.c \
-    src/hamsi.c \
-    src/scrypt.cpp
+    src/hamsi.c
 
 RESOURCES += \
     src/qt/bitcoin.qrc
@@ -346,7 +347,7 @@ isEmpty(BOOST_THREAD_LIB_SUFFIX) {
 }
 
 isEmpty(BDB_LIB_PATH) {
-    macx:BDB_LIB_PATH = /opt/local/lib/db48
+    macx:BDB_LIB_PATH = /usr/local/opt/berkeley-db@4/lib
 }
 
 isEmpty(BDB_LIB_SUFFIX) {
@@ -358,8 +359,10 @@ isEmpty(BDB_INCLUDE_PATH) {
 }
 
 isEmpty(BOOST_LIB_PATH) {
-    macx:BOOST_LIB_PATH = /opt/local/lib
+    macx:BOOST_LIB_PATH = /usr/local/opt/boost@1.60/lib
 }
+
+macx:OPENSSL_LIB_PATH += /usr/local/opt/openssl/lib
 
 isEmpty(BOOST_INCLUDE_PATH) {
     macx:BOOST_INCLUDE_PATH = /opt/local/include
@@ -367,6 +370,9 @@ isEmpty(BOOST_INCLUDE_PATH) {
 
 windows:DEFINES += WIN32 WIN32_LEAN_AND_MEAN
 windows:RC_FILE = src/qt/res/bitcoin-qt.rc
+
+windows:LIBS += -llibcrypto32MT
+windows:LIBS += -llibssl32MT
 
 windows:!contains(MINGW_THREAD_BUGFIX, 0) {
     # At least qmake's win32-g++-cross profile is missing the -lmingwthrd
@@ -381,18 +387,25 @@ windows:!contains(MINGW_THREAD_BUGFIX, 0) {
 
 !windows:!macx {
     DEFINES += LINUX
-    #LIBS += -lrt
+    LIBS += -lrt
 }
 
 macx:HEADERS += src/qt/macdockiconhandler.h
 macx:OBJECTIVE_SOURCES += src/qt/macdockiconhandler.mm
 macx:LIBS += -framework Foundation -framework ApplicationServices -framework AppKit
 macx:DEFINES += MAC_OSX MSG_NOSIGNAL=0
-macx:ICON = src/qt/res/icons/bitcoin.icns
+macx:ICON = src/qt/res/icons/Scash.icns
 macx:TARGET = "scash-qt"
+macx:INCLUDEPATH += /usr/local/opt/boost@1.60/include
+macx:INCLUDEPATH += /usr/local/opt/
+macx:INCLUDEPATH += /usr/local/opt/openssl/include
+macx:INCLUDEPATH += /usr/local/opt/berkeley-db@4/include
 macx:QMAKE_CFLAGS_THREAD += -pthread
 macx:QMAKE_LFLAGS_THREAD += -pthread
 macx:QMAKE_CXXFLAGS_THREAD += -pthread
+
+uinx:QMAKE_RPATHDIR += ../Library/Frameworks
+unix:QMAKE_RPATHDIR += ../Library
 
 # Set libraries and includes at end, to use platform-defined defaults if not overridden
 INCLUDEPATH += $$BOOST_INCLUDE_PATH $$BDB_INCLUDE_PATH $$OPENSSL_INCLUDE_PATH $$QRENCODE_INCLUDE_PATH

@@ -3,8 +3,8 @@
 #include "addresstablemodel.h"
 #include "guiutil.h"
 
-#include <QDataWidgetMapper>
-#include <QMessageBox>
+#include <QtWidgets/QDataWidgetMapper>
+#include <QtWidgets/QMessageBox>
 
 EditAddressDialog::EditAddressDialog(Mode mode, QWidget *parent) :
     QDialog(parent),

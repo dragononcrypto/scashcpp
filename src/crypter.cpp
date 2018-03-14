@@ -2,8 +2,14 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
+#ifdef WIN32
+#include "openssl/include/openssl/aes.h"
+#include "openssl/include/openssl/evp.h"
+#else
 #include <openssl/aes.h>
 #include <openssl/evp.h>
+#endif
+
 #include <vector>
 #include <string>
 #ifdef WIN32

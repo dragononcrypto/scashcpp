@@ -12,7 +12,6 @@
 #include "chartdata.h"
 #include "net.h"
 
-#include <unistd.h>
 #include <ios>
 #include <iostream>
 #include <fstream>
@@ -20,8 +19,6 @@
 #include <QPixmap>
 #include <QUrl>
 #include <QPainter>
-
-#include <qrcodegen.h>
 
 
 PerfMonDialog::PerfMonDialog(QWidget *parent) :
@@ -128,7 +125,10 @@ static void drawCharOnImage(QImage &img, ChartData& data, int divisor, QString u
                 img.setPixel(x, y, 0xff00000);
                 if (prevY != -1)
                 {
-                    for (int t = std::min(y, prevY); t < std::max(y, prevY); t++) img.setPixel(x, t, 0xcc4444);
+                    for (int t = (std::min)(y, prevY); t < (std::max)(y, prevY); t++)
+                    {
+                        img.setPixel(x, t, 0xcc4444);
+                    }
                 }
 
                 prevY = y;
@@ -140,7 +140,7 @@ static void drawCharOnImage(QImage &img, ChartData& data, int divisor, QString u
     if (p.begin(&img))
     {
         p.setPen(QPen(Qt::darkBlue));
-        p.setFont(QFont("Times", 12, QFont::Bold));
+        p.setFont(QFont("Verdana", 10, QFont::Normal));
         p.drawText(img.rect(), Qt::AlignTop | Qt::AlignRight,
                    QString::fromLatin1("Max: %1 %2  ").arg(maximum / divisor).arg(unit));
 
@@ -177,8 +177,24 @@ static void prepareAndDrawChartData(QImage &img, QLabel &label, ChartData &data,
     label.setPixmap(QPixmap::fromImage(img));
 }
 
+#ifdef WIN32
+#include <windows.h>
+#include <psapi.h>
+#endif
+
 int64 getMemUsage()
 {
+#ifdef WIN32
+    PROCESS_MEMORY_COUNTERS pmc;
+    if ( GetProcessMemoryInfo( GetCurrentProcess(), &pmc, sizeof(pmc)) )
+    {
+        return pmc.WorkingSetSize / 1024;
+    }
+    else
+    {
+        return 0;
+    }
+#else
     // 'file' stat seems to give the most reliable results
     std::ifstream stat_stream("/proc/self/stat", std::ifstream::ios_base::in);
 
@@ -206,6 +222,7 @@ int64 getMemUsage()
      unsigned long resident_set = rss * page_size_kb;
 
     return resident_set;
+#endif
 }
 
 void PerfMonDialog::updateNow()

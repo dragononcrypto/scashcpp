@@ -1,5 +1,5 @@
 /*
- * Qt4 bitcoin GUI.
+ * Qt5 bitcoin GUI.
  *
  * W.J. van der Laan 2011-2012
  * The Bitcoin Developers 2011-2012
@@ -33,40 +33,42 @@
 #include "wallet.h"
 #include "bitcoinrpc.h"
 
+#include <QMimeData>
+
 #ifdef Q_OS_MAC
 #include "macdockiconhandler.h"
 #endif
 
-#include <QApplication>
-#include <QMainWindow>
-#include <QMenuBar>
-#include <QMenu>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QMenuBar>
+#include <QtWidgets/QMenu>
 #include <QIcon>
-#include <QTabWidget>
-#include <QVBoxLayout>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QLabel>
-#include <QLineEdit>
-#include <QPushButton>
+#include <QtWidgets/QTabWidget>
+#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets/QToolBar>
+#include <QtWidgets/QStatusBar>
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QLineEdit>
+#include <QtWidgets/QPushButton>
 #include <QLocale>
-#include <QMessageBox>
-#include <QProgressBar>
-#include <QStackedWidget>
+#include <QtWidgets/QMessageBox>
+#include <QtWidgets/QProgressBar>
+#include <QtWidgets/QStackedWidget>
 #include <QDateTime>
 #include <QMovie>
-#include <QFileDialog>
+#include <QtWidgets/QFileDialog>
 #include <QDesktopServices>
 #include <QTimer>
 #include <QDragEnterEvent>
 #include <QUrl>
-#include <QStyle>
+#include <QtWidgets/QStyle>
 
 #include <iostream>
 
 extern CWallet *pwalletMain;
 extern int64 nLastCoinStakeSearchInterval;
-extern unsigned int nStakeTargetSpacing;
+extern int nStakeTargetSpacing;
 
 static BitcoinGUI *pGUIMain = NULL;
 void BitcoinGUI::switchToTransactionPage()
@@ -83,7 +85,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     walletModel(0),
     encryptWalletAction(0),
     changePassphraseAction(0),
-	lockWalletToggleAction(0),
+    lockWalletToggleAction(0),
     aboutQtAction(0),
     trayIcon(0),
     notificator(0),
@@ -92,8 +94,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     resize(850, 550);
     setWindowTitle(tr("Scash") + " - " + tr("Wallet"));
 #ifndef Q_OS_MAC
-    qApp->setWindowIcon(QIcon(":icons/bitcoin"));
-    setWindowIcon(QIcon(":icons/bitcoin"));
+    qApp->setWindowIcon(QIcon(":/icons/client_ico_new"));
+    setWindowIcon(QIcon(":/icons/client_ico_new"));
 #else
     setUnifiedTitleAndToolBarOnMac(true);
     QApplication::setAttribute(Qt::AA_DontShowIconsInMenus);
@@ -149,13 +151,13 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     frameBlocksLayout->setContentsMargins(3,0,3,0);
     frameBlocksLayout->setSpacing(3);
     labelEncryptionIcon = new QLabel();
-	labelMintingIcon = new QLabel();
+    labelMintingIcon = new QLabel();
     labelConnectionsIcon = new QLabel();
     labelBlocksIcon = new QLabel();
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelEncryptionIcon);
     frameBlocksLayout->addStretch();
-	frameBlocksLayout->addWidget(labelMintingIcon);
+    frameBlocksLayout->addWidget(labelMintingIcon);
     frameBlocksLayout->addStretch();
     frameBlocksLayout->addWidget(labelConnectionsIcon);
     frameBlocksLayout->addStretch();
@@ -198,7 +200,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     statusBar()->addPermanentWidget(frameBlocks);
 
     syncIconMovie = new QMovie(":/movies/update_spinner", "mng", this);
-	// this->setStyleSheet("background-color: #effbef;");
+    // this->setStyleSheet("background-color: #effbef;");
 
     // Clicking on a transaction on the overview page simply sends you to transaction history page
     connect(overviewPage, SIGNAL(transactionClicked(QModelIndex)), this, SLOT(gotoHistoryPage()));
@@ -283,13 +285,28 @@ void BitcoinGUI::createActions()
     quitAction->setMenuRole(QAction::QuitRole);
     aboutAction = new QAction(QIcon(":/icons/bitcoin"), tr("&About Scash"), this);
     aboutAction->setToolTip(tr("Show information about Scash"));
+
+#ifndef Q_OS_MAC
     aboutAction->setMenuRole(QAction::AboutRole);
+#endif
+
     aboutQtAction = new QAction(QIcon(":/trolltech/qmessagebox/images/qtlogo-64.png"), tr("About &Qt"), this);
     aboutQtAction->setToolTip(tr("Show information about Qt"));
+
+#ifndef Q_OS_MAC
     aboutQtAction->setMenuRole(QAction::AboutQtRole);
+#endif
+
+
+
+#ifndef Q_OS_MAC
     optionsAction = new QAction(QIcon(":/icons/options"), tr("&Options..."), this);
-    optionsAction->setToolTip(tr("Modify configuration options for Scash"));
     optionsAction->setMenuRole(QAction::PreferencesRole);
+#else
+    optionsAction = new QAction(QIcon(":/icons/options"), tr("&Settings..."), this);
+#endif
+    optionsAction->setToolTip(tr("Modify configuration options for Scash"));
+
     toggleHideAction = new QAction(QIcon(":/icons/bitcoin"), tr("&Show / Hide"), this);
     encryptWalletAction = new QAction(QIcon(":/icons/lock_closed"), tr("&Encrypt Wallet..."), this);
     encryptWalletAction->setToolTip(tr("Encrypt or decrypt wallet"));
@@ -320,7 +337,7 @@ void BitcoinGUI::createActions()
     connect(backupWalletAction, SIGNAL(triggered()), this, SLOT(backupWallet()));
     connect(changePassphraseAction, SIGNAL(triggered()), this, SLOT(changePassphrase()));
     connect(lockWalletToggleAction, SIGNAL(triggered()), this, SLOT(lockWalletToggle()));
-	connect(signMessageAction, SIGNAL(triggered()), this, SLOT(gotoSignMessageTab()));
+    connect(signMessageAction, SIGNAL(triggered()), this, SLOT(gotoSignMessageTab()));
     connect(verifyMessageAction, SIGNAL(triggered()), this, SLOT(gotoVerifyMessageTab()));
 }
 
@@ -340,24 +357,32 @@ void BitcoinGUI::createMenuBar()
     file->addAction(exportAction);
     file->addAction(signMessageAction);
     file->addAction(verifyMessageAction);
+#ifndef Q_OS_MAC
     file->addSeparator();
     file->addAction(quitAction);
+#endif
 
     QMenu *settings = appMenuBar->addMenu(tr("&Settings"));
     settings->addAction(encryptWalletAction);
     settings->addAction(changePassphraseAction);
-	settings->addAction(lockWalletToggleAction);
+    settings->addAction(lockWalletToggleAction);
+#ifndef Q_OS_MAC
     settings->addSeparator();
+#endif
     settings->addAction(optionsAction);
+
 
     QMenu *help = appMenuBar->addMenu(tr("&Help"));
     help->addAction(openRPCConsoleAction);
     help->addAction(openPerfMonDlgAction);
+#ifndef Q_OS_MAC
     help->addSeparator();
+#endif
     help->addAction(aboutAction);
     help->addAction(aboutQtAction);
 
-	// QString ss("QMenuBar::item { background-color: #effbef; color: black }"); 
+
+    // QString ss("QMenuBar::item { background-color: #effbef; color: black }");
     // appMenuBar->setStyleSheet(ss);
 }
 
@@ -373,7 +398,7 @@ void BitcoinGUI::createToolBars()
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
-	toolbar2->addAction(lockWalletToggleAction);
+    toolbar2->addAction(lockWalletToggleAction);
     toolbar2->addAction(exportAction);
 }
 
@@ -382,25 +407,8 @@ void BitcoinGUI::setClientModel(ClientModel *clientModel)
     this->clientModel = clientModel;
     if(clientModel)
     {
-        // Replace some strings and icons, when using the testnet
-        if(clientModel->isTestNet())
-        {
-            setWindowTitle(windowTitle() + QString(" ") + tr("[testnet]"));
-#ifndef Q_OS_MAC
-            qApp->setWindowIcon(QIcon(":icons/bitcoin_testnet"));
-            setWindowIcon(QIcon(":icons/bitcoin_client"));
-#else
-            MacDockIconHandler::instance()->setIcon(QIcon(":icons/bitcoin_testnet"));
-#endif
-            if(trayIcon)
-            {
-                trayIcon->setToolTip(tr("Scash client") + QString(" ") + tr("[testnet]"));
-                trayIcon->setIcon(QIcon(":/icons/client_ico"));
-                toggleHideAction->setIcon(QIcon(":/icons/client_ico"));
-            }
 
-            aboutAction->setIcon(QIcon(":/icons/toolbar_testnet"));
-        }
+
 
         // Keep up to date with client
         setNumConnections(clientModel->getNumConnections());
@@ -455,7 +463,7 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu = new QMenu(this);
     trayIcon->setContextMenu(trayIconMenu);
     trayIcon->setToolTip(tr("Scash client"));
-    trayIcon->setIcon(QIcon(":/icons/client_ico"));
+    trayIcon->setIcon(QIcon(":/icons/client_ico_new"));
     connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
             this, SLOT(trayIconActivated(QSystemTrayIcon::ActivationReason)));
     trayIcon->show();
@@ -463,7 +471,7 @@ void BitcoinGUI::createTrayIcon()
     // Note: On Mac, the dock icon is used to provide the tray's functionality.
     MacDockIconHandler *dockIconHandler = MacDockIconHandler::instance();
     trayIconMenu = dockIconHandler->dockMenu();
-	dockIconHandler->setMainWindow((QMainWindow*)this);
+    dockIconHandler->setMainWindow((QMainWindow*)this);
 #endif
 
     // Configuration of the tray icon (or dock icon) icon menu
@@ -477,6 +485,7 @@ void BitcoinGUI::createTrayIcon()
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(optionsAction);
     trayIconMenu->addAction(openRPCConsoleAction);
+    trayIconMenu->addAction(openPerfMonDlgAction);
 #ifndef Q_OS_MAC // This is built-in on Mac
     trayIconMenu->addSeparator();
     trayIconMenu->addAction(quitAction);
@@ -548,7 +557,7 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
 
         if (strStatusBarWarnings.isEmpty())
         {
-            progressBarLabel->setText(tr("Synchronizing with network..."));
+            progressBarLabel->setText(tr("Synchronizing with network (%1 blocks remaining)...").arg(nRemainingBlocks));
             progressBarLabel->setVisible(true);
             progressBar->setFormat(tr("~%n block(s) remaining", "", nRemainingBlocks));
             progressBar->setMaximum(nTotalBlocks);
@@ -575,7 +584,7 @@ void BitcoinGUI::setNumBlocks(int count, int nTotalBlocks)
         progressBar->setVisible(false);
     }
 
-	tooltip = tr("Current difficulty is %1.").arg(clientModel->GetDifficulty()) + QString("<br>") + tooltip;
+    tooltip = tr("Current difficulty is %1.").arg(clientModel->GetDifficulty()) + QString("<br>") + tooltip;
 
     QDateTime lastBlockDate = clientModel->getLastBlockDate();
     int secs = lastBlockDate.secsTo(QDateTime::currentDateTime());
@@ -641,7 +650,11 @@ void BitcoinGUI::error(const QString &title, const QString &message, bool modal)
     {
         QMessageBox::critical(this, title, message, QMessageBox::Ok, QMessageBox::Ok);
     } else {
+#ifdef LINUX
         notificator->notify(Notificator::Critical, title, message);
+#else
+        if (trayIcon) trayIcon->showMessage(title, message);
+#endif
     }
 }
 
@@ -719,7 +732,8 @@ void BitcoinGUI::incomingTransaction(const QModelIndex & parent, int start, int 
 
         bool hasMessage = ttm->hasMessage(start, TransactionTableModel::ToAddress, parent);
 
-        notificator->notify(Notificator::Information,
+#ifdef LINUX
+        if (notificator) notificator->notify(Notificator::Information,
                             (amount)<0 ? (hasMessage ? tr("Sent message") : tr("Sent transaction")) :
                                          (hasMessage ? tr("Incoming message") :tr("Incoming transaction")),
                               tr("Date: %1\n"
@@ -729,7 +743,27 @@ void BitcoinGUI::incomingTransaction(const QModelIndex & parent, int start, int 
                               .arg(date)
                               .arg(BitcoinUnits::formatWithUnit(walletModel->getOptionsModel()->getDisplayUnit(), amount, true))
                               .arg(type)
-                              .arg(address), icon);
+                              .arg(address)
+                    , icon
+                    );
+#else
+        if (trayIcon) trayIcon->showMessage(
+                            (amount)<0 ? (hasMessage ? tr("Sent message") : tr("Sent transaction")) :
+                                         (hasMessage ? tr("Incoming message") :tr("Incoming transaction")),
+                              tr("Date: %1\n"
+                                 "Amount: %2\n"
+                                 "Type: %3\n"
+                                 "Address: %4\n")
+                              .arg(date)
+                              .arg(BitcoinUnits::formatWithUnit(walletModel->getOptionsModel()->getDisplayUnit(), amount, true))
+                              .arg(type)
+                              .arg(address)
+#ifndef Q_OS_MAC
+                    , icon
+#endif
+                    );
+#endif
+
     }
 }
 
@@ -900,7 +934,7 @@ void BitcoinGUI::encryptWallet(bool status)
 
 void BitcoinGUI::backupWallet()
 {
-    QString saveDir = QDesktopServices::storageLocation(QDesktopServices::DocumentsLocation);
+    QString saveDir = QStandardPaths::standardLocations(QStandardPaths::DocumentsLocation).at(0);
     QString filename = QFileDialog::getSaveFileName(this, tr("Backup Wallet"), saveDir, tr("Wallet Data (*.dat)"));
     if(!filename.isEmpty()) {
         if(!walletModel->backupWallet(filename)) {
@@ -1004,8 +1038,6 @@ void BitcoinGUI::updateMintingIcon()
         else if (nWeight > 125) nEstimateTime += 3*60*60;
         else if (nWeight > 62) nEstimateTime +=  9*60*60;
         else if (nWeight > 31) nEstimateTime += 24*60*60;
-
-        nEstimateTime += nWeight > 1000 ? 0 : (nWeight > 500 ? (3 * 60) : (60 * 60));
 
         QString text;
         if (nEstimateTime < 60)

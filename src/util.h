@@ -24,8 +24,13 @@ typedef int pid_t; /* define for Windows compatibility */
 #include <boost/date_time/gregorian/gregorian_types.hpp>
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
+#ifdef WIN32
+#include "openssl/include/openssl/sha.h"
+#include "openssl/include/openssl/ripemd.h"
+#else
 #include <openssl/sha.h>
 #include <openssl/ripemd.h>
+#endif
 
 #include "netbase.h" // for AddTimeData
 
@@ -35,7 +40,7 @@ typedef unsigned long long  uint64;
 static const int64 COIN = 1000000;
 static const int64 CENT = 10000;
 
-#define loop                for (;;)
+#define LOOP                for (;;)
 #define BEGIN(a)            ((char*)&(a))
 #define END(a)              ((char*)&((&(a))[1]))
 #define UBEGIN(a)           ((unsigned char*)&(a))

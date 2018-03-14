@@ -17,7 +17,12 @@
 #include <QUrl>
 #include <QScrollBar>
 
+#ifdef WIN32
+#include "openssl/include/openssl/stack.h"
+#include "openssl/include/openssl/crypto.h"
+#else
 #include <openssl/crypto.h>
+#endif
 
 // TODO: make it possible to filter out categories (esp debug messages when implemented)
 // TODO: receive errors and debug messages through ClientModel

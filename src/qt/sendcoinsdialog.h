@@ -1,7 +1,7 @@
 #ifndef SENDCOINSDIALOG_H
 #define SENDCOINSDIALOG_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 #include <QString>
 
 namespace Ui {

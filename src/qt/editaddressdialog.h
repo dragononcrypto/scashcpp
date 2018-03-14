@@ -1,7 +1,7 @@
 #ifndef EDITADDRESSDIALOG_H
 #define EDITADDRESSDIALOG_H
 
-#include <QDialog>
+#include <QtWidgets/QDialog>
 
 QT_BEGIN_NAMESPACE
 class QDataWidgetMapper;

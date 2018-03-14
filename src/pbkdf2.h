@@ -3,7 +3,12 @@
 #ifndef PBKDF2_H
 #define PBKDF2_H
 
+#ifdef WIN32
+#include "openssl/include/openssl/sha.h"
+#else
 #include <openssl/sha.h>
+#endif
+
 #include <stdint.h>
 
 typedef struct HMAC_SHA256Context {

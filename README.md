@@ -1,4 +1,4 @@
-Scash (SCS) Release v. 1.2.1
+Scash (SCS) Release v. 1.2.2
 
 -----------------------------
 Scash is a peer-to-peer Proof of Stake Velocity digital currency with an initial Proof of Work mining

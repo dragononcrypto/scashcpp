@@ -197,9 +197,16 @@ Value getworkex(const Array& params, bool fHelp)
 
         Object result;
         result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
-        result.push_back(Pair("target_x13",   HexStr(BEGIN(hashTarget), END(hashTarget))));
-        // TOD: make target actual
-        result.push_back(Pair("target_msha",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+
+        if (GetBoolArg("-nomsha3"))
+        {
+            result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        }
+        else
+        {
+            result.push_back(Pair("target_x13",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+            result.push_back(Pair("target_msha",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        }
 
         CDataStream ssTx(SER_NETWORK, PROTOCOL_VERSION);
         ssTx << coinbaseTx;
@@ -340,9 +347,15 @@ Value getwork(const Array& params, bool fHelp)
         result.push_back(Pair("midstate", HexStr(BEGIN(pmidstate), END(pmidstate)))); // deprecated
         result.push_back(Pair("data",     HexStr(BEGIN(pdata), END(pdata))));
         result.push_back(Pair("hash1",    HexStr(BEGIN(phash1), END(phash1)))); // deprecated
-        result.push_back(Pair("target_x13",   HexStr(BEGIN(hashTarget), END(hashTarget))));
-        // TODO: make target actual!
-        result.push_back(Pair("target_msha",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        if (GetBoolArg("-nomsha3"))
+        {
+            result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        }
+        else
+        {
+            result.push_back(Pair("target_x13",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+            result.push_back(Pair("target_msha",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        }
         return result;
     }
     else
@@ -519,9 +532,15 @@ Value getblocktemplate(const Array& params, bool fHelp)
     result.push_back(Pair("transactions", transactions));
     result.push_back(Pair("coinbaseaux", aux));
     result.push_back(Pair("coinbasevalue", (int64_t)pblock->vtx[0].vout[0].nValue));
-    result.push_back(Pair("target_x13", hashTarget.GetHex()));
-    // TODO: make target actual
-    result.push_back(Pair("target_msha", hashTarget.GetHex()));
+    if (GetBoolArg("-nomsha3"))
+    {
+        result.push_back(Pair("target",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+    }
+    else
+    {
+        result.push_back(Pair("target_x13",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+        result.push_back(Pair("target_msha",   HexStr(BEGIN(hashTarget), END(hashTarget))));
+    }
     result.push_back(Pair("mintime", (int64_t)pindexPrev->GetMedianTimePast()+1));
     result.push_back(Pair("mutable", aMutable));
     result.push_back(Pair("noncerange", "00000000ffffffff"));

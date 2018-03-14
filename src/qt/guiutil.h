@@ -3,7 +3,7 @@
 
 #include <QString>
 #include <QObject>
-#include <QMessageBox>
+#include <QtWidgets/QMessageBox>
 
 QT_BEGIN_NAMESPACE
 class QFont;

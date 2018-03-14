@@ -1,7 +1,7 @@
 #ifndef QVALIDATEDLINEEDIT_H
 #define QVALIDATEDLINEEDIT_H
 
-#include <QLineEdit>
+#include <QtWidgets/QLineEdit>
 
 /** Line edit that can be marked as "invalid" to show input validation feedback. When marked as invalid,
    it will get a red background until it is focused.

@@ -164,7 +164,7 @@ CAddress GetLocalAddress(const CNetAddr *paddrPeer)
 bool RecvLine(SOCKET hSocket, string& strLine)
 {
     strLine = "";
-    loop
+    LOOP
     {
         char c;
         int nBytes = recv(hSocket, &c, 1, 0);
@@ -343,7 +343,7 @@ bool GetMyExternalIP2(const CService& addrConnect, const char* pszGet, const cha
     {
         if (strLine.empty()) // HTTP response is separated from headers by blank line
         {
-            loop
+            LOOP
             {
                 if (!RecvLine(hSocket, strLine))
                 {
@@ -739,7 +739,6 @@ void CNode::copyStats(CNodeStats &stats)
 
 extern int nAskedForBlocks;
 
-
 void ThreadSocketHandler(void* parg)
 {
     // Make this thread recognisable as the networking thread
@@ -788,7 +787,7 @@ void ThreadSocketHandler2(void* parg)
     list<CNode*> vNodesDisconnected;
     unsigned int nPrevNodeCount = 0;
 
-    loop
+    LOOP
     {
         //
         // Disconnect nodes
@@ -1214,7 +1213,7 @@ void ThreadMapPort2(void* parg)
         else
             printf("UPnP Port Mapping successful.\n");
         int i = 1;
-        loop {
+        LOOP {
             if (fShutdown || !fUseUPnP)
             {
                 r = UPNP_DeletePortMapping(urls.controlURL, data.first.servicetype, port.c_str(), "TCP", 0);
@@ -1249,7 +1248,7 @@ void ThreadMapPort2(void* parg)
         freeUPNPDevlist(devlist); devlist = 0;
         if (r != 0)
             FreeUPNPUrls(&urls);
-        loop {
+        LOOP {
             if (fShutdown || !fUseUPnP)
                 return;
             Sleep(2000);
@@ -1341,19 +1340,6 @@ void ThreadDNSAddressSeed2(void* parg)
 }
 
 
-
-
-
-
-
-
-
-
-
-
-unsigned int pnSeed[] =
-{
-};
 
 void DumpAddresses()
 {
@@ -1454,7 +1440,6 @@ void static ThreadStakeMinter(void* parg)
     printf("ThreadStakeMinter exiting, %d threads remaining\n", vnThreadsRunning[THREAD_CLOAKER]);
 }
 
-
 void ThreadOpenConnections2(void* parg)
 {
     printf("ThreadOpenConnections started\n");
@@ -1482,7 +1467,7 @@ void ThreadOpenConnections2(void* parg)
 
     // Initiate network connections
     int64 nStart = GetTime();
-    loop
+    LOOP
     {
         ProcessOneShot();
 
@@ -1524,19 +1509,7 @@ void ThreadOpenConnections2(void* parg)
         if (addrman.size()==0 && (GetTime() - nStart > 60) && !fTestNet)
         {
             std::vector<CAddress> vAdd;
-            for (unsigned int i = 0; i < ARRAYLEN(pnSeed); i++)
-            {
-                // It'll only connect to one or two seed nodes because once it connects,
-                // it'll get a pile of addresses with newer timestamps.
-                // Seed nodes are given a random 'last seen time' of between one and two
-                // weeks ago.
-                const int64 nOneWeek = 7*24*60*60;
-                struct in_addr ip;
-                memcpy(&ip, &pnSeed[i], sizeof(ip));
-                CAddress addr(CService(ip, GetDefaultPort()));
-                addr.nTime = GetTime()-GetRand(nOneWeek)-nOneWeek;
-                vAdd.push_back(addr);
-            }
+
             addrman.Add(vAdd, CNetAddr("127.0.0.1"));
         }
 
@@ -1570,7 +1543,7 @@ void ThreadOpenConnections2(void* parg)
         for (size_t connectionNumber = 0; connectionNumber < maxConnectionsBurst; connectionNumber++)
         {
             int nTries = 0;
-            loop
+            LOOP
             {
                 // use an nUnkBias between 10 (no outgoing connections) and 90 (8 outgoing connections)
                 CAddress addr = addrman.Select(10 + min(nOutbound,8)*10);
@@ -1673,7 +1646,7 @@ void ThreadOpenAddedConnections2(void* parg)
             }
         }
     }
-    loop
+    LOOP
     {
         vector<vector<CService> > vservConnectAddresses = vservAddressesToAdd;
         // Attempt to connect to each IP for each addnode entry until at least one is successful per addnode entry

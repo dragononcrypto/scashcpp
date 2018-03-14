@@ -138,7 +138,7 @@ int ReadHTTPRequest(std::basic_istream<char>& stream, int &proto, std::string& r
 int ReadHTTPHeader(std::basic_istream<char>& stream, map<string, string>& mapHeadersRet)
 {
     int nLen = 0;
-    loop
+    LOOP
     {
         string str;
         std::getline(stream, str);
@@ -556,7 +556,7 @@ void ThreadBESServer3(void* parg)
     AcceptedConnection *conn = (AcceptedConnection *) parg;
 
     bool fRun = true;
-    loop {
+    LOOP {
         if (fShutdown || !fRun)
         {
             conn->close();

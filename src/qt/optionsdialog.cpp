@@ -9,7 +9,7 @@
 #include <QDir>
 #include <QIntValidator>
 #include <QLocale>
-#include <QMessageBox>
+#include <QtWidgets/QMessageBox>
 #include <QRegExp>
 #include <QRegExpValidator>
 

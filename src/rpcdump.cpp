@@ -64,7 +64,6 @@ Value importprivkey(const Array& params, bool fHelp)
 
         if (!pwalletMain->AddKey(key))
             throw JSONRPCError(RPC_WALLET_ERROR, "Error adding key to wallet");
-
     }
 
     return Value::null;
@@ -86,9 +85,9 @@ Value dorescan(const Array& params, bool fHelp)
         pwalletMain->ReacceptWalletTransactions();
     }
 
-
     return Value::null;
 }
+
 
 Value dumpprivkey(const Array& params, bool fHelp)
 {

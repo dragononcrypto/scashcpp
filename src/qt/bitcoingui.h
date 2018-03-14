@@ -1,8 +1,8 @@
 #ifndef BITCOINGUI_H
 #define BITCOINGUI_H
 
-#include <QMainWindow>
-#include <QSystemTrayIcon>
+#include <QtWidgets/QMainWindow>
+#include <QtWidgets/QSystemTrayIcon>
 
 #include "util.h" // for uint64
 
