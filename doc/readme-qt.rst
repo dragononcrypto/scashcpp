@@ -1,4 +1,4 @@
-Bitcoin-qt: Qt4 GUI for Bitcoin
+Bitcoin-qt: Qt4 GUI for Scash
 ===============================
 
 Build instructions
@@ -28,13 +28,15 @@ then execute the following:
 
 ::
 
-    qmake
+    qmake-qt4
     make
 
-Alternatively, install Qt Creator and open the `bitcoin-qt.pro` file.
+Alternatively, install Qt Creator and open the `scash-qt.pro` file.
 
-An executable named `bitcoin-qt` will be built.
+A file named `scash-qt` will be built. Make executable and launch:
 
+chmod +x scash-qt
+./scash-qt
 
 Windows
 --------
