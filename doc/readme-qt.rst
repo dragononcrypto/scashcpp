@@ -1,4 +1,4 @@
-Bitcoin-qt: Qt4 GUI for Scash
+scash-qt: Qt4 GUI for Scash
 ===============================
 
 Build instructions
