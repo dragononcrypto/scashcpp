@@ -28,7 +28,7 @@ then execute the following:
 
 ::
 
-    qmake
+    qmake-qt4
     make
 
 Alternatively, install Qt Creator and open the `bitcoin-qt.pro` file.
