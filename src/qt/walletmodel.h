@@ -129,6 +129,8 @@ public:
     void lockCoin(COutPoint& output);
     void unlockCoin(COutPoint& output);
     void listLockedCoins(std::vector<COutPoint>& vOutpts);
+
+    std::string getNewAddress();
 	
 private:
     CWallet *wallet;

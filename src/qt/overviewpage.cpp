@@ -9,9 +9,12 @@
 #include "guiutil.h"
 #include "guiconstants.h"
 #include "askpassphrasedialog.h"
+#include "main.h"
 
 #include <QAbstractItemDelegate>
 #include <QPainter>
+
+#include <boost/filesystem.hpp>
 
 #define DECORATION_SIZE 64
 #define NUM_ITEMS 6
@@ -90,6 +93,56 @@ public:
 };
 #include "overviewpage.moc"
 
+extern bool fBurstMode; // from main.cpp
+extern bool fBurstLaunchedNow;  // from main.cpp
+
+int iBurstTimerProgress = 0;
+
+
+void setBurstStateConfig(bool state)
+{
+    try
+    {
+        boost::filesystem::path configFilePath = GetDataDir() / "burst_config";
+
+        if (!state)
+        {
+            if (boost::filesystem::exists(configFilePath))
+            {
+                boost::filesystem::remove(configFilePath);
+            }
+        }
+        else
+        {
+            if (!boost::filesystem::exists(configFilePath))
+            {
+                boost::filesystem::ofstream f(configFilePath);
+                f << "1";
+            }
+        }
+    }
+    catch (std::exception&)
+    {
+    }
+}
+
+bool getBurstStateConfig()
+{
+    try
+    {
+        boost::filesystem::path configFilePath = GetDataDir() / "burst_config";
+
+        if (boost::filesystem::exists(configFilePath))
+        {
+            return true;
+        }
+    }
+    catch (std::exception&)
+    {
+    }
+    return false;
+}
+
 OverviewPage::OverviewPage(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::OverviewPage),
@@ -116,6 +169,18 @@ OverviewPage::OverviewPage(QWidget *parent) :
 
     // start with displaying the "out of sync" warning
     showOutOfSyncWarning(true);
+
+    fBurstMode = getBurstStateConfig();
+    ui->radioBurst->setChecked(fBurstMode);
+    ui->radioPoS->setChecked(!fBurstMode);
+
+    timer = new QTimer(this);
+
+    // setup signal and slot
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateOnTimer()));
+
+    // msec
+    timer->start(1000);
 }
 
 void OverviewPage::handleTransactionClicked(const QModelIndex &index)
@@ -201,4 +266,110 @@ void OverviewPage::showOutOfSyncWarning(bool fShow)
 {
     ui->labelWalletStatus->setVisible(fShow);
     ui->labelTransactionsStatus->setVisible(fShow);
+}
+
+void OverviewPage::updateBurstState()
+{
+    if (ui->radioBurst->isChecked())
+    {
+        ui->progressBarBurst->setEnabled(false);
+        fBurstMode = true;
+        fBurstLaunchedNow = false;
+    }
+    else
+    {
+        updateBurstButtonIsAllowed(false);
+        ui->progressBarBurst->setEnabled(false);
+        fBurstMode = false;
+        fBurstLaunchedNow = false;
+    }
+    setBurstStateConfig(fBurstMode);
+}
+
+void OverviewPage::on_radioBurst_clicked()
+{
+    updateBurstState();
+}
+
+void OverviewPage::on_radioPoS_clicked()
+{
+    updateBurstState();
+}
+
+void OverviewPage::on_buttonBurstNow_clicked()
+{
+    if (fBurstMode)
+    {
+        fBurstLaunchedNow = true;
+        iBurstTimerProgress = 0;
+    }
+}
+
+extern bool fWalletIsUnlockedForBurst; // from bitcoingui.cpp
+extern uint64 nWeightForBURST; // from bitcoingui.cpp
+
+bool fBurstButtonEnabled = false;
+
+void OverviewPage::updateBurstButtonIsAllowed(bool allowed)
+{
+    ui->buttonBurstNow->setEnabled(allowed);
+    fBurstButtonEnabled = allowed;
+}
+
+void OverviewPage::updateOnTimer()
+{
+    if (fBurstMode)
+    {
+        if (IsInitialBlockDownload())
+        {
+            ui->labelBurstState->setText("You can not use BURST until wallet is fully synced");
+            updateBurstButtonIsAllowed(false);
+        }
+        else if (!fWalletIsUnlockedForBurst)
+        {
+            ui->labelBurstState->setText("You have to unlock wallet for staking first to use BURST");
+            updateBurstButtonIsAllowed(false);
+        }
+        else if (nWeightForBURST == 0)
+        {
+            ui->labelBurstState->setText("You don't have mature coins to use BURST");
+            iBurstTimerProgress = 100;
+            updateBurstButtonIsAllowed(false);
+        }
+        else
+        {
+            // TODO: also need to check minted coins amount
+
+            // All good
+            ui->labelBurstState->setText("");
+            updateBurstButtonIsAllowed(true);
+        }
+    }
+    else
+    {
+        // Burst is disable, so we do not care here
+        ui->labelBurstState->setText("");
+    }
+
+    if (fBurstLaunchedNow)
+    {
+        iBurstTimerProgress += 3;
+        if (iBurstTimerProgress < 100)
+        {
+            // BURST IS RUNNING
+            ui->progressBarBurst->setValue(iBurstTimerProgress);
+            ui->progressBarBurst->setEnabled(true);
+            updateBurstButtonIsAllowed(false);
+            ui->radioPoS->setEnabled(false);
+        }
+        else
+        {
+            // BURST IS DONE
+            ui->progressBarBurst->setValue(0);
+            ui->progressBarBurst->setEnabled(false);
+            updateBurstButtonIsAllowed(true);
+            ui->radioPoS->setEnabled(true);
+            fBurstLaunchedNow = false;
+        }
+    }
 }

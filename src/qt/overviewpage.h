@@ -2,6 +2,7 @@
 #define OVERVIEWPAGE_H
 
 #include <QtWidgets/QWidget>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 class QModelIndex;
@@ -41,12 +42,23 @@ private:
     qint64 currentUnconfirmedBalance;
     qint64 currentImmatureBalance;
 
+    QTimer* timer;
+
     TxViewDelegate *txdelegate;
     TransactionFilterProxy *filter;
+
+    void updateBurstState();
+    void updateBurstButtonIsAllowed(bool allowed);
+
+public slots:
+    void updateOnTimer();
 
 private slots:
     void updateDisplayUnit();
     void handleTransactionClicked(const QModelIndex &index);
+    void on_radioBurst_clicked();
+    void on_radioPoS_clicked();
+    void on_buttonBurstNow_clicked();
 };
 
 #endif // OVERVIEWPAGE_H

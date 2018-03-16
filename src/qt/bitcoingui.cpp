@@ -32,6 +32,7 @@
 #include "rpcconsole.h"
 #include "wallet.h"
 #include "bitcoinrpc.h"
+#include "vaultdialog.h"
 
 #include <QMimeData>
 
@@ -130,6 +131,8 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
 
     sendCoinsPage = new SendCoinsDialog(this);
 
+    vaultPage = new VaultDialog(this);
+
     signVerifyMessageDialog = new SignVerifyMessageDialog(this);
 
     centralWidget = new QStackedWidget(this);
@@ -138,6 +141,7 @@ BitcoinGUI::BitcoinGUI(QWidget *parent):
     centralWidget->addWidget(addressBookPage);
     centralWidget->addWidget(receiveCoinsPage);
     centralWidget->addWidget(sendCoinsPage);
+    centralWidget->addWidget(vaultPage);
     setCentralWidget(centralWidget);
 
     // Create status bar
@@ -268,6 +272,12 @@ void BitcoinGUI::createActions()
     addressBookAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_5));
     tabGroup->addAction(addressBookAction);
 
+    vaultAction = new QAction(QIcon(":/icons/vault"), tr("Scash &Vault"), this);
+    vaultAction->setToolTip(tr("Store documents authenticity over blockchain"));
+    vaultAction->setCheckable(true);
+    vaultAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_6));
+    tabGroup->addAction(vaultAction);
+
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(overviewAction, SIGNAL(triggered()), this, SLOT(gotoOverviewPage()));
     connect(sendCoinsAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
@@ -278,6 +288,9 @@ void BitcoinGUI::createActions()
     connect(historyAction, SIGNAL(triggered()), this, SLOT(gotoHistoryPage()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
     connect(addressBookAction, SIGNAL(triggered()), this, SLOT(gotoAddressBookPage()));
+
+    connect(vaultAction, SIGNAL(triggered()), this, SLOT(showNormalIfMinimized()));
+    connect(vaultAction, SIGNAL(triggered()), this, SLOT(gotoVaultPage()));
 
     quitAction = new QAction(QIcon(":/icons/quit"), tr("E&xit"), this);
     quitAction->setToolTip(tr("Quit application"));
@@ -395,6 +408,7 @@ void BitcoinGUI::createToolBars()
     toolbar->addAction(receiveCoinsAction);
     toolbar->addAction(historyAction);
     toolbar->addAction(addressBookAction);
+    toolbar->addAction(vaultAction);
 
     QToolBar *toolbar2 = addToolBar(tr("Actions toolbar"));
     toolbar2->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
@@ -442,6 +456,7 @@ void BitcoinGUI::setWalletModel(WalletModel *walletModel)
         receiveCoinsPage->setModel(walletModel->getAddressTableModel());
         sendCoinsPage->setModel(walletModel);
         signVerifyMessageDialog->setModel(walletModel);
+        vaultPage->setModel(walletModel);
 
         setEncryptionStatus(walletModel->getEncryptionStatus());
         connect(walletModel, SIGNAL(encryptionStatusChanged(int)), this, SLOT(setEncryptionStatus(int)));
@@ -810,6 +825,15 @@ void BitcoinGUI::gotoReceiveCoinsPage()
     connect(exportAction, SIGNAL(triggered()), receiveCoinsPage, SLOT(exportClicked()));
 }
 
+void BitcoinGUI::gotoVaultPage()
+{
+    vaultAction->setChecked(true);
+    centralWidget->setCurrentWidget(vaultPage);
+
+    exportAction->setEnabled(false);
+    disconnect(exportAction, SIGNAL(triggered()), 0, 0);
+}
+
 void BitcoinGUI::gotoSendCoinsPage()
 {
     sendCoinsAction->setChecked(true);
@@ -879,6 +903,8 @@ void BitcoinGUI::handleURI(QString strURI)
 }
 
 static bool bFirstLockAttempt = true;
+bool fWalletIsUnlockedForBurst = false;
+
 void BitcoinGUI::setEncryptionStatus(int status)
 {
     QString timeNow = QDateTime::currentDateTime().toString();
@@ -890,6 +916,7 @@ void BitcoinGUI::setEncryptionStatus(int status)
         encryptWalletAction->setEnabled(true);
         changePassphraseAction->setEnabled(false);
         lockWalletToggleAction->setVisible(false);
+        fWalletIsUnlockedForBurst = true;
         break;
     case WalletModel::Unlocked:
         labelEncryptionIcon->show();
@@ -903,6 +930,7 @@ void BitcoinGUI::setEncryptionStatus(int status)
         lockWalletToggleAction->setText(tr("&Lock Wallet"));
         lockWalletToggleAction->setToolTip(tr("Lock wallet"));
         notificator->notify(Notificator::Information, tr("Wallet unlocked!"), tr("Time: %1\n").arg(timeNow), QIcon(":/icons/lock_open"));
+        fWalletIsUnlockedForBurst = true;
         break;
     case WalletModel::Locked:
         labelEncryptionIcon->show();
@@ -913,8 +941,9 @@ void BitcoinGUI::setEncryptionStatus(int status)
         changePassphraseAction->setEnabled(true);
         lockWalletToggleAction->setVisible(true);
         lockWalletToggleAction->setIcon(QIcon(":/icons/lock_open"));
-        lockWalletToggleAction->setText(tr("&Unlock Wallet..."));
+        lockWalletToggleAction->setText(tr("&Unlock Wallet..."));        
         lockWalletToggleAction->setToolTip(tr("Unlock wallet"));
+        fWalletIsUnlockedForBurst = false;
         if (!bFirstLockAttempt)
         {
             notificator->notify(Notificator::Information, tr("Wallet locked!"), tr("Time: %1\n").arg(timeNow), QIcon(":/icons/lock_closed"));
@@ -1008,6 +1037,8 @@ void BitcoinGUI::showNormalIfMinimized(bool fToggleHidden)
         hide();
 }
 
+extern bool fBurstMode;
+
 void BitcoinGUI::updateMintingIcon()
 {
     if (pwalletMain && pwalletMain->IsLocked())
@@ -1030,39 +1061,46 @@ void BitcoinGUI::updateMintingIcon()
         labelMintingIcon->setToolTip(tr("Not minting because you don't have mature coins."));
         labelMintingIcon->setEnabled(false);
     }
+    else if (fBurstMode)
+    {
+        labelMintingIcon->setEnabled(true);
+        labelMintingIcon->setToolTip(tr("Minting.<br>Rewards will be received on the next usage of BURST"));
+    }
     else if (nLastCoinStakeSearchInterval)
     {
-        uint64 nEstimateTimeRaw = nStakeTargetSpacing * nNetworkWeight / nWeight * 24;
-        int nEstimateTime = nEstimateTimeRaw + 3*60;
+        {
+            uint64 nEstimateTimeRaw = nStakeTargetSpacing * nNetworkWeight / nWeight * 24;
+            int nEstimateTime = nEstimateTimeRaw + 3*60;
 
-        if (nWeight > 1000) nEstimateTime += 1;
-        else if (nWeight > 500) nEstimateTime += 1*60;
-        else if (nWeight > 320) nEstimateTime += 30*60;
-        else if (nWeight > 250) nEstimateTime += 1*60*60;
-        else if (nWeight > 125) nEstimateTime += 3*60*60;
-        else if (nWeight > 62) nEstimateTime +=  9*60*60;
-        else if (nWeight > 31) nEstimateTime += 24*60*60;
+            if (nWeight > 1000) nEstimateTime += 1;
+            else if (nWeight > 500) nEstimateTime += 1*60;
+            else if (nWeight > 320) nEstimateTime += 30*60;
+            else if (nWeight > 250) nEstimateTime += 1*60*60;
+            else if (nWeight > 125) nEstimateTime += 3*60*60;
+            else if (nWeight > 62) nEstimateTime +=  9*60*60;
+            else if (nWeight > 31) nEstimateTime += 24*60*60;
 
-        QString text;
-        if (nEstimateTime < 60)
-        {
-            text = tr("%n second(s)", "", nEstimateTime);
-        }
-        else if (nEstimateTime < 60*60)
-        {
-            text = tr("%n minute(s)", "", nEstimateTime/60);
-        }
-        else if (nEstimateTime < 24*60*60)
-        {
-            text = tr("%n hour(s)", "", nEstimateTime/(60*60));
-        }
-        else
-        {
-            text = tr("%n day(s)", "", nEstimateTime/(60*60*24));
-        }
+            QString text;
+            if (nEstimateTime < 60)
+            {
+                text = tr("%n second(s)", "", nEstimateTime);
+            }
+            else if (nEstimateTime < 60*60)
+            {
+                text = tr("%n minute(s)", "", nEstimateTime/60);
+            }
+            else if (nEstimateTime < 24*60*60)
+            {
+                text = tr("%n hour(s)", "", nEstimateTime/(60*60));
+            }
+            else
+            {
+                text = tr("%n day(s)", "", nEstimateTime/(60*60*24));
+            }
 
-        labelMintingIcon->setEnabled(true);
-        labelMintingIcon->setToolTip(tr("Minting.<br>Your weight is %1.<br>Network weight is %2.<br>Expected time to earn reward is %3.").arg(nWeight).arg(nNetworkWeight).arg(text));
+            labelMintingIcon->setEnabled(true);
+            labelMintingIcon->setToolTip(tr("Minting.<br>Your weight is %1.<br>Network weight is %2.<br>Expected time to earn reward is %3.").arg(nWeight).arg(nNetworkWeight).arg(text));
+        }
     }
     else
     {
@@ -1070,6 +1108,8 @@ void BitcoinGUI::updateMintingIcon()
         labelMintingIcon->setEnabled(false);
     }
 }
+
+uint64 nWeightForBURST = 0;
 
 void BitcoinGUI::updateMintingWeights()
 {
@@ -1079,7 +1119,10 @@ void BitcoinGUI::updateMintingWeights()
         nWeight = 0;
 
         if (pwalletMain)
+        {
             pwalletMain->GetStakeWeight(*pwalletMain, nMinMax, nMinMax, nWeight);
+            nWeightForBURST = nWeight;
+        }
 
         nNetworkWeight = GetPoSKernelPS();
     }

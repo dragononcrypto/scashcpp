@@ -191,6 +191,7 @@ HEADERS += src/qt/bitcoingui.h \
     src/sph_fugue.h \
     src/sph_hamsi.h \
     src/sph_types.h \
+    src/qt/vaultdialog.h
 
 SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/qt/transactiontablemodel.cpp \
@@ -250,6 +251,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/rpcrawtransaction.cpp \
     src/qt/overviewpage.cpp \
     src/qt/csvmodelwriter.cpp \
+    src/qt/vaultdialog.cpp \
     src/crypter.cpp \
     src/qt/sendcoinsentry.cpp \
     src/qt/messageentry.cpp \
@@ -279,6 +281,7 @@ SOURCES += src/qt/bitcoin.cpp src/qt/bitcoingui.cpp \
     src/fugue.c \
     src/hamsi.c
 
+
 RESOURCES += \
     src/qt/bitcoin.qrc
 
@@ -297,7 +300,8 @@ FORMS += \
     src/qt/forms/rpcconsole.ui \
     src/qt/forms/optionsdialog.ui \
     src/qt/forms/perfmondialog.ui \
-    src/qt/forms/qrcodedialog.ui
+    src/qt/forms/qrcodedialog.ui \
+    src/qt/forms/vaultdialog.ui
 
 
 contains(BITCOIN_QT_TEST, 1) {

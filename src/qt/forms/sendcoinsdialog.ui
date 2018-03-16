@@ -647,7 +647,7 @@
         <x>0</x>
         <y>0</y>
         <width>830</width>
-        <height>156</height>
+        <height>172</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -844,6 +844,23 @@
        </property>
        <property name="default">
         <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="burstSendButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="toolTip">
+        <string>Send your TX fast using BURST feature</string>
+       </property>
+       <property name="text">
+        <string>BURST Send</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../bitcoin.qrc">
+         <normaloff>:/icons/burstsend</normaloff>:/icons/burstsend</iconset>
        </property>
       </widget>
      </item>

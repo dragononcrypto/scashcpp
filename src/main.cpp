@@ -549,6 +549,7 @@ int64 CTransaction::GetMinFee(unsigned int nBlockSize, bool fAllowFree,
     if (messageBytes > 0)
     {
         nMinFee += messageBytes * SendMessageCostPerChar;
+        nMinFee += 1000;
     }
 
     // Raise the price as the block approaches full
@@ -4475,6 +4476,9 @@ static int nLimitProcessors = -1;
 bool fPoSBlockFound = false;
 bool fPoSFirstLaunch = true;
 
+bool fBurstMode = false;
+bool fBurstLaunchedNow = false;
+
 void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 {
     printf("CPUMiner started for proof-of-%s\n", fProofOfStake? "stake" : "work");
@@ -4494,6 +4498,11 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
         while (((GetArg("-localmining", 0) == 0) && vNodes.empty()) || IsInitialBlockDownload() || pwallet->IsLocked())
         {
+            if (IsInitialBlockDownload())
+            {
+                fPoSFirstLaunch = true;
+            }
+
             nLastCoinStakeSearchInterval = 0;
             Sleep(1000);
             if (fShutdown)
@@ -4502,16 +4511,41 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
                 return;
         }
 
-        if (fProofOfStake && fPoSBlockFound)
+        if (fProofOfStake)
         {
-            Sleep(5 * 60 * 1000);
-            fPoSBlockFound = false;
-        }
+            if (fPoSFirstLaunch)
+            {
+                fPoSFirstLaunch = false;
+                // 100 * 0.11s ~= 11s
+                for (int i = 0; i < 100; i++)
+                {
+                    Sleep(110);
+                    if (fShutdown)
+                        return;
+                    if (!fGenerateBitcoins && !fProofOfStake)
+                        return;
+                    if (fBurstLaunchedNow)
+                        break;
+                }
+            }
 
-        if (fProofOfStake && fPoSFirstLaunch)
-        {
-            Sleep(15 * 1000);
-            fPoSFirstLaunch = false;
+            if (fPoSBlockFound)
+            {
+                repeat:
+                    // 30 * ~11s ~= 330s
+                    fPoSBlockFound = false;
+                    for (int i = 0; i < 30 * 100; i++)
+                    {
+                        if (fShutdown)
+                            return;
+                        if (!fGenerateBitcoins && !fProofOfStake)
+                            return;
+                        if (fBurstLaunchedNow)
+                            break;
+                        Sleep(110);
+                    }
+                if (fBurstMode && !fBurstLaunchedNow) goto repeat;
+            }
         }
 
         //
@@ -4583,8 +4617,8 @@ void BitcoinMiner(CWallet *pwallet, bool fProofOfStake)
 
                 CheckWork(pblock.get(), *pwalletMain, reservekey);
                 SetThreadPriority(THREAD_PRIORITY_LOWEST);
-                break;
                 fPoSBlockFound = true;
+                break;                
             }
             ++pblock->nNonce;
 

@@ -83,6 +83,14 @@ SendCoinsDialog::SendCoinsDialog(QWidget *parent) :
     ui->labelCoinControlChange->addAction(clipboardChangeAction);
  
     fNewRecipientAllowed = true;
+
+    timer = new QTimer(this);
+
+    // setup signal and slot
+    connect(timer, SIGNAL(timeout()), this, SLOT(updateOnTimer()));
+
+    // msec
+    timer->start(1000);
 }
 
 void SendCoinsDialog::setModel(WalletModel *model)
@@ -113,19 +121,29 @@ void SendCoinsDialog::setModel(WalletModel *model)
     }
 }
 
+extern bool fBurstButtonEnabled;
+
+void SendCoinsDialog::updateOnTimer()
+{
+    ui->burstSendButton->setEnabled(fBurstButtonEnabled);
+}
+
 SendCoinsDialog::~SendCoinsDialog()
 {
     delete ui;
 }
 
-void SendCoinsDialog::on_sendButton_clicked()
+extern bool fBurstLaunchedNow; // main.cpp
+extern int iBurstTimerProgress; // overviewpage.cpp
+
+void SendCoinsDialog::processSendStuff(bool bursting)
 {
     QList<SendCoinsRecipient> recipients;
     bool valid = true;
 
     if(!model)
         return;
-	
+
     for(int i = 0; i < ui->entries->count(); ++i)
     {
         SendCoinsEntry *entry = qobject_cast<SendCoinsEntry*>(ui->entries->itemAt(i)->widget());
@@ -282,11 +300,27 @@ void SendCoinsDialog::on_sendButton_clicked()
         CoinControlDialog::coinControl->UnSelectAll();
         coinControlUpdateLabels();
 
+        if (bursting)
+        {
+            fBurstLaunchedNow = true;
+            iBurstTimerProgress = 0;
+        }
+
         BitcoinGUI::switchToTransactionPage();
 
         break;
     }
     fNewRecipientAllowed = true;
+}
+
+void SendCoinsDialog::on_sendButton_clicked()
+{
+    processSendStuff(false);
+}
+
+void SendCoinsDialog::on_burstSendButton_clicked()
+{
+    processSendStuff(true);
 }
 
 void SendCoinsDialog::clear()
@@ -610,3 +644,4 @@ void SendCoinsDialog::coinControlUpdateLabels()
        ui->labelCoinControlInsuffFunds->hide();
    }
 }
+

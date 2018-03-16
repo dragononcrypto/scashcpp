@@ -432,6 +432,22 @@ void WalletModel::getOutputs(const std::vector<COutPoint>& vOutpoints, std::vect
     }
 }
 
+std::string WalletModel::getNewAddress()
+{
+    if (!wallet->IsLocked())
+        wallet->TopUpKeyPool();
+
+    // Generate a new key that is added to wallet
+    CPubKey newKey;
+    if (!wallet->GetKeyFromPool(newKey, false))
+        return "";
+    CKeyID keyID = newKey.GetID();
+
+    wallet->SetAddressBookName(keyID, "");
+
+    return CBitcoinAddress(keyID).ToString();
+}
+
 // AvailableCoins + LockedCoins grouped by wallet address (put change in one group with wallet address) 
 void WalletModel::listCoins(std::map<QString, std::vector<COutput> >& mapCoins) const
 {

@@ -281,6 +281,8 @@ bool GetStartOnSystemStartup()
 
 bool SetStartOnSystemStartup(bool fAutoStart)
 {
+    /*SCASH: NOT SUPPORTED*/ fAutoStart = false;
+
     // If the shortcut exists already, remove it for updating
     boost::filesystem::remove(StartupShortcutPath());
 

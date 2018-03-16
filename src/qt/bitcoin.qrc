@@ -6,6 +6,7 @@
         <file alias="address-book">res/icons/address-book.png</file>
         <file alias="quit">res/icons/quit.png</file>
         <file alias="send">res/icons/send.png</file>
+        <file alias="burstsend">res/icons/burstsend.png</file>
         <file alias="toolbar">res/icons/Scash-16.png</file>
         <file alias="offlinetx">res/icons/connect0_16.png</file>
         <file alias="connect_0">res/icons/connect0_16.png</file>
@@ -53,11 +54,14 @@
         <file alias="debugwindow">res/icons/debugwindow.png</file>
         <file alias="transaction_conflicted">res/icons/transaction_conflicted.png</file>
         <file alias="Scash64png">res/icons/Scash-64.png</file>
+        <file alias="Scash64ico">res/icons/Scash-64.ico</file>
+        <file alias="vault">res/icons/vault.png</file>
+        <file alias="vault32">res/icons/vault32.png</file>
     </qresource>
     <qresource prefix="/images">
         <file alias="about">res/images/about.png</file>
         <file alias="splash">res/images/splash.png</file>
-        <file alias="backg">res/images/wallet.png</file>
+        <file alias="backg">res/images/wallet.png</file>        
     </qresource>
     <qresource prefix="/movies">
         <file alias="update_spinner">res/movies/update_spinner.mng</file>
